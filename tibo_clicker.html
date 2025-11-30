@@ -192,16 +192,34 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Conteneur global pour les contrôles au-dessus du jeu */
+        #top-controls-container {
+            max-width: 1000px; /* Alignement sur la largeur de game-container */
+            margin: 0 auto;
+            padding: 0 20px; /* Ajout du padding pour aligner sur le bord du jeu */
+            display: flex;
+            flex-direction: column; 
+            align-items: flex-end; /* Garde le sélecteur de langue à droite */
+            margin-bottom: 10px;
+        }
+        
+        /* Contrôle Musique (Large) */
         #music-control {
-            margin-top: 20px;
+            width: 100%; /* Prend toute la largeur de #top-controls-container (1000px) */
             padding: 10px;
             background: #2c2c2c;
             border-radius: 5px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between; /* Pour étaler le titre et les boutons */
             gap: 10px;
             font-size: 0.9em;
+            margin-bottom: 10px; 
+            box-sizing: border-box; /* Assure que le padding est inclus dans la width de 100% */
+        }
+        #music-control-buttons {
+            display: flex;
+            gap: 10px;
         }
         #music-control button {
             background: #4f4f4f;
@@ -210,18 +228,65 @@
             padding: 5px 10px;
             cursor: pointer;
             border-radius: 3px;
+            transition: background 0.2s;
+        }
+        #music-control button:hover {
+            background: #6a6a6a;
+        }
+        
+        /* Styles pour le sélecteur de langue compact */
+        #language-selector-container {
+            width: 100%; /* S'aligne à la musique ci-dessus */
+            display: flex;
+            justify-content: flex-end; /* Aligne le sélecteur à droite */
+            align-items: center;
+            gap: 5px;
+            font-size: 1.2em; 
+            color: #ccc;
+        }
+
+        #language-selector {
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #3b3b3b;
+            color: #f7f7f7;
+            border: 1px solid #5a5a5a;
+            cursor: pointer;
+            font-size: 0.9em;
+            appearance: none; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 5px center;
+            padding-right: 25px; 
         }
     </style>
 </head>
 <body>
 
-    <h1>Tibo Clicker - La Vraie Transfo' ! 💪</h1>
+    <h1 id="main-title">Tibo Clicker - La Vraie Transfo' ! 💪</h1>
+    
+    <!-- NOUVEAU CONTENEUR GLOBAL POUR LES CONTRÔLES -->
+    <div id="top-controls-container">
+        <!-- 1. Contrôle Musique (Large) -->
+        <div id="music-control">
+            <p><span id="music-label">Musique</span> : <span id="current-track-title">Musique de Fond Classique</span></p>
+            <div id="music-control-buttons">
+                 <button onclick="toggleMusic()">▶️ / ⏸️</button>
+                 <button onclick="nextTrack()">⏭️</button>
+            </div>
+        </div>
 
-    <div id="music-control">
-        <p>Ambiance : <span id="current-track-title">Musique de Fond Classique</span></p>
-        <button onclick="toggleMusic()">▶️ / ⏸️</button>
-        <button onclick="nextTrack()">⏭️</button>
+        <!-- 2. Sélecteur de Langue -->
+        <div id="language-selector-container">
+            <span id="lang-label">🌐</span>
+            <select id="language-selector" onchange="setLanguage(this.value)">
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+            </select>
+        </div>
     </div>
+
 
     <!-- 🎧 Élément Audio unique pour la lecture de la playlist -->
     <audio id="background-music" preload="auto"></audio>
@@ -231,7 +296,7 @@
         <div id="clicker-area">
             
             <div id="score-container">
-                <p>Tibos Possédés :</p>
+                <p id="tibos-owned-label">Tibos Possédés :</p>
                 <div id="score">0</div>
                 <div id="click-power-display">Puissance de Clic : 1 Tibo</div>
                 <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
@@ -243,33 +308,33 @@
         </div>
 
         <div id="upgrades-area">
-            <h2>Améliorations</h2>
+            <h2 id="upgrades-title">Améliorations</h2>
 
             <!-- Améliorations de Clic (Bonus Additif Unique) -->
             <div id="click-multiplier-container" class="new-upgrade-container">
                 <!-- Upgrade 1 initiale -->
-                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false">
+                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Mise en Place du "Mindset"</span>
-                        <br>Ajoute +1 TPC de base (Achat Unique)
+                        <br><span class="upgrade-description">Ajoute +1 TPC de base (Achat Unique)</span>
                     </div>
                     <span class="upgrade-cost">100 Tibos</span>
                 </button>
                 
                 <!-- Upgrade 2 -->
-                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false">
+                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Tibo Ultra Sale 💥</span>
-                        <br>Ajoute +3 TPC de base (Achat Unique)
+                        <br><span class="upgrade-description">Ajoute +3 TPC de base (Achat Unique)</span>
                     </div>
                     <span class="upgrade-cost">500 Tibos</span>
                 </button>
                 
                 <!-- Upgrade 3 -->
-                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false">
+                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
-                        <br>Ajoute +6 TPC de base (Achat Unique)
+                        <br><span class="upgrade-description">Ajoute +6 TPC de base (Achat Unique)</span>
                     </div>
                     <span class="upgrade-cost">3,000 Tibos</span>
                 </button>
@@ -278,40 +343,40 @@
             <hr style="border-color: #5a5a5a; margin: 15px 0;">
 
             <!-- Amélioration du Clic (Ajout) - Prix exponentiel -->
-            <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-addition="5" data-count="0">
+            <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-addition="5" data-count="0" data-upgrade-key="proteines">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Déverrouillage des Protéines</span>
-                    <br>Ajoute +5 Tibos par Clic
+                    <br><span class="upgrade-description">Ajoute +5 Tibos par Clic</span>
                     <span class="upgrade-count" id="count-addition">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">2,000 Tibos</span>
             </button>
 
             <!-- Amélioration Passive 1 - Prix exponentiel -->
-            <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-tps="1" data-count="0">
+            <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-tps="1" data-count="0" data-upgrade-key="alessio">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
-                    <br>Génère 1 Tibo/s
+                    <br><span class="upgrade-description">Génère 1 Tibo/s</span>
                     <span class="upgrade-count" id="count-passive-alessiode">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">500 Tibos</span>
             </button>
             
             <!-- Amélioration Passive 2 - Prix exponentiel -->
-            <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-tps="10" data-count="0">
+            <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-tps="10" data-count="0" data-upgrade-key="justine">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Justine - Community Manager 📸</span>
-                    <br>Génère 10 Tibos/s
+                    <br><span class="upgrade-description">Génère 10 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-justine">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">5,000 Tibos</span>
             </button>
             
             <!-- Nouvelle Amélioration Passive 3 - Prix exponentiel -->
-            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-tps="50" data-count="0">
+            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-tps="50" data-count="0" data-upgrade-key="patates">
                 <div class="upgrade-details">
                     <span class="upgrade-title">L'Usine à Patates Douces 🍠</span>
-                    <br>Génère 50 Tibos/s
+                    <br><span class="upgrade-description">Génère 50 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-patate">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">40,000 Tibos</span>
@@ -326,8 +391,11 @@
         let score = 0;
         let clickPower = 1; // Puissance de clic totale (base + bonus)
         let tps = 0; // Tibos Par Seconde
+        let currentLang = 'fr'; // Langue par défaut
         const GAME_STORAGE_KEY = 'tiboClickerSave';
+        const LANG_STORAGE_KEY = 'tiboClickerLang';
         const GROWTH_FACTOR = 1.15; // Facteur d'augmentation exponentiel
+        const FORMAT_THRESHOLD = 100000; // NOUVELLE CONSTANTE : 100 000 Tibos (100K)
 
         const scoreDisplay = document.getElementById('score');
         const tiboImage = document.getElementById('tibo-image');
@@ -349,6 +417,83 @@
             document.getElementById('upgrade-passive-justine'),
             document.getElementById('upgrade-passive-patate')
         ];
+        
+        // --- Dictionnaire de Traduction (Translations Dictionary) ---
+        const translations = {
+            fr: {
+                // Général
+                langLabel: "🌐", 
+                mainTitle: "Tibo Clicker - La Vraie Transfo' ! 💪",
+                musicLabel: "Musique", 
+                tibosOwnedLabel: "Tibos Possédés :",
+                clickPowerDisplay: (power) => `Puissance de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
+                tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${formatScore(tps)}`,
+                upgradesTitle: "Améliorations",
+                cost: (cost) => `${formatNumber(cost)} Tibos`, // Utilise formatNumber pour les coûts dans la liste
+                purchased: (bonus) => `Acheté ! (+${bonus} TPC)`,
+                owned: (count) => `Possédé: ${count}`,
+                
+                // Upgrades Uniques
+                mindset: { title: 'Mise en Place du "Mindset"', desc: 'Ajoute +1 TPC de base (Achat Unique)' },
+                ultrasale: { title: 'Tibo Ultra Sale 💥', desc: 'Ajoute +3 TPC de base (Achat Unique)' },
+                cheatmeal: { title: 'Le Cheat Meal Ultime 🍕', desc: 'Ajoute +6 TPC de base (Achat Unique)' },
+                
+                // Upgrades Cumulables
+                proteines: { title: 'Déverrouillage des Protéines', desc: 'Ajoute +5 Tibos par Clic' },
+                alessio: { title: 'Alessiode - Coach Personnel 🏋️', desc: 'Génère 1 Tibo/s' },
+                justine: { title: 'Justine - Community Manager 📸', desc: 'Génère 10 Tibos/s' },
+                patates: { title: "L'Usine à Patates Douces 🍠", desc: 'Génère 50 Tibos/s' },
+            },
+            en: {
+                // General
+                langLabel: "🌐",
+                mainTitle: "Tibo Clicker - The Real Transformation! 💪",
+                musicLabel: "Music",
+                tibosOwnedLabel: "Tibos Owned :",
+                clickPowerDisplay: (power) => `Click Power : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
+                tpsDisplay: (tps) => `Tibos Per Second (TPS) : ${formatScore(tps)}`,
+                upgradesTitle: "Upgrades",
+                cost: (cost) => `${formatNumber(cost)} Tibos`,
+                purchased: (bonus) => `Purchased! (+${bonus} CPC)`,
+                owned: (count) => `Owned: ${count}`,
+                
+                // Unique Upgrades
+                mindset: { title: 'Establishing the "Mindset"', desc: 'Adds +1 base CPC (Unique Purchase)' },
+                ultrasale: { title: 'Ultra Dirty Tibo 💥', desc: 'Adds +3 base CPC (Unique Purchase)' },
+                cheatmeal: { title: 'The Ultimate Cheat Meal 🍕', desc: 'Adds +6 base CPC (Unique Purchase)' },
+                
+                // Cumulative Upgrades
+                proteines: { title: 'Protein Unlock', desc: 'Adds +5 Tibos per Click' },
+                alessio: { title: 'Alessiode - Personal Coach 🏋️', desc: 'Generates 1 Tibo/s' },
+                justine: { title: 'Justine - Community Manager 📸', desc: 'Generates 10 Tibos/s' },
+                patates: { title: 'The Sweet Potato Factory 🍠', desc: 'Generates 50 Tibos/s' },
+            },
+            es: {
+                // General
+                langLabel: "🌐",
+                mainTitle: "Tibo Clicker - ¡La Verdadera Transformación! 💪",
+                musicLabel: "Música",
+                tibosOwnedLabel: "Tibos Poseídos :",
+                clickPowerDisplay: (power) => `Poder de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
+                tpsDisplay: (tps) => `Tibos Por Segundo (TPS) : ${formatScore(tps)}`,
+                upgradesTitle: "Mejoras",
+                cost: (cost) => `${formatNumber(cost)} Tibos`,
+                purchased: (bonus) => `¡Comprado! (+${bonus} PPC)`,
+                owned: (count) => `Poseído: ${count}`,
+                
+                // Unique Upgrades
+                mindset: { title: 'Establecer la "Mentalidad"', desc: 'Añade +1 PPC base (Compra Única)' },
+                ultrasale: { title: 'Tibo Ultra Sucio 💥', desc: 'Añade +3 PPC base (Compra Única)' },
+                cheatmeal: { title: 'La Comida Trampa Definitiva 🍕', desc: 'Añade +6 PPC base (Compra Única)' },
+                
+                // Cumulative Upgrades
+                proteines: { title: 'Desbloqueo de Proteínas', desc: 'Añade +5 Tibos por Clic' },
+                alessio: { title: 'Alessiode - Entrenador Personal 🏋️', desc: 'Genera 1 Tibo/s' },
+                justine: { title: 'Justine - Community Manager 📸', desc: 'Genera 10 Tibos/s' },
+                patates: { title: 'La Fábrica de Batatas 🍠', desc: 'Genera 50 Tibos/s' },
+            }
+        };
+
 
         // --- Fonctions utilitaires ---
         
@@ -357,11 +502,121 @@
             return Math.ceil(baseCost * Math.pow(GROWTH_FACTOR, count));
         }
         
-        function formatNumber(num) {
-            return Math.floor(num).toLocaleString('fr-FR');
+        /**
+         * Formate un grand nombre en utilisant la notation abrégée (K, M, B, etc.)
+         * si le nombre est supérieur ou égal à FORMAT_THRESHOLD (100K).
+         */
+        function formatScore(num) {
+            // Si le nombre est inférieur à 100K, on affiche le nombre entier avec séparateur
+            if (num < FORMAT_THRESHOLD) {
+                return Math.floor(num).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US');
+            }
+            
+            // Logique de formatage K/M/B/T... pour les grands nombres
+            const lookup = [
+                { value: 1e18, symbol: "E" },
+                { value: 1e15, symbol: "P" },
+                { value: 1e12, symbol: "T" },
+                { value: 1e9, symbol: "B" },
+                { value: 1e6, symbol: "M" },
+                { value: 1e3, symbol: "K" },
+            ];
+            
+            // Trouve le bon suffixe. On commence la recherche à partir de 1000 (K) même si on sait
+            // que l'entrée sera > 100K à ce stade de la fonction.
+            const item = lookup.find((item) => num >= item.value);
+            
+            if (item) {
+                // Arrondi à 2 décimales pour l'affichage abrégé (ex: 2.50M)
+                const formatted = (num / item.value).toFixed(2);
+                return formatted + item.symbol;
+            }
+            
+            // Fallback pour les nombres vraiment immenses (non gérés par la lookup)
+            return num.toExponential(2); 
         }
 
-        // --- Système de Sauvegarde/Chargement ---
+        /**
+         * Formate un nombre pour les prix d'achat (utilise les séparateurs de milliers).
+         * Ceci ne change pas et n'utilise pas la notation abrégée K/M/B.
+         */
+        function formatNumber(num) {
+            return Math.floor(num).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US'); 
+        }
+
+        // --- Logique de Traduction ---
+
+        window.setLanguage = function(lang) {
+            currentLang = lang;
+            localStorage.setItem(LANG_STORAGE_KEY, lang);
+            translateUI();
+        }
+
+        function translateUI() {
+            const langData = translations[currentLang];
+            if (!langData) return;
+
+            // Traduction des éléments fixes
+            document.getElementById('lang-label').textContent = langData.langLabel;
+            document.getElementById('main-title').textContent = langData.mainTitle;
+            document.getElementById('music-label').textContent = langData.musicLabel; 
+            document.getElementById('tibos-owned-label').textContent = langData.tibosOwnedLabel;
+            document.getElementById('upgrades-title').textContent = langData.upgradesTitle;
+
+            // Traduction des scores et TPC/TPS
+            document.getElementById('click-power-display').textContent = langData.clickPowerDisplay(clickPower);
+            document.getElementById('tps-display').textContent = langData.tpsDisplay(tps);
+            
+            // Mise à jour du score (avec le nouveau formatage)
+            scoreDisplay.textContent = formatScore(score);
+
+            // Traduction des Upgrades
+            upgradeButtons.forEach(button => {
+                const key = button.dataset.upgradeKey;
+                if (!key) return;
+
+                const upgradeData = langData[key];
+                
+                // Met à jour le titre et la description
+                button.querySelector('.upgrade-title').textContent = upgradeData.title;
+                
+                const descElement = button.querySelector('.upgrade-description');
+                if (descElement) {
+                    descElement.textContent = upgradeData.desc;
+                }
+                
+                const costElement = button.querySelector('.upgrade-cost');
+                
+                // Gestion des upgrades achetés (Uniques)
+                if (button.dataset.purchased === 'true') {
+                    const bonus = button.dataset.addBonus || 0;
+                    costElement.textContent = langData.purchased(bonus);
+                    
+                    const detailsElement = button.querySelector('.upgrade-details');
+                    if (detailsElement) {
+                        detailsElement.innerHTML = `<span class="upgrade-title">${upgradeData.title}</span><br>${langData.purchased(bonus)}`;
+                    }
+
+                } else {
+                    // Upgrades actifs/cumulables
+                    const currentCost = parseInt(button.dataset.cost) || parseInt(button.dataset.baseCost);
+                    if (currentCost) {
+                        costElement.textContent = langData.cost(currentCost);
+                    } else if (button.dataset.addBonus) {
+                        costElement.textContent = langData.cost(button.dataset.cost);
+                    }
+                }
+                
+                // Mise à jour du compteur (Possédé/Owned/Poseído) pour les upgrades cumulables
+                const countElement = button.querySelector('.upgrade-count');
+                if (countElement && button.dataset.baseCost) {
+                    countElement.textContent = langData.owned(button.dataset.count);
+                }
+            });
+        }
+
+
+        // --- Système de Sauvegarde/Chargement (mis à jour pour la langue) ---
         
         function saveGame() {
             const saveObject = {
@@ -388,6 +643,13 @@
 
         function loadGame() {
             const savedData = localStorage.getItem(GAME_STORAGE_KEY);
+            const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+            
+            if (savedLang) {
+                currentLang = savedLang;
+                document.getElementById('language-selector').value = savedLang;
+            }
+            
             if (!savedData) return false;
 
             const saveObject = JSON.parse(savedData);
@@ -414,11 +676,6 @@
                             // Si déjà acheté, on le masque
                             if (savedUpgrade.purchased) {
                                 button.classList.add('hidden');
-                                
-                                // Met à jour le texte du bouton après l'achat
-                                const bonus = button.dataset.addBonus;
-                                button.querySelector('.upgrade-details').innerHTML = `<span class="upgrade-title">${button.querySelector('.upgrade-title').textContent}</span><br>Acheté ! (+${bonus} TPC)`;
-                                button.querySelector('.upgrade-cost').textContent = 'Acheté';
                             }
                         }
                     }
@@ -439,10 +696,13 @@
         }
 
         function updateDisplays() {
-            // Assure que le score est mis à jour
-            scoreDisplay.textContent = formatNumber(score); 
-            clickPowerDisplay.textContent = `Puissance de Clic : ${formatNumber(clickPower)} Tibo${clickPower > 1 ? 's' : ''}`;
-            tpsDisplay.textContent = `Tibos par Seconde (TPS) : ${formatNumber(tps)}`;
+            // Utilise formatScore pour le score total
+            scoreDisplay.textContent = formatScore(score); 
+            const langData = translations[currentLang];
+            
+            // Utilise formatScore pour TPC et TPS aussi
+            clickPowerDisplay.textContent = langData.clickPowerDisplay(clickPower);
+            tpsDisplay.textContent = langData.tpsDisplay(tps);
         }
 
         /**
@@ -450,6 +710,8 @@
          * et les compteurs d'objets possédés.
          */
         function checkUpgrades() {
+            const langData = translations[currentLang];
+            
             upgradeButtons.forEach(button => {
                 if (button.dataset.purchased === 'true') {
                     button.disabled = true;
@@ -466,16 +728,18 @@
                     
                     // Met à jour l'affichage du coût et du count
                     button.dataset.cost = currentCost;
-                    button.querySelector('.upgrade-cost').textContent = formatNumber(currentCost) + ' Tibos';
+                    // Utilise formatNumber pour le coût (non formatScore)
+                    button.querySelector('.upgrade-cost').textContent = langData.cost(currentCost);
                     
                     // Mise à jour de l'affichage du nombre d'unités possédées
                     const countElement = button.querySelector('.upgrade-count');
                     if (countElement) {
-                         countElement.textContent = `Possédé: ${count}`;
+                         countElement.textContent = langData.owned(count);
                     }
                 } else {
                     // Logique pour les upgrades uniques (prix fixe)
                     currentCost = parseInt(button.dataset.cost);
+                    button.querySelector('.upgrade-cost').textContent = langData.cost(currentCost);
                 }
 
 
@@ -521,8 +785,9 @@
 
         // Fonction pour l'effet de texte flottant
         function createFloatingText(amount) {
+            // Utilise formatScore pour le texte flottant
             const text = document.createElement('div');
-            text.textContent = `+${formatNumber(amount)}`;
+            text.textContent = `+${formatScore(amount)}`;
             text.classList.add('floating-text');
             
             // Positionne le texte au niveau du clic
@@ -543,14 +808,15 @@
         upgradeButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const cost = parseInt(button.dataset.cost);
+                const langData = translations[currentLang];
                 
                 if (score >= cost) {
                     updateScore(-cost); // Déduire le coût
                     
                     // --- Upgrades Additifs Uniques (Bonus de Clic de Base) ---
                     if (button.dataset.addBonus) {
-                        // Ajoute le bonus à la puissance de clic totale
-                        clickPower += parseInt(button.dataset.addBonus); 
+                        const bonus = parseInt(button.dataset.addBonus);
+                        clickPower += bonus; 
                         button.dataset.purchased = 'true'; 
                         
                         // Animation et remplacement pour la chaîne d'upgrades
@@ -559,12 +825,17 @@
                         setTimeout(() => {
                             button.classList.add('hidden');
                             checkUpgrades(); // Révèle l'upgrade suivante si nécessaire
+                            translateUI(); // Re-traduit pour les nouveaux boutons
                         }, 500); // 0.5s pour correspondre à la transition CSS
                         
                         // Met à jour le texte du bouton après l'achat
-                        const bonus = button.dataset.addBonus;
-                        button.querySelector('.upgrade-details').innerHTML = `<span class="upgrade-title">${button.querySelector('.upgrade-title').textContent}</span><br>Acheté ! (+${bonus} TPC)`;
-                        button.querySelector('.upgrade-cost').textContent = 'Acheté';
+                        const detailsElement = button.querySelector('.upgrade-details');
+                        if (detailsElement) {
+                             const key = button.dataset.upgradeKey;
+                             const title = langData[key].title;
+                             detailsElement.innerHTML = `<span class="upgrade-title">${title}</span><br>${langData.purchased(bonus)}`;
+                        }
+                        button.querySelector('.upgrade-cost').textContent = langData.purchased(bonus);
                     } 
                     
                     // --- Upgrades Cumulables (Ajout ou TPS) ---
@@ -582,7 +853,7 @@
                         // Mise à jour immédiate de l'affichage du nombre d'unités possédées après l'achat
                         const countElement = button.querySelector('.upgrade-count');
                         if (countElement) {
-                             countElement.textContent = `Possédé: ${count}`;
+                             countElement.textContent = langData.owned(count);
                         }
                         
                         // Le coût est recalculé et mis à jour via checkUpgrades()
@@ -607,16 +878,12 @@
         const audioPlayer = document.getElementById('background-music');
         const trackTitleDisplay = document.getElementById('current-track-title');
 
-        // ***********************************************************************************
-        // * MISE À JOUR : La playlist utilise MAINTENANT les noms de fichiers que vous avez uploadés.
-        // ***********************************************************************************
         const allTracks = [
             // VOS MORCEAUX PERSONNELS (Utilise les noms de fichiers du screenshot)
+            // NOTE : Il faut que ces fichiers soient disponibles dans l'environnement !
             { src: 'Concerto-Glazunov.mp3', title: "Concerto de Glazunov" },
             { src: 'Ballade-Tomasi.mp3', title: "Ballade de Tomasi" },
             { src: 'Tableaux-de-Provence-Paule-Maurice.mp3', title: "Tableaux de Provence" }
-            
-            // Si vous avez d'autres musiques, vous pouvez les ajouter ici.
         ];
 
         // Filtre les sources manquantes (#) mais conserve les sources qui semblent être des noms de fichiers
@@ -625,20 +892,27 @@
         let currentTrackIndex = 0;
         let isPlaying = false;
 
-        function loadTrack(index) {
+        function loadTrack(index, autoPlay = false) {
             if (playlist.length === 0) {
                 trackTitleDisplay.textContent = "Aucune musique disponible. Ajoutez vos sources MP3!";
                 return;
             }
 
-            // Correction: Utiliser le src de la playlist pour définir la source de l'élément audio
-            audioPlayer.src = playlist[index].src;
+            // Assure que l'index est dans la boucle
+            currentTrackIndex = index % playlist.length;
+            if (currentTrackIndex < 0) {
+                currentTrackIndex += playlist.length;
+            }
+
+            // Définition de la source
+            audioPlayer.src = playlist[currentTrackIndex].src;
             audioPlayer.load();
-            trackTitleDisplay.textContent = playlist[index].title;
+            trackTitleDisplay.textContent = playlist[currentTrackIndex].title;
             
-            if (isPlaying) {
+            if (autoPlay || isPlaying) {
                  audioPlayer.play().catch(error => {
-                    console.log("La lecture automatique a été bloquée. Cliquez sur l'icône de Tibo ou sur le bouton de lecture pour commencer !");
+                    console.log("La lecture audio a été bloquée. Un clic sur Tibo ou le bouton de lecture est nécessaire.");
+                    isPlaying = false;
                 });
             }
         }
@@ -658,8 +932,8 @@
 
         window.nextTrack = function() {
             if (playlist.length === 0) return;
-            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-            loadTrack(currentTrackIndex);
+            // Charge la piste suivante et tente de jouer si isPlaying est vrai
+            loadTrack(currentTrackIndex + 1, isPlaying); 
         }
 
         // Écouteur pour passer à la piste suivante à la fin de la piste actuelle
@@ -670,8 +944,11 @@
 
         // --- Initialisation du Jeu ---
         function initializeGame() {
-            // Tente de charger la partie
+            // Tente de charger la partie et la langue
             loadGame();
+
+            // Applique la traduction initiale
+            translateUI();
 
             // S'assure que l'affichage est à jour après le chargement ou l'initialisation
             updateDisplays(); 
