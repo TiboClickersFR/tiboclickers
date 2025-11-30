@@ -47,8 +47,8 @@
             border-bottom-right-radius: 8px;
             position: relative; /* Pour les animations */
             overflow-y: auto; /* Permet le défilement si beaucoup d'upgrades */
-            /* MODIFICATION ICI : Réduction de la hauteur maximale du cadre */
-            max-height: 60vh; /* Limite la hauteur de la zone d'amélioration à 60% du viewport */
+            /* Hauteur maximale réduite à 60vh comme demandé précédemment */
+            max-height: 60vh; 
         }
 
         #score {
@@ -319,7 +319,7 @@
                         <span class="upgrade-title">Mise en Place du "Mindset"</span>
                         <br><span class="upgrade-description">Ajoute +1 TPC de base (Achat Unique)</span>
                     </div>
-                    <span class="upgrade-cost">100 Tibos</span>
+                    <span class="upgrade-cost">100 Tibos</span> 
                 </button>
                 
                 <!-- Upgrade 2 -->
@@ -337,7 +337,7 @@
                         <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
                         <br><span class="upgrade-description">Ajoute +6 TPC de base (Achat Unique)</span>
                     </div>
-                    <span class="upgrade-cost">3,000 Tibos</span>
+                    <span class="upgrade-cost">3000 Tibos</span>
                 </button>
             </div>
             
@@ -350,7 +350,7 @@
                     <br><span class="upgrade-description">Ajoute +5 Tibos par Clic</span>
                     <span class="upgrade-count" id="count-addition">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">2,000 Tibos</span>
+                <span class="upgrade-cost">2000 Tibos</span>
             </button>
 
             <!-- Amélioration Passive 1 - Alessio -->
@@ -370,7 +370,7 @@
                     <br><span class="upgrade-description">Génère 10 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-justine">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">5,000 Tibos</span>
+                <span class="upgrade-cost">5000 Tibos</span>
             </button>
             
             <!-- Amélioration Passive 3 - Patate Douce (CHEATEE: 150 TPS) -->
@@ -380,7 +380,7 @@
                     <br><span class="upgrade-description">Génère 150 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-patate">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">40,000 Tibos</span>
+                <span class="upgrade-cost">40000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Nogode -->
@@ -390,7 +390,7 @@
                     <br><span class="upgrade-description">Génère 500 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-nogode">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">200,000 Tibos</span>
+                <span class="upgrade-cost">200000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Sachatte -->
@@ -400,17 +400,17 @@
                     <br><span class="upgrade-description">Génère 2,000 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-sachatte">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">1,000,000 Tibos</span>
+                <span class="upgrade-cost">1000000 Tibos</span>
             </button>
             
             <!-- NOUVELLE AMÉLIORATION : Milodes -->
-            <button id="upgrade-passive-milodes" class="upgrade-button" data-base-cost="8000000" data-tps="10000" data-count="0" data-upgrade-key="milodes">
+            <button id="upgrade-passive-milodes" data-base-cost="8000000" data-tps="10000" data-count="0" data-upgrade-key="milodes">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Milodes - Le Mobilisateur Instantané 🚀</span>
                     <br><span class="upgrade-description">Génère 10,000 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-milodes">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">8,000,000 Tibos</span>
+                <span class="upgrade-cost">8000000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Thomas -->
@@ -420,7 +420,7 @@
                     <br><span class="upgrade-description">Génère 50,000 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-thomas">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">50,000,000 Tibos</span>
+                <span class="upgrade-cost">50000000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Lenaik -->
@@ -430,7 +430,7 @@
                     <br><span class="upgrade-description">Génère 200,000 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-lenaik">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost">200,000,000 Tibos</span>
+                <span class="upgrade-cost">200000000 Tibos</span>
             </button>
 
             
@@ -487,7 +487,8 @@
                 clickPowerDisplay: (power) => `Puissance de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
                 tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${formatScore(tps)}`,
                 upgradesTitle: "Améliorations",
-                cost: (cost) => `${formatNumber(cost)} Tibos`, // Utilise formatNumber pour les coûts dans la liste
+                // UTILISE formatScore() pour afficher la notation abrégée pour les prix
+                cost: (cost) => `${formatScore(cost)} Tibos`, 
                 purchased: (bonus) => `Acheté ! (+${bonus} TPC)`,
                 owned: (count) => `Possédé: ${count}`,
                 
@@ -518,7 +519,8 @@
                 clickPowerDisplay: (power) => `Click Power : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
                 tpsDisplay: (tps) => `Tibos Per Second (TPS) : ${formatScore(tps)}`,
                 upgradesTitle: "Upgrades",
-                cost: (cost) => `${formatNumber(cost)} Tibos`,
+                // UTILISE formatScore() pour afficher la notation abrégée pour les prix
+                cost: (cost) => `${formatScore(cost)} Tibos`,
                 purchased: (bonus) => `Purchased! (+${bonus} CPC)`,
                 owned: (count) => `Owned: ${count}`,
                 
@@ -532,13 +534,13 @@
                 alessio: { title: 'Alessiode - Personal Coach 🏋️', desc: 'Generates 1 Tibo/s' },
                 justine: { title: 'Justine - Community Manager 📸', desc: 'Generates 10 Tibos/s' },
                 // Sweet Potato (CHEATED)
-                patates: { title: 'The COSMIQUE Sweet Potato Factory 🍠🚀', desc: 'Generates 150 Tibos/s' },
+                patates: { title: 'The COSMIQUE Sweet Potato Factory 🍠🚀', desc: 'Generates 150 Tibo/s' },
                 // New Characters
-                nogode: { title: 'Nogode - The Dark Disruptor 🖤', desc: 'Generates 500 Tibos/s' },
-                sachatte: { title: 'Sachatte - The Mystic Scout ✨', desc: 'Generates 2,000 Tibos/s' },
-                milodes: { title: 'Milodes - The Instant Mobilizer 🚀', desc: 'Generates 10,000 Tibos/s' },
-                thomas: { title: 'Thomas - The Resource Architect 💰', desc: 'Generates 50,000 Tibos/s' },
-                lenaik: { title: 'Lenaik - The Hyper-Protective Guardian 🛡️', desc: 'Generates 200,000 Tibos/s' },
+                nogode: { title: 'Nogode - The Dark Disruptor 🖤', desc: 'Generates 500 Tibo/s' },
+                sachatte: { title: 'Sachatte - The Mystic Scout ✨', desc: 'Generates 2,000 Tibo/s' },
+                milodes: { title: 'Milodes - The Instant Mobilizer 🚀', desc: 'Generates 10,000 Tibo/s' },
+                thomas: { title: 'Thomas - The Resource Architect 💰', desc: 'Generates 50,000 Tibo/s' },
+                lenaik: { title: 'Lenaik - The Hyper-Protective Guardian 🛡️', desc: 'Generates 200,000 Tibo/s' },
             },
             es: {
                 // General
@@ -549,7 +551,8 @@
                 clickPowerDisplay: (power) => `Poder de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
                 tpsDisplay: (tps) => `Tibos Por Segundo (TPS) : ${formatScore(tps)}`,
                 upgradesTitle: "Mejoras",
-                cost: (cost) => `${formatNumber(cost)} Tibos`,
+                // UTILISE formatScore() pour afficher la notation abrégée pour les prix
+                cost: (cost) => `${formatScore(cost)} Tibos`,
                 purchased: (bonus) => `¡Comprado! (+${bonus} PPC)`,
                 owned: (count) => `Poseído: ${count}`,
                 
@@ -582,8 +585,8 @@
         }
         
         /**
-         * Formate un grand nombre en utilisant la notation abrégée (K, M, B, etc.)
-         * si le nombre est supérieur ou égal à FORMAT_THRESHOLD (100K).
+         * Formate un nombre pour l'affichage (score, TPC, TPS, ou coût).
+         * Utilise les séparateurs de milliers si < 100K, et la notation abrégée (K, M, B) si >= 100K.
          */
         function formatScore(num) {
             // Si le nombre est inférieur à 100K, on affiche le nombre entier avec séparateur
@@ -601,8 +604,7 @@
                 { value: 1e3, symbol: "K" },
             ];
             
-            // Trouve le bon suffixe. On commence la recherche à partir de 1000 (K) même si on sait
-            // que l'entrée sera > 100K à ce stade de la fonction.
+            // Trouve le bon suffixe.
             const item = lookup.find((item) => num >= item.value);
             
             if (item) {
@@ -611,17 +613,12 @@
                 return formatted + item.symbol;
             }
             
-            // Fallback pour les nombres vraiment immenses (non gérés par la lookup)
+            // Fallback pour les nombres vraiment immenses 
             return num.toExponential(2); 
         }
 
-        /**
-         * Formate un nombre pour les prix d'achat (utilise les séparateurs de milliers).
-         * Ceci ne change pas et n'utilise pas la notation abrégée K/M/B.
-         */
-        function formatNumber(num) {
-            return Math.floor(num).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US'); 
-        }
+        // REMARQUE: La fonction formatNumber(num) a été supprimée car formatScore(num) 
+        // gère maintenant les deux cas (séparateur pour petits nombres et abréviation pour grands nombres).
 
         // --- Logique de Traduction ---
 
@@ -680,8 +677,10 @@
                     // Upgrades actifs/cumulables
                     const currentCost = parseInt(button.dataset.cost) || parseInt(button.dataset.baseCost);
                     if (currentCost) {
+                        // Utilisation de formatScore pour le coût
                         costElement.textContent = langData.cost(currentCost);
                     } else if (button.dataset.addBonus) {
+                        // Utilisation de formatScore pour le coût unique
                         costElement.textContent = langData.cost(button.dataset.cost);
                     }
                 }
@@ -807,7 +806,8 @@
                     
                     // Met à jour l'affichage du coût et du count
                     button.dataset.cost = currentCost;
-                    // Utilise formatNumber pour le coût (non formatScore)
+                    
+                    // Utilisation de formatScore pour le coût
                     button.querySelector('.upgrade-cost').textContent = langData.cost(currentCost);
                     
                     // Mise à jour de l'affichage du nombre d'unités possédées
@@ -818,6 +818,7 @@
                 } else {
                     // Logique pour les upgrades uniques (prix fixe)
                     currentCost = parseInt(button.dataset.cost);
+                    // Utilisation de formatScore pour le coût
                     button.querySelector('.upgrade-cost').textContent = langData.cost(currentCost);
                 }
 
