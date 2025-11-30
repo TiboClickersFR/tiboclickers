@@ -22,6 +22,9 @@
         #game-container {
             display: flex;
             max-width: 1000px;
+            /* Changement: Utilisation de max-height pour limiter la hauteur sur PC */
+            max-height: 65vh; 
+            height: 100%; /* S'assure qu'il prend la hauteur définie par max-height si le contenu le permet */
             margin: 0 auto;
             border: 2px solid #5a5a5a;
             border-radius: 10px;
@@ -31,7 +34,7 @@
 
         #clicker-area {
             flex: 2;
-            padding: 20px;
+            padding: 15px; /* Réduction du padding */
             border-right: 2px solid #5a5a5a;
             display: flex;
             flex-direction: column;
@@ -41,64 +44,78 @@
 
         #upgrades-area {
             flex: 1;
-            padding: 20px;
+            padding: 15px; /* Réduction du padding */
             background-color: #2c2c2c;
             border-top-right-radius: 8px;
             border-bottom-right-radius: 8px;
-            position: relative; /* Pour les animations */
-            overflow-y: auto; /* Permet le défilement si beaucoup d'upgrades */
-            /* Hauteur maximale réduite à 60vh comme demandé précédemment */
-            max-height: 60vh; 
+            position: relative; 
+            overflow-y: auto; 
+            /* Changement: Limite la hauteur de la zone d'upgrades sur PC */
+            max-height: 65vh; 
+        }
+        
+        /* ------------------------------------------------ */
+        /* Mise à jour de la zone de clic/score */
+        /* ------------------------------------------------ */
+
+        #score-container {
+            margin-bottom: 15px; /* Réduction de la marge */
         }
 
         #score {
             font-size: 2.5em;
             font-weight: bold;
-            color: #ffcc00; /* Jaune pour l'or */
-            margin-bottom: 20px;
+            color: #ffcc00; 
+            margin-bottom: 15px; /* Réduction de la marge */
             text-shadow: 2px 2px 4px #000;
         }
 
         #tibo-image {
-            /* Image plus grande */
-            width: 350px; 
-            height: 350px;
-            border-radius: 50%; /* Image ronde pour un meilleur effet de bouton */
+            width: 300px; /* Légère réduction pour PC */
+            height: 300px; /* Légère réduction pour PC */
+            border-radius: 50%; 
             cursor: pointer;
             box-shadow: 0 0 15px #ffcc00, 0 0 30px rgba(255, 204, 0, 0.5);
             transition: transform 0.1s;
-            user-select: none; /* Empêche la sélection du texte/image */
+            user-select: none;
             object-fit: cover;
             /* MISE À JOUR : Utilisation de votre fichier "Tibo.png" */
             background-image: url('Tibo.png'); 
             background-size: cover;
             background-position: center;
             border: 5px solid #ffcc00;
+            margin-bottom: 15px; 
         }
 
         #tibo-image:active {
-            transform: scale(0.95); /* Effet de clic */
+            transform: scale(0.95); 
         }
+        
+        #click-power-display, #tps-display {
+            font-size: 1.2em;
+            margin-top: 5px;
+            color: #ccc;
+        }
+        
+        /* ------------------------------------------------ */
+        /* Mise à jour des Améliorations */
+        /* ------------------------------------------------ */
 
         .upgrade-button {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
+            width: 100%; 
+            padding: 10px; /* Légère réduction du padding */
+            margin: 6px 0; /* Légère réduction de la marge */
             background-color: #3b3b3b;
             color: #f7f7f7;
             border: 2px solid #5a5a5a;
-            border-radius: 5px;
+            border-radius: 8px; 
             cursor: pointer;
             font-size: 1em;
-            transition: background-color 0.2s, transform 0.1s, opacity 0.5s; /* Ajout d'opacity pour l'animation */
+            transition: background-color 0.2s, transform 0.1s, opacity 0.5s;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .upgrade-button.hidden {
-            display: none;
-            opacity: 0;
+            text-align: left; 
         }
 
         .upgrade-button:hover:not(:disabled) {
@@ -114,27 +131,33 @@
         }
         
         .upgrade-details {
-            text-align: left;
+            flex-grow: 1; 
         }
         
         .upgrade-title {
             font-weight: bold;
             color: #ffcc00;
+            font-size: 1.1em;
         }
 
         .upgrade-cost {
             font-weight: bold;
             color: #ffcc00;
-            white-space: nowrap; /* Empêche le coût de passer à la ligne */
+            white-space: nowrap;
+            margin-left: 10px; 
+            flex-shrink: 0; 
         }
         
-        /* Cible l'élément qui affiche le nombre possédé */
         .upgrade-count {
             display: block;
-            font-size: 0.7em;
+            font-size: 0.8em;
             color: #aaa;
-            margin-top: 5px;
+            margin-top: 4px;
         }
+
+        /* ------------------------------------------------ */
+        /* Animations/Flottants */
+        /* ------------------------------------------------ */
 
         .floating-text {
             position: absolute;
@@ -157,66 +180,33 @@
                 opacity: 0;
             }
         }
-
-        h2 {
-            color: #ffcc00;
-            border-bottom: 2px solid #5a5a5a;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
-
-        #click-power-display {
-            font-size: 1.2em;
-            margin-top: 10px;
-            color: #ccc;
-        }
-
-        #tps-display {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            color: #ccc;
-        }
-
-        /* Styles pour les animations d'apparition des nouvelles améliorations */
-        .new-upgrade-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
         
-        .new-upgrade-animation {
-            animation: fadeIn 0.8s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* ------------------------------------------------ */
+        /* Contrôles Haut de Page (Musique/Langue) */
+        /* ------------------------------------------------ */
 
-        /* Conteneur global pour les contrôles au-dessus du jeu */
         #top-controls-container {
-            max-width: 1000px; /* Alignement sur la largeur de game-container */
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 0 20px; /* Ajout du padding pour aligner sur le bord du jeu */
+            padding: 0 20px;
             display: flex;
             flex-direction: column; 
-            align-items: flex-end; /* Garde le sélecteur de langue à droite */
-            margin-bottom: 10px;
+            align-items: flex-end;
+            margin-bottom: 15px;
         }
         
-        /* Contrôle Musique (Large) */
         #music-control {
-            width: 100%; /* Prend toute la largeur de #top-controls-container (1000px) */
+            width: 100%;
             padding: 10px;
             background: #2c2c2c;
             border-radius: 5px;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Pour étaler le titre et les boutons */
+            justify-content: space-between;
             gap: 10px;
             font-size: 0.9em;
             margin-bottom: 10px; 
-            box-sizing: border-box; /* Assure que le padding est inclus dans la width de 100% */
+            box-sizing: border-box;
         }
         #music-control-buttons {
             display: flex;
@@ -231,15 +221,11 @@
             border-radius: 3px;
             transition: background 0.2s;
         }
-        #music-control button:hover {
-            background: #6a6a6a;
-        }
         
-        /* Styles pour le sélecteur de langue compact */
         #language-selector-container {
-            width: 100%; /* S'aligne à la musique ci-dessus */
+            width: 100%; 
             display: flex;
-            justify-content: flex-end; /* Aligne le sélecteur à droite */
+            justify-content: flex-end; 
             align-items: center;
             gap: 5px;
             font-size: 1.2em; 
@@ -260,13 +246,75 @@
             background-position: right 5px center;
             padding-right: 25px; 
         }
+
+        /* ------------------------------------------------ */
+        /* Règles de Responsivité (Media Queries) */
+        /* ------------------------------------------------ */
+
+        @media (max-width: 768px) {
+            
+            body {
+                padding: 10px;
+            }
+
+            #game-container {
+                flex-direction: column; /* La zone de clic passe au-dessus des upgrades */
+                width: 100%;
+                max-height: none; /* Supprime la limite de hauteur sur mobile */
+                height: auto;
+            }
+
+            #clicker-area {
+                border-right: none; 
+                border-bottom: 2px solid #5a5a5a; 
+                padding: 15px;
+            }
+
+            #upgrades-area {
+                border-top-right-radius: 0;
+                border-bottom-left-radius: 8px;
+                max-height: 50vh; /* Limite la hauteur de la liste pour laisser de la place au clic */
+                overflow-y: scroll;
+            }
+
+            #tibo-image {
+                width: 250px; 
+                height: 250px;
+                margin: 15px auto; 
+            }
+            
+            #score {
+                font-size: 2em; 
+            }
+
+            #click-power-display, #tps-display {
+                font-size: 1em; 
+            }
+            
+            #top-controls-container {
+                padding: 0 10px; 
+            }
+            
+            #music-control {
+                flex-direction: column; 
+                align-items: flex-start;
+            }
+            #music-control-buttons {
+                width: 100%;
+                justify-content: space-around; 
+            }
+            
+            #language-selector-container {
+                justify-content: flex-end; 
+            }
+        }
     </style>
 </head>
 <body>
 
     <h1 id="main-title">Tibo Clicker - La Vraie Transfo' ! 💪</h1>
     
-    <!-- NOUVEAU CONTENEUR GLOBAL POUR LES CONTRÔLES -->
+    <!-- CONTENEUR GLOBAL POUR LES CONTRÔLES -->
     <div id="top-controls-container">
         <!-- 1. Contrôle Musique (Large) -->
         <div id="music-control">
@@ -591,7 +639,8 @@
         function formatScore(num) {
             // Si le nombre est inférieur à 100K, on affiche le nombre entier avec séparateur
             if (num < FORMAT_THRESHOLD) {
-                return Math.floor(num).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US');
+                // Utilise Math.round pour éviter les problèmes d'arrondi sur les nombres très petits
+                return Math.round(num).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US');
             }
             
             // Logique de formatage K/M/B/T... pour les grands nombres
@@ -616,9 +665,6 @@
             // Fallback pour les nombres vraiment immenses 
             return num.toExponential(2); 
         }
-
-        // REMARQUE: La fonction formatNumber(num) a été supprimée car formatScore(num) 
-        // gère maintenant les deux cas (séparateur pour petits nombres et abréviation pour grands nombres).
 
         // --- Logique de Traduction ---
 
@@ -688,7 +734,7 @@
                 // Mise à jour du compteur (Possédé/Owned/Poseído) pour les upgrades cumulables
                 const countElement = button.querySelector('.upgrade-count');
                 if (countElement && button.dataset.baseCost) {
-                    countElement.textContent = langData.owned(button.dataset.count);
+                    countElement.textContent = langData.owned(parseInt(button.dataset.count));
                 }
             });
         }
@@ -958,6 +1004,7 @@
         const audioPlayer = document.getElementById('background-music');
         const trackTitleDisplay = document.getElementById('current-track-title');
 
+        // Note: Les sources MP3 sont des placeholders et doivent être remplacées par des liens valides si elles ne sont pas chargées localement.
         const allTracks = [
             { src: 'Concerto-Glazunov.mp3', title: "Concerto de Glazunov" },
             { src: 'Ballade-Tomasi.mp3', title: "Ballade de Tomasi" },
