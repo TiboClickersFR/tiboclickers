@@ -47,7 +47,8 @@
             border-bottom-right-radius: 8px;
             position: relative; /* Pour les animations */
             overflow-y: auto; /* Permet le défilement si beaucoup d'upgrades */
-            max-height: 80vh; /* Limite la hauteur de la zone d'amélioration */
+            /* MODIFICATION ICI : Réduction de la hauteur maximale du cadre */
+            max-height: 60vh; /* Limite la hauteur de la zone d'amélioration à 60% du viewport */
         }
 
         #score {
@@ -352,7 +353,7 @@
                 <span class="upgrade-cost">2,000 Tibos</span>
             </button>
 
-            <!-- Amélioration Passive 1 - Prix exponentiel -->
+            <!-- Amélioration Passive 1 - Alessio -->
             <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-tps="1" data-count="0" data-upgrade-key="alessio">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
@@ -362,7 +363,7 @@
                 <span class="upgrade-cost">500 Tibos</span>
             </button>
             
-            <!-- Amélioration Passive 2 - Prix exponentiel -->
+            <!-- Amélioration Passive 2 - Justine -->
             <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-tps="10" data-count="0" data-upgrade-key="justine">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Justine - Community Manager 📸</span>
@@ -372,15 +373,66 @@
                 <span class="upgrade-cost">5,000 Tibos</span>
             </button>
             
-            <!-- Nouvelle Amélioration Passive 3 - Prix exponentiel -->
-            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-tps="50" data-count="0" data-upgrade-key="patates">
+            <!-- Amélioration Passive 3 - Patate Douce (CHEATEE: 150 TPS) -->
+            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-tps="150" data-count="0" data-upgrade-key="patates">
                 <div class="upgrade-details">
-                    <span class="upgrade-title">L'Usine à Patates Douces 🍠</span>
-                    <br><span class="upgrade-description">Génère 50 Tibos/s</span>
+                    <span class="upgrade-title">L'Usine à Patates Douces COSMIQUE 🍠🚀</span>
+                    <br><span class="upgrade-description">Génère 150 Tibos/s</span>
                     <span class="upgrade-count" id="count-passive-patate">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">40,000 Tibos</span>
             </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Nogode -->
+            <button id="upgrade-passive-nogode" class="upgrade-button" data-base-cost="200000" data-tps="500" data-count="0" data-upgrade-key="nogode">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Nogode - Le Disrupteur Sombre 🖤</span>
+                    <br><span class="upgrade-description">Génère 500 Tibos/s</span>
+                    <span class="upgrade-count" id="count-passive-nogode">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">200,000 Tibos</span>
+            </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Sachatte -->
+            <button id="upgrade-passive-sachatte" class="upgrade-button" data-base-cost="1000000" data-tps="2000" data-count="0" data-upgrade-key="sachatte">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Sachatte - L'Éclaireuse Mystique ✨</span>
+                    <br><span class="upgrade-description">Génère 2,000 Tibos/s</span>
+                    <span class="upgrade-count" id="count-passive-sachatte">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">1,000,000 Tibos</span>
+            </button>
+            
+            <!-- NOUVELLE AMÉLIORATION : Milodes -->
+            <button id="upgrade-passive-milodes" class="upgrade-button" data-base-cost="8000000" data-tps="10000" data-count="0" data-upgrade-key="milodes">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Milodes - Le Mobilisateur Instantané 🚀</span>
+                    <br><span class="upgrade-description">Génère 10,000 Tibos/s</span>
+                    <span class="upgrade-count" id="count-passive-milodes">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">8,000,000 Tibos</span>
+            </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Thomas -->
+            <button id="upgrade-passive-thomas" class="upgrade-button" data-base-cost="50000000" data-tps="50000" data-count="0" data-upgrade-key="thomas">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Thomas - L'Architecte des Ressources 💰</span>
+                    <br><span class="upgrade-description">Génère 50,000 Tibos/s</span>
+                    <span class="upgrade-count" id="count-passive-thomas">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">50,000,000 Tibos</span>
+            </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Lenaik -->
+            <button id="upgrade-passive-lenaik" class="upgrade-button" data-base-cost="200000000" data-tps="200000" data-count="0" data-upgrade-key="lenaik">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Lenaik - La Gardienne Hyper-Protectrice 🛡️</span>
+                    <br><span class="upgrade-description">Génère 200,000 Tibos/s</span>
+                    <span class="upgrade-count" id="count-passive-lenaik">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">200,000,000 Tibos</span>
+            </button>
+
             
         </div>
         
@@ -395,7 +447,7 @@
         const GAME_STORAGE_KEY = 'tiboClickerSave';
         const LANG_STORAGE_KEY = 'tiboClickerLang';
         const GROWTH_FACTOR = 1.15; // Facteur d'augmentation exponentiel
-        const FORMAT_THRESHOLD = 100000; // NOUVELLE CONSTANTE : 100 000 Tibos (100K)
+        const FORMAT_THRESHOLD = 100000; // Constante : 100 000 Tibos (100K)
 
         const scoreDisplay = document.getElementById('score');
         const tiboImage = document.getElementById('tibo-image');
@@ -415,7 +467,13 @@
             document.getElementById('upgrade-addition'),
             document.getElementById('upgrade-passive-alessiode'),
             document.getElementById('upgrade-passive-justine'),
-            document.getElementById('upgrade-passive-patate')
+            document.getElementById('upgrade-passive-patate'),
+            // Nouveaux Personnages
+            document.getElementById('upgrade-passive-nogode'), 
+            document.getElementById('upgrade-passive-sachatte'),
+            document.getElementById('upgrade-passive-milodes'),
+            document.getElementById('upgrade-passive-thomas'),
+            document.getElementById('upgrade-passive-lenaik')
         ];
         
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
@@ -442,7 +500,14 @@
                 proteines: { title: 'Déverrouillage des Protéines', desc: 'Ajoute +5 Tibos par Clic' },
                 alessio: { title: 'Alessiode - Coach Personnel 🏋️', desc: 'Génère 1 Tibo/s' },
                 justine: { title: 'Justine - Community Manager 📸', desc: 'Génère 10 Tibos/s' },
-                patates: { title: "L'Usine à Patates Douces 🍠", desc: 'Génère 50 Tibos/s' },
+                // Patate Douce (CHEATEE)
+                patates: { title: "L'Usine à Patates Douces COSMIQUE 🍠🚀", desc: 'Génère 150 Tibos/s' },
+                // Nouveaux Personnages
+                nogode: { title: 'Nogode - Le Disrupteur Sombre 🖤', desc: 'Génère 500 Tibos/s' },
+                sachatte: { title: "Sachatte - L'Éclaireuse Mystique ✨", desc: 'Génère 2,000 Tibos/s' },
+                milodes: { title: 'Milodes - Le Mobilisateur Instantané 🚀', desc: 'Génère 10,000 Tibos/s' },
+                thomas: { title: 'Thomas - L\'Architecte des Ressources 💰', desc: 'Génère 50,000 Tibos/s' },
+                lenaik: { title: 'Lenaik - La Gardienne Hyper-Protectrice 🛡️', desc: 'Génère 200,000 Tibos/s' },
             },
             en: {
                 // General
@@ -466,7 +531,14 @@
                 proteines: { title: 'Protein Unlock', desc: 'Adds +5 Tibos per Click' },
                 alessio: { title: 'Alessiode - Personal Coach 🏋️', desc: 'Generates 1 Tibo/s' },
                 justine: { title: 'Justine - Community Manager 📸', desc: 'Generates 10 Tibos/s' },
-                patates: { title: 'The Sweet Potato Factory 🍠', desc: 'Generates 50 Tibos/s' },
+                // Sweet Potato (CHEATED)
+                patates: { title: 'The COSMIQUE Sweet Potato Factory 🍠🚀', desc: 'Generates 150 Tibos/s' },
+                // New Characters
+                nogode: { title: 'Nogode - The Dark Disruptor 🖤', desc: 'Generates 500 Tibos/s' },
+                sachatte: { title: 'Sachatte - The Mystic Scout ✨', desc: 'Generates 2,000 Tibos/s' },
+                milodes: { title: 'Milodes - The Instant Mobilizer 🚀', desc: 'Generates 10,000 Tibos/s' },
+                thomas: { title: 'Thomas - The Resource Architect 💰', desc: 'Generates 50,000 Tibos/s' },
+                lenaik: { title: 'Lenaik - The Hyper-Protective Guardian 🛡️', desc: 'Generates 200,000 Tibos/s' },
             },
             es: {
                 // General
@@ -490,7 +562,14 @@
                 proteines: { title: 'Desbloqueo de Proteínas', desc: 'Añade +5 Tibos por Clic' },
                 alessio: { title: 'Alessiode - Entrenador Personal 🏋️', desc: 'Genera 1 Tibo/s' },
                 justine: { title: 'Justine - Community Manager 📸', desc: 'Genera 10 Tibos/s' },
-                patates: { title: 'La Fábrica de Batatas 🍠', desc: 'Genera 50 Tibos/s' },
+                // Sweet Potato (CHEATED)
+                patates: { title: 'La Fábrica de Batatas CÓSMICA 🍠🚀', desc: 'Genera 150 Tibo/s' },
+                // New Characters
+                nogode: { title: 'Nogode - El Disruptor Oscuro 🖤', desc: 'Genera 500 Tibo/s' },
+                sachatte: { title: 'Sachatte - La Exploradora Mística ✨', desc: 'Genera 2,000 Tibo/s' },
+                milodes: { title: 'Milodes - El Movilizador Instantáneo 🚀', desc: 'Genera 10,000 Tibo/s' },
+                thomas: { title: 'Thomas - El Arquitecto de Recursos 💰', desc: 'Genera 50,000 Tibo/s' },
+                lenaik: { title: 'Lenaik - La Guardiana Hiperprotectora 🛡️', desc: 'Genera 200,000 Tibo/s' },
             }
         };
 
@@ -879,11 +958,9 @@
         const trackTitleDisplay = document.getElementById('current-track-title');
 
         const allTracks = [
-            // VOS MORCEAUX PERSONNELS (Utilise les noms de fichiers du screenshot)
-            // NOTE : Il faut que ces fichiers soient disponibles dans l'environnement !
             { src: 'Concerto-Glazunov.mp3', title: "Concerto de Glazunov" },
             { src: 'Ballade-Tomasi.mp3', title: "Ballade de Tomasi" },
-            { src: 'Tableaux-de-Provence-Paule-Maurice.mp3', title: "Tableaux de Provence" }
+            { src: 'Tableaux_de_Provences-Paule_Maurice.mp3', title: "Tableaux de Provence" }
         ];
 
         // Filtre les sources manquantes (#) mais conserve les sources qui semblent être des noms de fichiers
