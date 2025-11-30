@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tibo Clicker</title>
+    <title>Tibo Clicker - La Vraie Transfo' !</title>
+    <!-- AJOUT DE L'ICÔNE (FAVICON) POUR L'ONGLET DU NAVIGATEUR -->
+    <!-- Remplacez 'tibo_icon.png' par le nom de votre fichier d'icône. -->
+    <link rel="icon" type="image/png" href="tibo_icon.png">
     <style>
         /* CSS pour le style du jeu */
         body {
@@ -22,9 +25,9 @@
         #game-container {
             display: flex;
             max-width: 1000px;
-            /* Changement: Utilisation de max-height pour limiter la hauteur sur PC */
+            /* Limite la hauteur sur PC pour rendre l'interface plus compacte */
             max-height: 65vh; 
-            height: 100%; /* S'assure qu'il prend la hauteur définie par max-height si le contenu le permet */
+            height: 100%; 
             margin: 0 auto;
             border: 2px solid #5a5a5a;
             border-radius: 10px;
@@ -50,7 +53,7 @@
             border-bottom-right-radius: 8px;
             position: relative; 
             overflow-y: auto; 
-            /* Changement: Limite la hauteur de la zone d'upgrades sur PC */
+            /* Limite la hauteur de la zone d'upgrades sur PC */
             max-height: 65vh; 
         }
         
@@ -580,7 +583,7 @@
                 // Cumulative Upgrades
                 proteines: { title: 'Protein Unlock', desc: 'Adds +5 Tibos per Click' },
                 alessio: { title: 'Alessiode - Personal Coach 🏋️', desc: 'Generates 1 Tibo/s' },
-                justine: { title: 'Justine - Community Manager 📸', desc: 'Generates 10 Tibos/s' },
+                justine: { title: 'Justine - Community Manager 📸', desc: 'Generates 10 Tibo/s' },
                 // Sweet Potato (CHEATED)
                 patates: { title: 'The COSMIQUE Sweet Potato Factory 🍠🚀', desc: 'Generates 150 Tibo/s' },
                 // New Characters
@@ -1006,6 +1009,8 @@
 
         // Note: Les sources MP3 sont des placeholders et doivent être remplacées par des liens valides si elles ne sont pas chargées localement.
         const allTracks = [
+            // AJOUT DU MORCEAU DAMN
+            { src: 'damn.mp3', title: "Gabin - DAMN" },
             { src: 'Concerto-Glazunov.mp3', title: "Concerto de Glazunov" },
             { src: 'Ballade-Tomasi.mp3', title: "Ballade de Tomasi" },
             { src: 'Tableaux_de_Provences-Paule_Maurice.mp3', title: "Tableaux de Provence" }
