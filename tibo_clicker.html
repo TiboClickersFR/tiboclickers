@@ -321,7 +321,8 @@
     <div id="top-controls-container">
         <!-- 1. Contrôle Musique (Large) -->
         <div id="music-control">
-            <p><span id="music-label">Musique</span> : <span id="current-track-title">Damn de Gabin</span></p>
+            <!-- TITRE DE LA PISTE MIS À JOUR POUR CORRESPONDRE À LA NOUVELLE PLAYLIST -->
+            <p><span id="music-label">Musique</span> : <span id="current-track-title">Damn (Gabin)</span></p>
             <div id="music-control-buttons">
                  <button onclick="toggleMusic()">▶️ / ⏸️</button>
                  <button onclick="nextTrack()">⏭️</button>
@@ -331,7 +332,7 @@
         <!-- 2. Sélecteur de Langue -->
         <div id="language-selector-container">
             <span id="lang-label">🌐</span>
-            <select id="language-selector" onchange="setLanguage(this.value)">
+            <select id="language-selector" onchange="setLanguage(this.value, false)">
                 <option value="fr">Français</option>
                 <option value="en">English</option>
                 <option value="es">Español</option>
@@ -399,7 +400,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Déverrouillage des Protéines</span>
                     <br><span class="upgrade-description">Ajoute +5 Tibos par Clic</span>
-                    <span class="upgrade-count" id="count-addition">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">2000 Tibos</span>
             </button>
@@ -409,7 +410,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
                     <br><span class="upgrade-description">Génère 1 Tibo/s</span>
-                    <span class="upgrade-count" id="count-passive-alessiode">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">500 Tibos</span>
             </button>
@@ -419,7 +420,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Justine - Community Manager 📸</span>
                     <br><span class="upgrade-description">Génère 10 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-justine">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">5000 Tibos</span>
             </button>
@@ -429,7 +430,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">L'Usine à Patates Douces COSMIQUE 🍠🚀</span>
                     <br><span class="upgrade-description">Génère 150 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-patate">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">40000 Tibos</span>
             </button>
@@ -439,7 +440,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Nogode - Le Disrupteur Sombre 🖤</span>
                     <br><span class="upgrade-description">Génère 500 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-nogode">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">200000 Tibos</span>
             </button>
@@ -449,7 +450,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Sachatte - L'Éclaireuse Mystique ✨</span>
                     <br><span class="upgrade-description">Génère 2,000 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-sachatte">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">1000000 Tibos</span>
             </button>
@@ -459,7 +460,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Milodes - Le Mobilisateur Instantané 🚀</span>
                     <br><span class="upgrade-description">Génère 10,000 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-milodes">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">8000000 Tibos</span>
             </button>
@@ -469,7 +470,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Thomas - L'Architecte des Ressources 💰</span>
                     <br><span class="upgrade-description">Génère 50,000 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-thomas">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">50000000 Tibos</span>
             </button>
@@ -479,7 +480,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Lenaik - La Gardienne Hyper-Protectrice 🛡️</span>
                     <br><span class="upgrade-description">Génère 200,000 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-lenaik">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">200000000 Tibos</span>
             </button>
@@ -489,7 +490,7 @@
                 <div class="upgrade-details">
                     <span class="upgrade-title">Rodrigues - Le Bâton de Pèlerin 💫</span>
                     <br><span class="upgrade-description">Génère 1,000,000 Tibos/s</span>
-                    <span class="upgrade-count" id="count-passive-rodrigues">Possédé: 0</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">1000000000 Tibos</span>
             </button>
@@ -547,7 +548,8 @@
                 musicLabel: "Musique", 
                 tibosOwnedLabel: "Tibos Possédés :",
                 clickPowerDisplay: (power) => `Puissance de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${formatScore(tps)}`,
+                // MISE À JOUR : TPS affiché en valeur précise
+                tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Améliorations",
                 // Upgrades Multiplicateurs (Achat Unique)
                 mindsetTitle: "Mise en Place du \"Mindset\"",
@@ -580,7 +582,8 @@
                 rodriguesDescription: "Génère 1,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
-                costText: (cost) => `${formatScore(cost)} Tibos`
+                costText: (cost) => `${formatScore(cost)} Tibos`,
+                purchasedText: "Acheté" // Nouvelle chaîne pour l'achat
             },
             en: {
                 // General
@@ -589,7 +592,8 @@
                 musicLabel: "Music", 
                 tibosOwnedLabel: "Tibos Owned:",
                 clickPowerDisplay: (power) => `Click Power: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                tpsDisplay: (tps) => `Tibos Per Second (TPS): ${formatScore(tps)}`,
+                // MISE À JOUR : TPS affiché en valeur précise
+                tpsDisplay: (tps) => `Tibos Per Second (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Upgrades",
                 // Multiplier Upgrades (One-Time Purchase)
                 mindsetTitle: "\"Mindset\" Implementation",
@@ -622,7 +626,8 @@
                 rodriguesDescription: "Generates 1,000,000 Tibos/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
-                costText: (cost) => `${formatScore(cost)} Tibos`
+                costText: (cost) => `${formatScore(cost)} Tibos`,
+                purchasedText: "Purchased"
             },
             es: {
                  // General
@@ -631,7 +636,8 @@
                 musicLabel: "Música", 
                 tibosOwnedLabel: "Tibos Poseídos:",
                 clickPowerDisplay: (power) => `Poder de Clic: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${formatScore(tps)}`,
+                // MISE À JOUR : TPS affiché en valeur précise
+                tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Mejoras",
                 // Upgrades Multiplicadores (Compra Única)
                 mindsetTitle: "Implementación del \"Mindset\"",
@@ -657,14 +663,15 @@
                 milodesDescription: "Genera 10,000 Tibos/s",
                 thomasTitle: "Thomas - El Arquitecto de Recursos 💰",
                 thomasDescription: "Genera 50,000 Tibos/s",
-                lenaikTitle: "Lenaik - La Guardiana Hiperprotectora 🛡️",
+                lenaikTitle: "Lenaik - La Gardiana Hiperprotectora 🛡️",
                 lenaikDescription: "Genera 200,000 Tibos/s",
                  // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - El Bastón del Peregrino 💫",
                 rodriguesDescription: "Genera 1,000,000 Tibos/s",
-                // Texto secundario
+                // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
-                costText: (cost) => `${formatScore(cost)} Tibos`
+                costText: (cost) => `${formatScore(cost)} Tibos`,
+                purchasedText: "Comprado"
             }
         };
 
@@ -672,11 +679,15 @@
         let currentTrackIndex = 0;
         const backgroundMusic = document.getElementById('background-music');
 
+        // PLAYLIST MISE À JOUR SELON LA DEMANDE DE L'UTILISATEUR
         const playlist = [
-            // Le nom du fichier est corrigé pour être 'damn-gabin.mp3'
-            { url: 'damn-gabin.mp3', title: 'Damn de Gabin' },
-            { url: 'tibo-vibration.mp3', title: 'Vibration Tibo' }, 
-            { url: 'tibo-transfo.mp3', title: 'La Vraie Transfo' }
+            { url: 'damn-gabin.mp3', title: 'Damn (Gabin)' },
+            { url: 'Motivation-Gabin.mp3', title: 'Motivation (Gabin)' }, 
+            { url: 'BoubouMax-Gabin.mp3', title: 'BoubouMax (Gabin)' },
+            { url: 'Oddloop-Frederic.mp3', title: 'Oddloop (Frederic)' },
+            { url: 'Ballade-Tomasi.mp3', title: 'Ballade (Tomasi)' },
+            { url: 'Concerto-Glazunov.mp3', title: 'Concerto (Glazunov)' },
+            { url: 'Tableaux_de_Provences-Paule_Maurice.mp3', title: 'Tableaux de Provences (Maurice)' }
         ];
 
         // --- Fonctions de Musique ---
@@ -713,12 +724,23 @@
 
         // --- Fonctions de Traduction (Language Functions) ---
 
-        function setLanguage(lang) {
+        /**
+         * Change la langue et met à jour l'UI. 
+         * @param {string} lang Le code de langue ('fr', 'en', 'es').
+         * @param {boolean} updateSave Indique si la préférence doit être sauvegardée (false pour le chargement initial).
+         */
+        function setLanguage(lang, updateSave = true) {
             if (!translations[lang]) return;
             currentLang = lang;
             document.getElementById('language-selector').value = lang;
+            
+            // On met à jour l'UI UNIQUEMENT ici. Si cette fonction est appelée après
+            // le chargement des données, tout sera à jour.
             updateUI(); 
-            saveLanguage();
+            
+            if (updateSave) {
+                 saveLanguage();
+            }
         }
 
         function updateUI() {
@@ -738,34 +760,38 @@
             // Mise à jour de tous les boutons d'amélioration
             upgradeButtons.forEach(button => {
                 const upgradeKey = button.getAttribute('data-upgrade-key');
-                const count = parseInt(button.getAttribute('data-count') || 0);
+                // L'attribut data-count DOIT être à jour suite à loadGame
+                const count = parseInt(button.getAttribute('data-count') || 0); 
                 const isPurchased = button.getAttribute('data-purchased') === 'true';
 
                 if (upgradeKey) {
                     const titleElement = button.querySelector('.upgrade-title');
                     const descElement = button.querySelector('.upgrade-description');
-                    const countElement = button.querySelector('.upgrade-count');
+                    // On utilise le sélecteur de classe pour trouver l'élément du compteur
+                    const countElement = button.querySelector('.upgrade-count'); 
                     const costElement = button.querySelector('.upgrade-cost');
                     
                     const cost = calculateCost(button);
 
-                    // Mise à jour des textes
+                    // Mise à jour des textes de titre/description
                     if (titleElement) titleElement.textContent = t[`${upgradeKey}Title`];
                     if (descElement) descElement.textContent = t[`${upgradeKey}Description`];
                     
                     if (costElement) {
                          if (isPurchased) {
-                            costElement.textContent = `✅ ${currentLang === 'fr' ? 'Acheté' : currentLang === 'en' ? 'Purchased' : 'Comprado'}`;
+                            costElement.textContent = `✅ ${t.purchasedText}`;
                             button.disabled = true;
                         } else {
+                            // Le coût est formaté, car il peut être grand
                             costElement.textContent = t.costText(cost);
                         }
                     }
 
-                    // Mise à jour du compteur pour les upgrades répétables
+                    // *** POINT CLÉ : SYNCHRONISATION DU COMPTEUR VISUEL ***
                     if (countElement) {
-                        if (button.getAttribute('data-purchased') !== 'true') {
-                           countElement.textContent = t.countText(count);
+                        if (!isPurchased) {
+                           // Lit le data-count qui a été restauré dans loadGame
+                           countElement.textContent = t.countText(count); 
                            countElement.style.display = 'block';
                         } else {
                            countElement.style.display = 'none';
@@ -797,9 +823,13 @@
             clickPowerDisplay.textContent = t.clickPowerDisplay(clickPower);
         }
 
+        // CORRECTION DE LA FONCTION : Le TPS doit s'afficher en valeur brute ou avec une décimale pour la précision
         function updateTPSDisplay() {
             const t = translations[currentLang];
-            tpsDisplay.textContent = t.tpsDisplay(tps);
+            // Utilise toFixed(0) si TPS est petit, toFixed(1) si TPS est grand pour rester lisible et précis.
+            // Le toFixed(0) est une troncature simple pour éviter d'afficher "0.0 Tibos"
+            const tpsValue = tps > 1000 ? tps.toFixed(1) : tps.toFixed(0); 
+            tpsDisplay.textContent = t.tpsDisplay(parseFloat(tpsValue));
         }
 
         function calculateCost(button) {
@@ -887,9 +917,7 @@
                 }
 
                 // 2. Mise à jour de l'UI et de l'état
-                updateScoreDisplay();
-                updateTPSDisplay();
-                updateUI(); // Met à jour le texte du bouton et le statut 'disabled'
+                updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
                 saveGame(); // Sauvegarde le jeu après l'achat
             } else {
                 console.log(translations[currentLang].notEnoughTibos);
@@ -906,7 +934,7 @@
                     button.disabled = true;
                     // Assure que le coût affiche "Acheté"
                     const costElement = button.querySelector('.upgrade-cost');
-                    if (costElement) costElement.textContent = `✅ ${currentLang === 'fr' ? 'Acheté' : currentLang === 'en' ? 'Purchased' : 'Comprado'}`;
+                    if (costElement) costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
                 } else {
                     button.disabled = score < cost;
                 }
@@ -916,6 +944,7 @@
         // Rend visible les upgrades cachés une fois le score atteint
         function checkUpgradeVisibility() {
             // Logique pour révéler les upgrades uniques
+            // Note: On utilise le score actuel (qui est chargé) pour vérifier
             if (score >= 400 && upgrade2_new.classList.contains('hidden')) {
                 upgrade2_new.classList.remove('hidden');
                 upgrade2_new.style.opacity = 1;
@@ -941,18 +970,25 @@
             // Vérifie si le TPS est > 0 avant d'ajouter le score
             if (tps > 0) {
                 // Ajout du TPS (divisé par le nombre de cycles par seconde, ici 10)
+                // L'utilisation de tps / 10 pour un intervalle de 100ms donne tps / seconde
                 const addedScore = tps / 10; 
                 score += addedScore; 
             }
             
             // Affichage et vérification
             updateScoreDisplay();
+            updateTPSDisplay(); // Assure la mise à jour constante du TPS
             checkUpgradeCosts();
             checkUpgradeVisibility();
 
             // Sauvegarde du jeu toutes les 10 secondes (pour ne pas surcharger)
-            if (Math.floor(performance.now() / 1000) % 10 === 0) {
+            // Utiliser un drapeau pour ne pas sauvegarder 10 fois par seconde
+            const now = Math.floor(performance.now() / 1000);
+            if (now % 10 === 0 && !window.hasSavedThisSecond) {
                 saveGame();
+                window.hasSavedThisSecond = true;
+            } else if (now % 10 !== 0) {
+                 window.hasSavedThisSecond = false;
             }
         }
 
@@ -963,7 +999,8 @@
 
         function saveGame() {
             const saveObject = {
-                score: score,
+                // Le score est stocké en décimal, il est tronqué seulement à l'affichage
+                score: score, 
                 clickPower: clickPower,
                 tps: tps,
                 upgrades: [],
@@ -982,52 +1019,52 @@
             localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(saveObject));
         }
 
+        /**
+         * Charge le jeu en restaurant toutes les données avant de mettre à jour l'UI.
+         */
         function loadGame() {
             const savedGame = localStorage.getItem(GAME_STORAGE_KEY);
             const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
 
-            // Chargement de la Langue
-            if (savedLang) {
-                currentLang = savedLang;
-                setLanguage(currentLang);
-            }
+            // 1. Initialisation des données par défaut
+            score = 0;
+            clickPower = 1;
+            tps = 0;
             
-            // Chargement de la Sauvegarde
+            // 2. Chargement de la Sauvegarde (si elle existe)
             if (savedGame) {
                 const saveObject = JSON.parse(savedGame);
                 
+                // Restauration des scores globaux
                 score = saveObject.score || 0;
                 clickPower = saveObject.clickPower || 1;
-                tps = saveObject.tps || 0;
+                // Le TPS est restauré en nombre flottant
+                tps = saveObject.tps || 0; 
 
-                // Restauration de l'état de chaque bouton
+                // Restauration de l'état des boutons (set des attributs)
                 saveObject.upgrades.forEach(savedUpgrade => {
                     const button = document.getElementById(savedUpgrade.id);
                     if (button) {
                         button.setAttribute('data-count', savedUpgrade.count);
                         button.setAttribute('data-purchased', savedUpgrade.purchased.toString());
-
-                        // Re-calcul du coût et du statut
-                        const cost = calculateCost(button);
-                        const costElement = button.querySelector('.upgrade-cost');
-
-                        // Ajustement de l'UI pour les achats uniques déjà réalisés
-                        if (savedUpgrade.purchased) {
-                            button.disabled = true;
-                            if (costElement) costElement.textContent = `✅ ${currentLang === 'fr' ? 'Acheté' : currentLang === 'en' ? 'Purchased' : 'Comprado'}`;
-                        } else {
-                            // Mise à jour du coût pour les upgrades répétables
-                            if (costElement) costElement.textContent = translations[currentLang].costText(cost);
-                        }
                     }
                 });
+                
+                // Restauration de la langue à partir de la sauvegarde du jeu
+                if (saveObject.lang) {
+                    currentLang = saveObject.lang;
+                }
             }
             
-            // Après le chargement, on met à jour l'UI finale et l'état des boutons
-            updateScoreDisplay();
-            updateTPSDisplay();
-            checkUpgradeVisibility();
-            updateUI();
+            // 3. Chargement de la Langue (si elle est définie indépendamment de la save)
+            if (savedLang) {
+                currentLang = savedLang;
+            }
+            
+            // 4. Mise à jour finale et unique de l'interface et de l'état.
+            // setLanguage va appeler updateUI, et l'UI lira les attributs data-count qui sont maintenant corrects.
+            setLanguage(currentLang, false); // 'false' pour ne pas sauvegarder la langue pendant le chargement
+            checkUpgradeVisibility(); // Assure la visibilité des upgrades débloqués
         }
         
         function saveLanguage() {
@@ -1039,11 +1076,8 @@
         window.onload = function() {
             // 1. Initialisation de la Musique
             loadTrack(currentTrackIndex); 
-            // 2. Chargement du jeu et de la langue
+            // 2. Chargement du jeu (qui met à jour l'UI à la fin)
             loadGame(); 
-            // 3. Mise à jour de l'UI après chargement
-            updateUI();
-            checkUpgradeCosts();
         };
 
         // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
