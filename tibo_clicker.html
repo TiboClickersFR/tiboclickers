@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tibo Clicker</title>
+    <style>
+        /* CSS pour le style du jeu */
+        body {
+            /* Simule l'arrière-plan de Cookie Clicker (couleur sombre, motif subtil) */
+            background-color: #0b0908; 
+            color: #f7f7f7;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle, #222222 1px, transparent 1px);
+            background-size: 15px 15px;
+        }
+
+        #game-container {
+            display: flex;
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 2px solid #5a5a5a;
+            border-radius: 10px;
+            background-color: #1a1a1a;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #clicker-area {
+            flex: 2;
+            padding: 20px;
+            border-right: 2px solid #5a5a5a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        #upgrades-area {
+            flex: 1;
+            padding: 20px;
+            background-color: #2c2c2c;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            position: relative; /* Pour les animations */
+            overflow-y: auto; /* Permet le défilement si beaucoup d'upgrades */
+            max-height: 80vh; /* Limite la hauteur de la zone d'amélioration */
+        }
+
+        #score {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ffcc00; /* Jaune pour l'or */
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        #tibo-image {
+            /* Image plus grande */
+            width: 350px; 
+            height: 350px;
+            border-radius: 50%; /* Image ronde pour un meilleur effet de bouton */
+            cursor: pointer;
+            box-shadow: 0 0 15px #ffcc00, 0 0 30px rgba(255, 204, 0, 0.5);
+            transition: transform 0.1s;
+            user-select: none; /* Empêche la sélection du texte/image */
+            object-fit: cover;
+            /* MISE À JOUR : Utilisation de votre fichier "Tibo.png" */
+            background-image: url('Tibo.png'); 
+            background-size: cover;
+            background-position: center;
+            border: 5px solid #ffcc00;
+        }
+
+        #tibo-image:active {
+            transform: scale(0.95); /* Effet de clic */
+        }
+
+        .upgrade-button {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #3b3b3b;
+            color: #f7f7f7;
+            border: 2px solid #5a5a5a;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s, transform 0.1s, opacity 0.5s; /* Ajout d'opacity pour l'animation */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upgrade-button.hidden {
+            display: none;
+            opacity: 0;
+        }
+
+        .upgrade-button:hover:not(:disabled) {
+            background-color: #4f4f4f;
+            transform: translateY(-2px);
+        }
+
+        .upgrade-button:disabled {
+            background-color: #222222;
+            color: #777;
+            cursor: not-allowed;
+            border-color: #333;
+        }
+        
+        .upgrade-details {
+            text-align: left;
+        }
+        
+        .upgrade-title {
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .upgrade-cost {
+            font-weight: bold;
+            color: #ffcc00;
+            white-space: nowrap; /* Empêche le coût de passer à la ligne */
+        }
+        
+        /* Cible l'élément qui affiche le nombre possédé */
+        .upgrade-count {
+            display: block;
+            font-size: 0.7em;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .floating-text {
+            position: absolute;
+            font-size: 2em;
+            color: #ffcc00;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            animation: floatUp 0.8s ease-out;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+
+        h2 {
+            color: #ffcc00;
+            border-bottom: 2px solid #5a5a5a;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        #click-power-display {
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #ccc;
+        }
+
+        #tps-display {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+
+        /* Styles pour les animations d'apparition des nouvelles améliorations */
+        .new-upgrade-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .new-upgrade-animation {
+            animation: fadeIn 0.8s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #music-control {
+            margin-top: 20px;
+            padding: 10px;
+            background: #2c2c2c;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+        #music-control button {
+            background: #4f4f4f;
+            color: #ffcc00;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tibo Clicker - La Vraie Transfo' ! 💪</h1>
+
+    <div id="music-control">
+        <p>Ambiance : <span id="current-track-title">Musique de Fond Classique</span></p>
+        <button onclick="toggleMusic()">▶️ / ⏸️</button>
+        <button onclick="nextTrack()">⏭️</button>
+    </div>
+
+    <!-- 🎧 Élément Audio unique pour la lecture de la playlist -->
+    <audio id="background-music" preload="auto"></audio>
+
+    <div id="game-container">
+        
+        <div id="clicker-area">
+            
+            <div id="score-container">
+                <p>Tibos Possédés :</p>
+                <div id="score">0</div>
+                <div id="click-power-display">Puissance de Clic : 1 Tibo</div>
+                <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
+            </div>
+
+            <div id="tibo-image"></div>
+            <!-- Image de Tibo -->
+
+        </div>
+
+        <div id="upgrades-area">
+            <h2>Améliorations</h2>
+
+            <!-- Améliorations de Clic (Bonus Additif Unique) -->
+            <div id="click-multiplier-container" class="new-upgrade-container">
+                <!-- Upgrade 1 initiale -->
+                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Mise en Place du "Mindset"</span>
+                        <br>Ajoute +1 TPC de base (Achat Unique)
+                    </div>
+                    <span class="upgrade-cost">100 Tibos</span>
+                </button>
+                
+                <!-- Upgrade 2 -->
+                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Tibo Ultra Sale 💥</span>
+                        <br>Ajoute +3 TPC de base (Achat Unique)
+                    </div>
+                    <span class="upgrade-cost">500 Tibos</span>
+                </button>
+                
+                <!-- Upgrade 3 -->
+                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
+                        <br>Ajoute +6 TPC de base (Achat Unique)
+                    </div>
+                    <span class="upgrade-cost">3,000 Tibos</span>
+                </button>
+            </div>
+            
+            <hr style="border-color: #5a5a5a; margin: 15px 0;">
+
+            <!-- Amélioration du Clic (Ajout) - Prix exponentiel -->
+            <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-addition="5" data-count="0">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Déverrouillage des Protéines</span>
+                    <br>Ajoute +5 Tibos par Clic
+                    <span class="upgrade-count" id="count-addition">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">2,000 Tibos</span>
+            </button>
+
+            <!-- Amélioration Passive 1 - Prix exponentiel -->
+            <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-tps="1" data-count="0">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
+                    <br>Génère 1 Tibo/s
+                    <span class="upgrade-count" id="count-passive-alessiode">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">500 Tibos</span>
+            </button>
+            
+            <!-- Amélioration Passive 2 - Prix exponentiel -->
+            <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-tps="10" data-count="0">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Justine - Community Manager 📸</span>
+                    <br>Génère 10 Tibos/s
+                    <span class="upgrade-count" id="count-passive-justine">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">5,000 Tibos</span>
+            </button>
+            
+            <!-- Nouvelle Amélioration Passive 3 - Prix exponentiel -->
+            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-tps="50" data-count="0">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">L'Usine à Patates Douces 🍠</span>
+                    <br>Génère 50 Tibos/s
+                    <span class="upgrade-count" id="count-passive-patate">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">40,000 Tibos</span>
+            </button>
+            
+        </div>
+        
+    </div>
+
+    <script>
+        // JavaScript pour la logique du jeu
+        let score = 0;
+        let clickPower = 1; // Puissance de clic totale (base + bonus)
+        let tps = 0; // Tibos Par Seconde
+        const GAME_STORAGE_KEY = 'tiboClickerSave';
+        const GROWTH_FACTOR = 1.15; // Facteur d'augmentation exponentiel
+
+        const scoreDisplay = document.getElementById('score');
+        const tiboImage = document.getElementById('tibo-image');
+        const clickPowerDisplay = document.getElementById('click-power-display');
+        const tpsDisplay = document.getElementById('tps-display');
+        
+        // Références aux boutons pour la gestion de l'apparition
+        const upgrade1 = document.getElementById('upgrade-click-1');
+        const upgrade2_new = document.getElementById('upgrade-click-2-new'); 
+        const upgrade3_new = document.getElementById('upgrade-click-3-new'); 
+        
+        // Liste de tous les boutons (incluant les cachés pour la vérification des coûts)
+        const upgradeButtons = [
+            upgrade1,
+            upgrade2_new,
+            upgrade3_new,
+            document.getElementById('upgrade-addition'),
+            document.getElementById('upgrade-passive-alessiode'),
+            document.getElementById('upgrade-passive-justine'),
+            document.getElementById('upgrade-passive-patate')
+        ];
+
+        // --- Fonctions utilitaires ---
+        
+        // Calcul le prix exponentiel : prix de base * 1.15^n
+        function calculateNewCost(baseCost, count) {
+            return Math.ceil(baseCost * Math.pow(GROWTH_FACTOR, count));
+        }
+        
+        function formatNumber(num) {
+            return Math.floor(num).toLocaleString('fr-FR');
+        }
+
+        // --- Système de Sauvegarde/Chargement ---
+        
+        function saveGame() {
+            const saveObject = {
+                score: score,
+                clickPower: clickPower,
+                tps: tps,
+                upgrades: {}
+            };
+
+            upgradeButtons.forEach(button => {
+                const id = button.id;
+                // Sauvegarder l'état des upgrades cumulables (count)
+                if (button.dataset.baseCost) {
+                    saveObject.upgrades[id] = { count: parseInt(button.dataset.count) };
+                } 
+                // Sauvegarder l'état des upgrades uniques (purchased)
+                else {
+                    saveObject.upgrades[id] = { purchased: button.dataset.purchased === 'true' };
+                }
+            });
+
+            localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(saveObject));
+        }
+
+        function loadGame() {
+            const savedData = localStorage.getItem(GAME_STORAGE_KEY);
+            if (!savedData) return false;
+
+            const saveObject = JSON.parse(savedData);
+            
+            score = saveObject.score || 0;
+            clickPower = saveObject.clickPower || 1;
+            tps = saveObject.tps || 0;
+
+            // Restaurer l'état des upgrades
+            if (saveObject.upgrades) {
+                upgradeButtons.forEach(button => {
+                    const id = button.id;
+                    const savedUpgrade = saveObject.upgrades[id];
+                    
+                    if (savedUpgrade) {
+                        // Cumulable
+                        if (button.dataset.baseCost) {
+                            button.dataset.count = savedUpgrade.count || 0;
+                        } 
+                        // Unique
+                        else {
+                            button.dataset.purchased = savedUpgrade.purchased ? 'true' : 'false';
+                            
+                            // Si déjà acheté, on le masque
+                            if (savedUpgrade.purchased) {
+                                button.classList.add('hidden');
+                                
+                                // Met à jour le texte du bouton après l'achat
+                                const bonus = button.dataset.addBonus;
+                                button.querySelector('.upgrade-details').innerHTML = `<span class="upgrade-title">${button.querySelector('.upgrade-title').textContent}</span><br>Acheté ! (+${bonus} TPC)`;
+                                button.querySelector('.upgrade-cost').textContent = 'Acheté';
+                            }
+                        }
+                    }
+                });
+            }
+            return true;
+        }
+
+        // Sauvegarde automatique toutes les 2 secondes (2000ms)
+        setInterval(saveGame, 2000); 
+
+        // --- Fonctions de Mise à Jour ---
+
+        function updateScore(amount) {
+            score += amount;
+            updateDisplays(); // Met à jour le score dans updateDisplays
+            checkUpgrades();
+        }
+
+        function updateDisplays() {
+            // Assure que le score est mis à jour
+            scoreDisplay.textContent = formatNumber(score); 
+            clickPowerDisplay.textContent = `Puissance de Clic : ${formatNumber(clickPower)} Tibo${clickPower > 1 ? 's' : ''}`;
+            tpsDisplay.textContent = `Tibos par Seconde (TPS) : ${formatNumber(tps)}`;
+        }
+
+        /**
+         * Vérifie l'état de tous les boutons d'amélioration, met à jour les coûts
+         * et les compteurs d'objets possédés.
+         */
+        function checkUpgrades() {
+            upgradeButtons.forEach(button => {
+                if (button.dataset.purchased === 'true') {
+                    button.disabled = true;
+                    return;
+                }
+                
+                let currentCost;
+                
+                // --- Logique pour les upgrades cumulables (prix exponentiel) ---
+                if (button.dataset.baseCost) {
+                    const baseCost = parseInt(button.dataset.baseCost);
+                    const count = parseInt(button.dataset.count);
+                    currentCost = calculateNewCost(baseCost, count);
+                    
+                    // Met à jour l'affichage du coût et du count
+                    button.dataset.cost = currentCost;
+                    button.querySelector('.upgrade-cost').textContent = formatNumber(currentCost) + ' Tibos';
+                    
+                    // Mise à jour de l'affichage du nombre d'unités possédées
+                    const countElement = button.querySelector('.upgrade-count');
+                    if (countElement) {
+                         countElement.textContent = `Possédé: ${count}`;
+                    }
+                } else {
+                    // Logique pour les upgrades uniques (prix fixe)
+                    currentCost = parseInt(button.dataset.cost);
+                }
+
+
+                // --- Logique d'apparition/disparition pour les upgrades uniques consécutives ---
+                if (button.id === 'upgrade-click-2-new') {
+                    // Apparaît après l'achat de upgrade-click-1
+                    if (upgrade1.dataset.purchased === 'true' && button.dataset.purchased !== 'true') {
+                        button.classList.remove('hidden');
+                        button.classList.add('new-upgrade-animation');
+                    } else {
+                        button.classList.add('hidden');
+                    }
+                } else if (button.id === 'upgrade-click-3-new') {
+                    // Apparaît après l'achat de upgrade-click-2-new
+                    if (upgrade2_new.dataset.purchased === 'true' && button.dataset.purchased !== 'true') {
+                        button.classList.remove('hidden');
+                        button.classList.add('new-upgrade-animation');
+                    } else {
+                        button.classList.add('hidden');
+                    }
+                }
+
+                // Vérification standard de l'achat
+                if (!button.classList.contains('hidden')) {
+                    button.disabled = score < currentCost;
+                } else {
+                    button.disabled = true;
+                }
+            });
+        }
+
+        // --- Logique du Clic ---
+
+        // Écouteur de clic principal sur l'image
+        tiboImage.addEventListener('click', () => {
+            updateScore(clickPower);
+            createFloatingText(clickPower);
+            
+            // Tente de jouer la musique au premier clic
+            const music = document.getElementById('background-music');
+            music.play().catch(error => {});
+        });
+
+        // Fonction pour l'effet de texte flottant
+        function createFloatingText(amount) {
+            const text = document.createElement('div');
+            text.textContent = `+${formatNumber(amount)}`;
+            text.classList.add('floating-text');
+            
+            // Positionne le texte au niveau du clic
+            const rect = tiboImage.getBoundingClientRect();
+            text.style.left = `${rect.left + rect.width / 2}px`;
+            text.style.top = `${rect.top + rect.height / 2}px`;
+            
+            document.body.appendChild(text);
+
+            // Supprime l'élément après l'animation
+            text.addEventListener('animationend', () => {
+                text.remove();
+            });
+        }
+
+        // --- Logique des Améliorations (Upgrades) ---
+
+        upgradeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const cost = parseInt(button.dataset.cost);
+                
+                if (score >= cost) {
+                    updateScore(-cost); // Déduire le coût
+                    
+                    // --- Upgrades Additifs Uniques (Bonus de Clic de Base) ---
+                    if (button.dataset.addBonus) {
+                        // Ajoute le bonus à la puissance de clic totale
+                        clickPower += parseInt(button.dataset.addBonus); 
+                        button.dataset.purchased = 'true'; 
+                        
+                        // Animation et remplacement pour la chaîne d'upgrades
+                        button.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            button.classList.add('hidden');
+                            checkUpgrades(); // Révèle l'upgrade suivante si nécessaire
+                        }, 500); // 0.5s pour correspondre à la transition CSS
+                        
+                        // Met à jour le texte du bouton après l'achat
+                        const bonus = button.dataset.addBonus;
+                        button.querySelector('.upgrade-details').innerHTML = `<span class="upgrade-title">${button.querySelector('.upgrade-title').textContent}</span><br>Acheté ! (+${bonus} TPC)`;
+                        button.querySelector('.upgrade-cost').textContent = 'Acheté';
+                    } 
+                    
+                    // --- Upgrades Cumulables (Ajout ou TPS) ---
+                    else {
+                        let count = parseInt(button.dataset.count);
+                        count++;
+                        button.dataset.count = count; // Mettre à jour la donnée interne
+                        
+                        if (button.dataset.addition) {
+                            clickPower += parseInt(button.dataset.addition);
+                        } else if (button.dataset.tps) {
+                            tps += parseInt(button.dataset.tps);
+                        }
+
+                        // Mise à jour immédiate de l'affichage du nombre d'unités possédées après l'achat
+                        const countElement = button.querySelector('.upgrade-count');
+                        if (countElement) {
+                             countElement.textContent = `Possédé: ${count}`;
+                        }
+                        
+                        // Le coût est recalculé et mis à jour via checkUpgrades()
+                    }
+
+                    updateDisplays();
+                    checkUpgrades(); // Vérifie les nouveaux coûts et l'état des boutons
+                }
+            });
+        });
+
+        // --- Logique Passive (Intervalle de temps) ---
+
+        setInterval(() => {
+            if (tps > 0) {
+                // On ajoute les TPS au score toutes les 1000ms (1 seconde)
+                updateScore(tps); 
+            }
+        }, 1000);
+
+        // --- Système Audio (Playlist) ---
+        const audioPlayer = document.getElementById('background-music');
+        const trackTitleDisplay = document.getElementById('current-track-title');
+
+        // ***********************************************************************************
+        // * MISE À JOUR : La playlist utilise MAINTENANT les noms de fichiers que vous avez uploadés.
+        // ***********************************************************************************
+        const allTracks = [
+            // VOS MORCEAUX PERSONNELS (Utilise les noms de fichiers du screenshot)
+            { src: 'Concerto-Glazunov.mp3', title: "Concerto de Glazunov" },
+            { src: 'Ballade-Tomasi.mp3', title: "Ballade de Tomasi" },
+            { src: 'Tableaux-de-Provence-Paule-Maurice.mp3', title: "Tableaux de Provence" }
+            
+            // Si vous avez d'autres musiques, vous pouvez les ajouter ici.
+        ];
+
+        // Filtre les sources manquantes (#) mais conserve les sources qui semblent être des noms de fichiers
+        const playlist = allTracks.filter(track => track.src !== '#' && track.src !== '' ); 
+        
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+
+        function loadTrack(index) {
+            if (playlist.length === 0) {
+                trackTitleDisplay.textContent = "Aucune musique disponible. Ajoutez vos sources MP3!";
+                return;
+            }
+
+            // Correction: Utiliser le src de la playlist pour définir la source de l'élément audio
+            audioPlayer.src = playlist[index].src;
+            audioPlayer.load();
+            trackTitleDisplay.textContent = playlist[index].title;
+            
+            if (isPlaying) {
+                 audioPlayer.play().catch(error => {
+                    console.log("La lecture automatique a été bloquée. Cliquez sur l'icône de Tibo ou sur le bouton de lecture pour commencer !");
+                });
+            }
+        }
+
+        window.toggleMusic = function() {
+            if (playlist.length === 0) return;
+            if (audioPlayer.paused) {
+                audioPlayer.play().catch(error => {
+                    console.log("Lecture audio impossible sans interaction utilisateur.");
+                });
+                isPlaying = true;
+            } else {
+                audioPlayer.pause();
+                isPlaying = false;
+            }
+        }
+
+        window.nextTrack = function() {
+            if (playlist.length === 0) return;
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(currentTrackIndex);
+        }
+
+        // Écouteur pour passer à la piste suivante à la fin de la piste actuelle
+        audioPlayer.addEventListener('ended', () => {
+            nextTrack();
+        });
+
+
+        // --- Initialisation du Jeu ---
+        function initializeGame() {
+            // Tente de charger la partie
+            loadGame();
+
+            // S'assure que l'affichage est à jour après le chargement ou l'initialisation
+            updateDisplays(); 
+            checkUpgrades(); 
+            
+            // Initialise le système de musique
+            if (playlist.length > 0) {
+                loadTrack(currentTrackIndex);
+            }
+        }
+
+        // Lancement de l'initialisation
+        initializeGame();
+    </script>
+
+</body>
+</html>
