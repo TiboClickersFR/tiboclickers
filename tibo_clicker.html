@@ -366,6 +366,7 @@
             <!-- Améliorations de Clic (Bonus Additif Unique) -->
             <div id="click-multiplier-container" class="new-upgrade-container">
                 <!-- Upgrade 1 initiale -->
+                <!-- Ces achats sont uniques, ils utilisent data-cost -->
                 <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Mise en Place du "Mindset"</span>
@@ -396,6 +397,7 @@
             <hr style="border-color: #5a5a5a; margin: 15px 0;">
 
             <!-- Amélioration du Clic (Ajout) - Prix exponentiel -->
+            <!-- Ces achats sont répétables, ils utilisent data-base-cost -->
             <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-addition="5" data-count="0" data-upgrade-key="proteines">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Déverrouillage des Protéines</span>
@@ -832,16 +834,35 @@
             tpsDisplay.textContent = t.tpsDisplay(parseFloat(tpsValue));
         }
 
+        /**
+         * Calcule le coût d'une amélioration en fonction de son type (unique ou répétable).
+         * @param {HTMLElement} button Le bouton de l'amélioration.
+         * @returns {number} Le coût actuel de l'amélioration.
+         */
         function calculateCost(button) {
+            const isPurchased = button.getAttribute('data-purchased') === 'true';
+            
+            // Si c'est un achat unique déjà fait, le prix reste l'original (mais le bouton est désactivé plus tard)
+            if (isPurchased) {
+                // Utilise data-cost si disponible (pour les achats uniques) ou base-cost
+                return parseInt(button.getAttribute('data-cost') || button.getAttribute('data-base-cost'));
+            }
+
+            // Pour tous les autres cas (achat unique non fait, ou achat répétable)
+            
+            // 1. Détermine le coût de base
+            // Utilise data-base-cost pour les répétables, data-cost pour les uniques.
             const baseCost = parseInt(button.getAttribute('data-base-cost') || button.getAttribute('data-cost'));
             const count = parseInt(button.getAttribute('data-count') || 0);
-            
-            if (button.hasAttribute('data-purchased')) {
-                return baseCost; // Les achats uniques gardent leur coût initial
+
+            // 2. Si l'amélioration n'est PAS répétable (pas de data-count), retourne le coût de base
+            if (!button.hasAttribute('data-count')) {
+                return baseCost;
             }
             
-            // Coût exponentiel pour les upgrades répétables
-            return Math.floor(baseCost * Math.pow(GROWTH_FACTOR, count));
+            // 3. Logique d'augmentation exponentielle pour les améliorations répétables
+            const calculatedCost = Math.floor(baseCost * Math.pow(GROWTH_FACTOR, count));
+            return calculatedCost;
         }
 
 
@@ -893,7 +914,13 @@
             if (score >= cost) {
                 score -= cost;
                 
-                // 1. Mise à jour de la puissance de clic
+                // Incrémente le compteur pour l'achat suivant (seulement si c'est répétable)
+                if (button.hasAttribute('data-count')) {
+                    let count = parseInt(button.getAttribute('data-count'));
+                    button.setAttribute('data-count', ++count);
+                }
+                
+                // 1. Mise à jour de la puissance de clic / TPS
                 if (button.hasAttribute('data-add-bonus')) {
                     // Clics uniques (Mindset, Ultra Sale, Cheat Meal)
                     const bonus = parseInt(button.getAttribute('data-add-bonus'));
@@ -904,16 +931,13 @@
                     // Clic répétable (Protéines)
                     const addition = parseInt(button.getAttribute('data-addition'));
                     clickPower += addition;
-                    let count = parseInt(button.getAttribute('data-count'));
-                    button.setAttribute('data-count', ++count);
-
+                    // L'incrémentation du count est faite au début
+                    
                 } else if (button.hasAttribute('data-tps')) {
                     // Passifs (TPS)
                     const passiveTps = parseInt(button.getAttribute('data-tps'));
                     tps += passiveTps;
-                    let count = parseInt(button.getAttribute('data-count'));
-                    button.setAttribute('data-count', ++count);
-                    
+                    // L'incrémentation du count est faite au début
                 }
 
                 // 2. Mise à jour de l'UI et de l'état
@@ -930,10 +954,16 @@
                 const cost = calculateCost(button);
                 const isPurchased = button.getAttribute('data-purchased') === 'true';
                 
+                // Mettre à jour le coût affiché (si non acheté)
+                const costElement = button.querySelector('.upgrade-cost');
+                if (costElement && !isPurchased) {
+                     // Utilise la traduction pour formater le coût
+                    costElement.textContent = translations[currentLang].costText(cost);
+                }
+                
                 if (isPurchased) {
                     button.disabled = true;
                     // Assure que le coût affiche "Acheté"
-                    const costElement = button.querySelector('.upgrade-cost');
                     if (costElement) costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
                 } else {
                     button.disabled = score < cost;
