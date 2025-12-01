@@ -535,10 +535,12 @@
          * Initialise Firebase et tente d'authentifier l'utilisateur.
          */
         async function initializeFirebase() {
-             if (Object.keys(firebaseConfig).length === 0) {
-                console.error("Firebase config non trouvé. Vérifiez les variables globales.");
+             // VERIFICATION CRUCIALE DE L'OBJET firebaseConfig
+             // Le parse d'une chaîne vide donne un objet vide {}, d'où la vérification.
+             if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.projectId) {
+                console.error("Firebase config non trouvé. Vérifiez les variables globales et l'état de l'artefact.");
                 document.getElementById('user-info').textContent = "Erreur: Config Firebase manquante.";
-                return;
+                return; // ARRÊT SI CONFIG MANQUANTE
             }
             
             try {
@@ -571,6 +573,7 @@
                         isAuthReady = true;
                         document.getElementById('user-info').textContent = "Non connecté (anonyme).";
                         console.warn("Utilisateur déconnecté ou échec de l'authentification.");
+                        loadGameFromLocal(); // On charge le local si l'auth échoue
                     }
                 });
 
@@ -609,7 +612,11 @@
          * Charge l'état du jeu depuis Firestore.
          */
         async function loadGameFromFirestore() {
-             if (!isAuthReady || !userId) return;
+             if (!isAuthReady || !userId) {
+                 // Si auth n'est pas prêt, on charge le local en attendant la résolution
+                 loadGameFromLocal();
+                 return; 
+             }
 
              // Chemin Firestore: /artifacts/{appId}/users/{userId}/game-saves/tiboClicker
              const docRef = doc(db, 
@@ -624,11 +631,12 @@
                     applySaveObject(saveObject);
                     console.log("Jeu chargé depuis Firestore.");
                 } else {
-                    console.log("Aucune sauvegarde Firestore trouvée. Démarrage d'une nouvelle partie.");
-                    // Si pas de sauvegarde, on charge les valeurs par défaut (déjà fait par loadGameFromLocal)
+                    console.log("Aucune sauvegarde Firestore trouvée. Démarrage d'une nouvelle partie ou chargement local.");
+                    loadGameFromLocal(); // Tente de charger du local s'il n'y a rien en ligne
                 }
             } catch (e) {
                 console.error("Erreur lors du chargement depuis Firestore: ", e);
+                loadGameFromLocal(); // Charge le local en cas d'erreur de connexion/lecture
             } finally {
                  // Met à jour l'UI dans tous les cas pour être sûr que la langue et le reste s'affichent
                  setLanguage(currentLang, false); 
@@ -1045,8 +1053,14 @@
             checkUpgradeCosts();
             checkUpgradeVisibility();
 
-            saveGameToFirestore(); // Sauvegarde après chaque clic (ou après l'achat)
+            // La sauvegarde est faite dans la boucle gameLoop toutes les 10 secondes
+            // On peut ajouter une sauvegarde ici après 2 clics pour être réactif
+            if (window.clickCount % 2 === 0) {
+                 saveGameToFirestore(); 
+            }
+            window.clickCount++;
         });
+        window.clickCount = 0; // Compteur pour la sauvegarde rapide
 
         function createFloatingText(amount, event) {
             const text = document.createElement('div');
@@ -1230,9 +1244,10 @@
          * @param {Object} saveObject L'objet de sauvegarde.
          */
         function applySaveObject(saveObject) {
-            score = saveObject.score || 0;
-            clickPower = saveObject.clickPower || 1;
-            tps = saveObject.tps || 0; 
+            // Assurez-vous que les nombres sont bien parsés
+            score = Number(saveObject.score) || 0;
+            clickPower = Number(saveObject.clickPower) || 1;
+            tps = Number(saveObject.tps) || 0; 
             
             if (saveObject.lang) {
                 currentLang = saveObject.lang;
