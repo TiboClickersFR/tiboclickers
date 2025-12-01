@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tibo Clicker - La Vraie Transfo' !</title>
-    <!-- Chargement de Tailwind CSS pour le style -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Utilisation de la police Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chargement de Tailwind CSS (utilisé ici pour la facilité de la mise en page de base, bien que le CSS customisé domine) -->
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <!-- AJOUT DE L'ICÔNE (FAVICON) POUR L'ONGLET DU NAVIGATOR. Remplacez 'tibo_icon.png' par le nom de votre fichier d'icône. -->
+    <link rel="icon" type="image/png" href="tibo_icon.png">
     <style>
         /* CSS pour le style du jeu */
         body {
+            /* Simule l'arrière-plan de Cookie Clicker (couleur sombre, motif subtil) */
             background-color: #0b0908; 
             color: #f7f7f7;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
             margin: 0;
             padding: 20px;
@@ -22,22 +23,10 @@
             background-size: 15px 15px;
         }
 
-        #auth-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000; 
-        }
-        
         #game-container {
             display: flex;
             max-width: 1000px;
+            /* Limite la hauteur sur PC pour rendre l'interface plus compacte */
             max-height: 65vh; 
             height: 100%; 
             margin: 0 auto;
@@ -45,12 +34,11 @@
             border-radius: 10px;
             background-color: #1a1a1a;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            transition: opacity 0.5s;
         }
 
         #clicker-area {
             flex: 2;
-            padding: 15px; 
+            padding: 15px; /* Réduction du padding */
             border-right: 2px solid #5a5a5a;
             display: flex;
             flex-direction: column;
@@ -60,34 +48,43 @@
 
         #upgrades-area {
             flex: 1;
-            padding: 15px; 
+            padding: 15px; /* Réduction du padding */
             background-color: #2c2c2c;
             border-top-right-radius: 8px;
             border-bottom-right-radius: 8px;
             position: relative; 
             overflow-y: auto; 
+            /* Limite la hauteur de la zone d'upgrades sur PC */
             max-height: 65vh; 
         }
         
+        /* ------------------------------------------------ */
+        /* Mise à jour de la zone de clic/score */
+        /* ------------------------------------------------ */
+
+        #score-container {
+            margin-bottom: 15px; /* Réduction de la marge */
+        }
+
         #score {
             font-size: 2.5em;
             font-weight: bold;
             color: #ffcc00; 
-            margin-bottom: 15px; 
+            margin-bottom: 15px; /* Réduction de la marge */
             text-shadow: 2px 2px 4px #000;
         }
 
         #tibo-image {
-            width: 300px; 
-            height: 300px; 
+            width: 300px; /* Légère réduction pour PC */
+            height: 300px; /* Légère réduction pour PC */
             border-radius: 50%; 
             cursor: pointer;
             box-shadow: 0 0 15px #ffcc00, 0 0 30px rgba(255, 204, 0, 0.5);
             transition: transform 0.1s;
             user-select: none;
             object-fit: cover;
-            /* Placeholder pour l'image de Tibo */
-            background-image: url('https://placehold.co/300x300/1a1a1a/ffcc00?text=TIBO'); 
+            /* Utilisation d'une image de Tibo (assumée être 'Tibo.png' ou placeholder) */
+            background-image: url('Tibo.png'); 
             background-size: cover;
             background-position: center;
             border: 5px solid #ffcc00;
@@ -98,10 +95,21 @@
             transform: scale(0.95); 
         }
         
+        #click-power-display, #tps-display {
+            font-size: 1.2em;
+            margin-top: 5px;
+            color: #ccc;
+        }
+        
+        /* ------------------------------------------------ */
+        /* Mise à jour des Améliorations */
+        /* ------------------------------------------------ */
+
         .upgrade-button {
             width: 100%; 
-            padding: 10px; 
-            margin: 6px 0; 
+            padding: 10px; /* Légère réduction du padding */
+            margin: 6px 0; /* Légère réduction de la marge */
+            /* COULEUR DE FOND GRIS FONCÉ UNIFORME */
             background-color: #3b3b3b;
             color: #f7f7f7;
             border: 2px solid #5a5a5a;
@@ -127,6 +135,35 @@
             border-color: #333;
         }
         
+        .upgrade-details {
+            flex-grow: 1; 
+        }
+        
+        .upgrade-title {
+            font-weight: bold;
+            color: #ffcc00;
+            font-size: 1.1em;
+        }
+
+        .upgrade-cost {
+            font-weight: bold;
+            color: #ffcc00;
+            white-space: nowrap;
+            margin-left: 10px; 
+            flex-shrink: 0; 
+        }
+        
+        .upgrade-count {
+            display: block;
+            font-size: 0.8em;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        /* ------------------------------------------------ */
+        /* Animations/Flottants */
+        /* ------------------------------------------------ */
+
         .floating-text {
             position: absolute;
             font-size: 2em;
@@ -149,19 +186,10 @@
             }
         }
         
-        #supabase-status {
-            background-color: #3b3b3b;
-            color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            text-align: left;
-            font-size: 0.9em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
+        /* ------------------------------------------------ */
+        /* Contrôles Haut de Page (Musique/Langue) */
+        /* ------------------------------------------------ */
+
         #top-controls-container {
             max-width: 1000px;
             margin: 0 auto;
@@ -172,11 +200,97 @@
             margin-bottom: 15px;
         }
         
+        #music-control {
+            width: 100%;
+            padding: 10px;
+            background: #2c2c2c;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 0.9em;
+            margin-bottom: 10px; 
+            box-sizing: border-box;
+        }
+        #music-control-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        #music-control button {
+            background: #4f4f4f;
+            color: #ffcc00;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+        
+        #language-selector-container {
+            width: 100%; 
+            display: flex;
+            justify-content: flex-end; 
+            align-items: center;
+            gap: 5px;
+            font-size: 1.2em; 
+            color: #ccc;
+        }
+
+        #language-selector {
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #3b3b3b;
+            color: #f7f7f7;
+            border: 1px solid #5a5a5a;
+            cursor: pointer;
+            font-size: 0.9em;
+            appearance: none; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 5px center;
+            padding-right: 25px; 
+        }
+        
+        /* ------------------------------------------------ */
+        /* Status/Message Box (non-alert) */
+        /* ------------------------------------------------ */
+        .status-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border-radius: 5px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s, top 0.5s;
+        }
+        .status-message.error {
+            background-color: #f44336; /* Red */
+        }
+        .status-message.show {
+            opacity: 1;
+            top: 50px;
+        }
+
+
+        /* ------------------------------------------------ */
+        /* Règles de Responsivité (Media Queries) */
+        /* ------------------------------------------------ */
+
         @media (max-width: 768px) {
+            
+            body {
+                padding: 10px;
+            }
+
             #game-container {
-                flex-direction: column; 
+                flex-direction: column; /* La zone de clic passe au-dessus des upgrades */
                 width: 100%;
-                max-height: none; 
+                max-height: none; /* Supprime la limite de hauteur sur mobile */
                 height: auto;
             }
 
@@ -189,7 +303,7 @@
             #upgrades-area {
                 border-top-right-radius: 0;
                 border-bottom-left-radius: 8px;
-                max-height: 50vh; 
+                max-height: 50vh; /* Limite la hauteur de la liste pour laisser de la place au clic */
                 overflow-y: scroll;
             }
 
@@ -198,85 +312,54 @@
                 height: 250px;
                 margin: 15px auto; 
             }
+            
+            #score {
+                font-size: 2em; 
+            }
+
+            #click-power-display, #tps-display {
+                font-size: 1em; 
+            }
+            
+            #top-controls-container {
+                padding: 0 10px; 
+            }
+            
+            #music-control {
+                flex-direction: column; 
+                align-items: flex-start;
+            }
+            #music-control-buttons {
+                width: 100%;
+                justify-content: space-around; 
+            }
+            
+            #language-selector-container {
+                justify-content: flex-end; 
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- 
-        ===================================================================
-        SECTION D'AUTHENTIFICATION (Affichée tant que l'utilisateur n'est pas connecté)
-        ===================================================================
-    -->
-    <div id="auth-container" class="hidden">
-        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border-2 border-indigo-500">
-            <h1 class="text-3xl font-bold mb-6 text-indigo-400 text-center">Tibo Clicker: Connexion</h1>
-            <p id="auth-header-message" class="text-sm text-gray-400 mb-6 text-center">Connectez-vous pour charger votre progression ou inscrivez-vous pour une nouvelle transfo' !</p>
-
-            <div id="auth-message-box" class="p-3 mb-4 rounded-lg text-sm hidden"></div>
-
-            <form id="auth-form" class="space-y-4">
-                <div>
-                    <label for="auth-email" class="block text-sm font-medium text-gray-300 text-left">Email (Utilisateur)</label>
-                    <input type="email" id="auth-email" required placeholder="votre@email.com"
-                           class="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="auth-password" class="block text-sm font-medium text-gray-300 text-left">Mot de Passe</label>
-                    <input type="password" id="auth-password" required placeholder="minimum 6 caractères"
-                           class="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <div class="flex flex-col space-y-3 pt-4">
-                    <button type="button" onclick="handleAuth('login')"
-                            class="w-full py-2 px-4 border border-transparent rounded-md font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150">
-                        Se Connecter
-                    </button>
-                    <button type="button" onclick="handleAuth('signup')"
-                            class="w-full py-2 px-4 border border-transparent rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
-                        S'inscrire (Nouveau Compte)
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- 
-        ===================================================================
-        SECTION DU JEU (Affichée après connexion)
-        ===================================================================
-    -->
-
     <h1 id="main-title">Tibo Clicker - La Vraie Transfo' ! 💪</h1>
     
+    <!-- CONTENEUR GLOBAL POUR LES CONTRÔLES -->
     <div id="top-controls-container">
-        
-        <!-- Statut Firebase et UID -->
-        <div id="supabase-status">
-            <span id="status-message">Chargement...</span>
-            <span id="user-info" style="font-size: 0.8em;">
-                <span id="user-display" class="font-semibold text-indigo-400 break-all"></span>
-                 | 
-                <button onclick="signOutUser()" class="text-red-500 hover:text-red-300 transition duration-150">
-                    Déconnexion
-                </button>
-            </span>
-        </div>
-        
-        <!-- Contrôle Musique -->
-        <div id="music-control" class="w-full p-2 bg-gray-800 rounded-md flex items-center justify-between gap-4 text-left">
+        <!-- 1. Contrôle Musique (Large) -->
+        <div id="music-control">
+            <!-- TITRE DE LA PISTE MIS À JOUR POUR CORRESPONDRE À LA NOUVELLE PLAYLIST -->
             <p><span id="music-label">Musique</span> : <span id="current-track-title">Damn (Gabin)</span></p>
-            <div id="music-control-buttons" class="flex gap-2">
-                 <button onclick="toggleMusic()" class="bg-gray-700 text-ffcc00 border-none px-2 py-1 rounded hover:bg-gray-600">▶️ / ⏸️</button>
-                 <button onclick="nextTrack()" class="bg-gray-700 text-ffcc00 border-none px-2 py-1 rounded hover:bg-gray-600">⏭️</button>
+            <div id="music-control-buttons">
+                 <button onclick="toggleMusic()">▶️ / ⏸️</button>
+                 <button onclick="nextTrack()">⏭️</button>
             </div>
         </div>
 
-        <!-- Sélecteur de Langue -->
-        <div id="language-selector-container" class="w-full flex justify-end items-center gap-2 mt-2">
-            <span id="lang-label" class="text-gray-400">🌐 Langue:</span>
-            <select id="language-selector" onchange="setLanguage(this.value, true)"
-                    class="p-1 rounded bg-gray-700 text-white border border-gray-600 cursor-pointer">
+        <!-- 2. Sélecteur de Langue -->
+        <div id="language-selector-container">
+            <span id="lang-label">🌐</span>
+            <select id="language-selector" onchange="setLanguage(this.value, true)">
                 <option value="fr">Français</option>
                 <option value="en">English</option>
                 <option value="es">Español</option>
@@ -285,8 +368,11 @@
     </div>
 
 
-    <!-- Élément Audio unique pour la lecture de la playlist -->
+    <!-- 🎧 Élément Audio unique pour la lecture de la playlist -->
     <audio id="background-music" preload="auto"></audio>
+    
+    <!-- Zone de message (remplace alert() et console.log des erreurs d'achat) -->
+    <div id="statusMessage" class="status-message"></div>
 
     <div id="game-container">
         
@@ -300,6 +386,8 @@
             </div>
 
             <div id="tibo-image"></div>
+            <!-- Image de Tibo -->
+
         </div>
 
         <div id="upgrades-area">
@@ -307,184 +395,199 @@
 
             <!-- Améliorations de Clic (Bonus Additif Unique) -->
             <div id="click-multiplier-container" class="new-upgrade-container">
+                <!-- Upgrade 1 initiale -->
+                <!-- Ces achats sont uniques, ils utilisent data-cost -->
                 <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Mise en Place du "Mindset"</span>
-                        <br><span class="upgrade-description text-gray-400 text-xs">Ajoute +1 TPC de base (Achat Unique)</span>
+                        <br><span class="upgrade-description">Ajoute +1 TPC de base (Achat Unique)</span>
                     </div>
-                    <span class="upgrade-cost text-ffcc00">100 Tibos</span> 
+                    <span class="upgrade-cost">100 Tibos</span> 
                 </button>
                 
+                <!-- Upgrade 2 -->
                  <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Tibo Ultra Sale 💥</span>
-                        <br><span class="upgrade-description text-gray-400 text-xs">Ajoute +3 TPC de base (Achat Unique)</span>
+                        <br><span class="upgrade-description">Ajoute +3 TPC de base (Achat Unique)</span>
                     </div>
-                    <span class="upgrade-cost text-ffcc00">500 Tibos</span>
+                    <span class="upgrade-cost">500 Tibos</span>
                 </button>
                 
+                <!-- Upgrade 3 -->
                  <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
-                        <br><span class="upgrade-description text-gray-400 text-xs">Ajoute +6 TPC de base (Achat Unique)</span>
+                        <br><span class="upgrade-description">Ajoute +6 TPC de base (Achat Unique)</span>
                     </div>
-                    <span class="upgrade-cost text-ffcc00">3000 Tibos</span>
+                    <span class="upgrade-cost">3000 Tibos</span>
                 </button>
             </div>
             
             <hr style="border-color: #5a5a5a; margin: 15px 0;">
 
             <!-- Amélioration du Clic (Ajout) - Prix exponentiel -->
+            <!-- Ces achats sont répétables, ils utilisent data-base-cost -->
             <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-addition="5" data-count="0" data-upgrade-key="proteines">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Déverrouillage des Protéines</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Ajoute +5 Tibos par Clic</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Ajoute +5 Tibos par Clic</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">2000 Tibos</span>
+                <span class="upgrade-cost">2000 Tibos</span>
             </button>
 
             <!-- Amélioration Passive 1 - Alessio -->
             <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-tps="1" data-count="0" data-upgrade-key="alessio">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 1 Tibo/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 1 Tibo/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">500 Tibos</span>
+                <span class="upgrade-cost">500 Tibos</span>
             </button>
             
             <!-- Amélioration Passive 2 - Justine -->
             <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-tps="10" data-count="0" data-upgrade-key="justine">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Justine - Community Manager 📸</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 10 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 10 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">5000 Tibos</span>
+                <span class="upgrade-cost">5000 Tibos</span>
             </button>
             
             <!-- Amélioration Passive 3 - Patate Douce (CHEATEE: 150 TPS) -->
             <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-tps="150" data-count="0" data-upgrade-key="patates">
                 <div class="upgrade-details">
                     <span class="upgrade-title">L'Usine à Patates Douces COSMIQUE 🍠🚀</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 150 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 150 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">40000 Tibos</span>
+                <span class="upgrade-cost">40000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Nogode -->
             <button id="upgrade-passive-nogode" class="upgrade-button" data-base-cost="200000" data-tps="500" data-count="0" data-upgrade-key="nogode">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Nogode - Le Disrupteur Sombre 🖤</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 500 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 500 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">200000 Tibos</span>
+                <span class="upgrade-cost">200000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Sachatte -->
             <button id="upgrade-passive-sachatte" class="upgrade-button" data-base-cost="1000000" data-tps="2000" data-count="0" data-upgrade-key="sachatte">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Sachatte - L'Éclaireuse Mystique ✨</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 2,000 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 2,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">1000000 Tibos</span>
+                <span class="upgrade-cost">1000000 Tibos</span>
             </button>
             
-            <!-- AMÉLIORATION CORRIGÉE : Milodes -->
+            <!-- AMÉLIORATION CORRIGÉE : Milodes (Le style est géré par la classe .upgrade-button) -->
             <button id="upgrade-passive-milodes" class="upgrade-button" data-base-cost="8000000" data-tps="10000" data-count="0" data-upgrade-key="milodes">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Milodes - Le Mobilisateur Instantané 🚀</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 10,000 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 10,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">8000000 Tibos</span>
+                <span class="upgrade-cost">8000000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Thomas -->
             <button id="upgrade-passive-thomas" class="upgrade-button" data-base-cost="50000000" data-tps="50000" data-count="0" data-upgrade-key="thomas">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Thomas - L'Architecte des Ressources 💰</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 50,000 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 50,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">50000000 Tibos</span>
+                <span class="upgrade-cost">50000000 Tibos</span>
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Lenaik -->
-            <button id="upgrade-passive-lenaik" data-base-cost="200000000" data-tps="200000" data-count="0" data-upgrade-key="lenaik">
+            <button id="upgrade-passive-lenaik" class="upgrade-button" data-base-cost="200000000" data-tps="200000" data-count="0" data-upgrade-key="lenaik">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Lenaik - La Gardienne Hyper-Protectrice 🛡️</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 200,000 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 200,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">200000000 Tibos</span>
+                <span class="upgrade-cost">200000000 Tibos</span>
             </button>
             
             <!-- NOUVELLE AMÉLIORATION : Rodrigues -->
             <button id="upgrade-passive-rodrigues" class="upgrade-button" data-base-cost="1000000000" data-tps="1000000" data-count="0" data-upgrade-key="rodrigues">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Rodrigues - Le Bâton de Pèlerin 💫</span>
-                    <br><span class="upgrade-description text-gray-400 text-xs">Génère 1,000,000 Tibos/s</span>
-                    <span class="upgrade-count text-gray-500">Possédé: 0</span>
+                    <br><span class="upgrade-description">Génère 1,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
                 </div>
-                <span class="upgrade-cost text-ffcc00">1000000000 Tibos</span>
+                <span class="upgrade-cost">1000000000 Tibos</span>
             </button>
             
         </div>
         
     </div>
 
-    <!-- Firebase SDK Imports & Script Logique -->
+    <!-- Dépendances Firebase -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc, setLogLevel, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // --- CONFIGURATION CRITIQUE FIREBASE ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        // --- Configuration Firebase (Variables Globales) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-tibo-clicker-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let app;
-        let db;
-        let auth;
-        let currentUserId = null;
-        let isAuthReady = false; 
-
-        // Active le mode debug pour voir les logs de Firebase dans la console
-        setLogLevel('Debug');
         
-        // --- Logique du Jeu ---
-        let score = 0;
-        let clickPower = 1; 
-        let tps = 0; 
-        let currentLang = 'fr'; 
-        const LANG_STORAGE_KEY = 'tiboClickerLang'; 
-        const GROWTH_FACTOR = 1.15; 
-        const SAVE_INTERVAL_MS = 10000; // Sauvegarde toutes les 10 secondes
+        let db, auth, userId = null;
+        let isAuthReady = false;
 
-        // Références DOM
+        setLogLevel('Debug'); // Active le logging pour le débogage
+
+        // --- Variables d'État du Jeu ---
+        let score = 0;
+        let clickPower = 1; // Puissance de clic totale (base + bonus)
+        let tps = 0; // Tibos Par Seconde (peut être flottant pour plus de précision)
+        let currentLang = 'fr'; // Langue par défaut
+        const GROWTH_FACTOR = 1.15; // Facteur d'augmentation exponentiel
+
+        // --- Références DOM ---
         const scoreDisplay = document.getElementById('score');
         const tiboImage = document.getElementById('tibo-image');
         const clickPowerDisplay = document.getElementById('click-power-display');
         const tpsDisplay = document.getElementById('tps-display');
-        const statusMessage = document.getElementById('status-message');
-        const userDisplay = document.getElementById('user-display');
-        const authContainer = document.getElementById('auth-container');
-        const authMessageBox = document.getElementById('auth-message-box');
+        const statusMessage = document.getElementById('statusMessage');
+        const languageSelector = document.getElementById('language-selector');
         
-        // Références aux boutons (simplifiées)
-        const upgradeButtons = Array.from(document.querySelectorAll('.upgrade-button'));
+        // Références aux boutons pour la gestion de l'apparition
+        const upgrade2_new = document.getElementById('upgrade-click-2-new'); 
+        const upgrade3_new = document.getElementById('upgrade-click-3-new'); 
+        
+        // Liste de tous les boutons
+        const upgradeButtons = [
+            document.getElementById('upgrade-click-1'),
+            upgrade2_new,
+            upgrade3_new,
+            document.getElementById('upgrade-addition'),
+            document.getElementById('upgrade-passive-alessiode'),
+            document.getElementById('upgrade-passive-justine'),
+            document.getElementById('upgrade-passive-patate'),
+            document.getElementById('upgrade-passive-nogode'), 
+            document.getElementById('upgrade-passive-sachatte'),
+            document.getElementById('upgrade-passive-milodes'),
+            document.getElementById('upgrade-passive-thomas'),
+            document.getElementById('upgrade-passive-lenaik'),
+            document.getElementById('upgrade-passive-rodrigues')
+        ].filter(b => b != null); // S'assurer qu'il n'y a pas de nulls
 
-
-        // --- Dictionnaire de Traduction (simplifié pour la démo) ---
+        // --- Dictionnaire de Traduction (Translations Dictionary) ---
+        // (Le dictionnaire de traduction reste inchangé, car il était très complet)
         const translations = {
             fr: {
-                // ... (traductions pour le jeu)
+                langLabel: "🌐", 
                 mainTitle: "Tibo Clicker - La Vraie Transfo' ! 💪",
                 musicLabel: "Musique", 
                 tibosOwnedLabel: "Tibos Possédés :",
@@ -520,15 +623,13 @@
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
                 purchasedText: "Acheté",
-                // Statut Firebase
-                statusLoading: "Connexion Cloud et chargement...",
-                statusReady: "Cloud OK.",
-                statusSaving: "Sauvegarde en cours...",
-                statusSaved: "Sauvegardé !",
-                statusError: "Erreur de BDD.",
+                notEnoughTibos: "Pas assez de Tibos pour cette amélioration!",
+                savingGame: "Sauvegarde en cours...",
+                gameSaved: "Jeu sauvegardé dans le Cloud!",
+                gameLoaded: "Progression chargée!"
             },
             en: {
-                // ... (Traductions anglaises)
+                langLabel: "🌐", 
                 mainTitle: "Tibo Clicker - The Real Transformation! 💪",
                 musicLabel: "Music", 
                 tibosOwnedLabel: "Tibos Owned:",
@@ -564,15 +665,13 @@
                 countText: (count) => `Owned: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
                 purchasedText: "Purchased",
-                // Statut Firebase
-                statusLoading: "Cloud connection and loading...",
-                statusReady: "Cloud OK.",
-                statusSaving: "Saving...",
-                statusSaved: "Saved!",
-                statusError: "DB Error.",
+                notEnoughTibos: "Not enough Tibos for this upgrade!",
+                savingGame: "Saving game...",
+                gameSaved: "Game saved to Cloud!",
+                gameLoaded: "Progress loaded!"
             },
             es: {
-                 // ... (Traductions espagnoles)
+                langLabel: "🌐", 
                 mainTitle: "Tibo Clicker - ¡La Verdadera Transformación! 💪",
                 musicLabel: "Música", 
                 tibosOwnedLabel: "Tibos Poseídos:",
@@ -608,213 +707,58 @@
                 countText: (count) => `Poseído: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
                 purchasedText: "Comprado",
-                // Statut Firebase
-                statusLoading: "Conexión Cloud y cargando...",
-                statusReady: "Cloud OK.",
-                statusSaving: "Guardando...",
-                statusSaved: "¡Guardado!",
-                statusError: "Error de BD.",
+                notEnoughTibos: "¡No hay suficientes Tibos para esta mejora!",
+                savingGame: "Guardando partida...",
+                gameSaved: "¡Partida guardada en la Nube!",
+                gameLoaded: "¡Progreso cargado!"
             }
         };
 
-        // --- Fonctions Utilitaire d'UI/Messages ---
-        
-        function showAuthMessage(message, type = 'error') {
-            authMessageBox.textContent = message;
-            authMessageBox.className = 'p-3 mb-4 rounded-lg text-sm';
-            authMessageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+        // --- Configuration de la Playlist ---
+        let currentTrackIndex = 0;
+        const backgroundMusic = document.getElementById('background-music');
 
-            if (type === 'success') {
-                authMessageBox.classList.add('bg-green-100', 'text-green-700');
-            } else if (type === 'error') {
-                authMessageBox.classList.add('bg-red-100', 'text-red-700');
-            }
-            authMessageBox.classList.remove('hidden');
-        }
-
-        function setStatus(messageKey, isError = false) {
-            const t = translations[currentLang] || translations['fr'];
-            statusMessage.textContent = t[messageKey] || messageKey;
-            
-            let color = '#ffcc00'; 
-            if (isError) {
-                color = '#ff6b6b'; 
-            } else if (messageKey === 'statusSaved') {
-                color = '#7dff6b'; 
-            } else if (messageKey === 'statusReady') {
-                color = '#7dd8ff'; 
-            }
-            
-            statusMessage.style.color = color;
-        }
-
-        // --- Fonctions d'Authentification ---
-        
-        window.handleAuth = async function(mode) {
-            authMessageBox.classList.add('hidden');
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-
-            if (!email || password.length < 6) {
-                showAuthMessage("Email et mot de passe (min 6 caractères) requis.", 'error');
-                return;
-            }
-
-            try {
-                if (mode === 'signup') {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    showAuthMessage("Inscription réussie ! Connexion automatique.", 'success');
-                } else if (mode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showAuthMessage("Connexion réussie !", 'success');
-                }
-            } catch (error) {
-                console.error(`Erreur d'authentification (${mode}):`, error);
-                let msg = "Une erreur est survenue. ";
-                if (error.code === 'auth/email-already-in-use') {
-                    msg = "Cet email est déjà utilisé. Veuillez vous connecter.";
-                } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                    msg = "Identifiants invalides (email ou mot de passe incorrect).";
-                } else if (error.code === 'auth/weak-password') {
-                    msg = "Le mot de passe doit contenir au moins 6 caractères.";
-                }
-                showAuthMessage(msg, 'error');
-            }
-        }
-        
-        window.signOutUser = async function() {
-            try {
-                if (auth) {
-                    await signOut(auth);
-                    // onAuthStateChanged va gérer l'affichage de l'interface d'authentification
-                }
-            } catch (error) {
-                console.error("Erreur de déconnexion:", error);
-                setStatus("Erreur lors de la déconnexion.", true);
-            }
-        }
-
-        // --- Fonctions de Sauvegarde Firestore ---
-
-        function getGameDataRef(userId) {
-            // Chemin de la sauvegarde privée: /artifacts/{appId}/users/{userId}/game_data/tibo_clicker_save
-            return doc(db, 'artifacts', appId, 'users', userId, 'game_data', 'tibo_clicker_save');
-        }
-
-        function saveGame(showSuccessMessage) {
-            if (!currentUserId || !isAuthReady || !db) {
-                console.warn("Impossible de sauvegarder : Utilisateur non connecté ou DB non prête.");
-                return;
-            }
-            
-            const upgradesData = upgradeButtons.map(button => ({
-                id: button.id,
-                count: parseInt(button.getAttribute('data-count') || 0),
-                purchased: button.getAttribute('data-purchased') === 'true'
-            }));
-
-            setStatus('statusSaving');
-
-            const saveObject = {
-                score: score, 
-                click_power: clickPower,
-                tps: tps,
-                upgrades: JSON.stringify(upgradesData),
-                lang: currentLang,
-                last_saved: new Date().toISOString()
-            };
-
-            const docRef = getGameDataRef(currentUserId);
-
-            setDoc(docRef, saveObject)
-                .then(() => {
-                    if (showSuccessMessage) {
-                        setStatus('statusSaved');
-                    } else {
-                        setStatus('statusReady'); 
-                    }
-                })
-                .catch(error => {
-                    console.error("Erreur lors de la sauvegarde Firestore:", error);
-                    setStatus('statusError', true);
-                });
-        }
-
-        // Charge les données du jeu (Firestore > Défaut)
-        async function loadGame() {
-            setStatus('statusLoading');
-            
-            if (!currentUserId || !db) return;
-            
-            let loadedData = null;
-            const docRef = getGameDataRef(currentUserId);
-
-            try {
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    loadedData = docSnap.data();
-                    console.log("Jeu chargé depuis Firestore.");
-                } else {
-                    console.log("Aucune sauvegarde trouvée. Démarrage par défaut.");
-                }
-
-            } catch (error) {
-                console.error("Erreur de BDD Firestore lors du chargement:", error);
-                setStatus('statusError', true);
-            }
-            
-            // Appliquer les données
-            if (loadedData) {
-                score = loadedData.score || 0;
-                clickPower = loadedData.click_power || 1;
-                tps = loadedData.tps || 0; 
-                
-                if (loadedData.lang && loadedData.lang !== currentLang) {
-                    currentLang = loadedData.lang;
-                    setLanguage(currentLang, false);
-                }
-
-                try {
-                    const savedUpgrades = loadedData.upgrades ? JSON.parse(loadedData.upgrades) : [];
-                    savedUpgrades.forEach(savedUpgrade => {
-                        const button = document.getElementById(savedUpgrade.id);
-                        if (button) {
-                            button.setAttribute('data-count', savedUpgrade.count.toString());
-                            button.setAttribute('data-purchased', savedUpgrade.purchased.toString());
-                        }
-                    });
-                } catch (e) {
-                     console.error("Erreur lors du chargement des améliorations:", e);
-                }
-            }
-
-            // Mettre à jour la vue finale
-            updateUI(); 
-            checkUpgradeVisibility(); 
-            setStatus('statusReady');
-        }
-
-        // --- Logique du Jeu et Musique (Fonctions identiques) ---
-
+        // PLAYLIST MISE À JOUR SELON LA DEMANDE DE L'UTILISATEUR
         const playlist = [
             { url: 'damn-gabin.mp3', title: 'Damn (Gabin)' },
             { url: 'Motivation-Gabin.mp3', title: 'Motivation (Gabin)' }, 
-            // Ajoutez vos URLs de musique ici
+            { url: 'BoubouMax-Gabin.mp3', title: 'BoubouMax (Gabin)' },
+            { url: 'Oddloop-Frederic.mp3', title: 'Oddloop (Frederic)' },
+            { url: 'Ballade-Tomasi.mp3', title: 'Ballade (Tomasi)' },
+            { url: 'Concerto-Glazunov.mp3', title: 'Concerto (Glazunov)' },
+            { url: 'Tableaux_de_Provences-Paule_Maurice.mp3', title: 'Tableaux de Provences (Maurice)' }
         ];
-        let currentTrackIndex = 0;
-        const backgroundMusic = document.getElementById('background-music');
-        
+
+        // --- Fonctions Utilitaire (Messages) ---
+        function showMessage(msg, isError = false) {
+            statusMessage.textContent = msg;
+            statusMessage.classList.remove('error');
+            if (isError) {
+                statusMessage.classList.add('error');
+            }
+            statusMessage.classList.add('show');
+            
+            // Masquer après 3 secondes
+            setTimeout(() => {
+                statusMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Fonctions de Musique ---
+
         function loadTrack(index) {
             backgroundMusic.src = playlist[index].url;
             document.getElementById('current-track-title').textContent = playlist[index].title;
-            backgroundMusic.load(); 
+            backgroundMusic.load(); // Charge la nouvelle source
         }
+
         function playMusic() {
+            // Tente de jouer, utilise catch pour gérer les erreurs de lecture automatique
             backgroundMusic.play().catch(error => {
                 console.warn("La lecture automatique a été bloquée. Le clic de l'utilisateur la relancera.");
             });
         }
+
         window.toggleMusic = function() {
             if (backgroundMusic.paused) {
                 playMusic();
@@ -822,58 +766,45 @@
                 backgroundMusic.pause();
             }
         }
+
         window.nextTrack = function() {
             currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
             loadTrack(currentTrackIndex);
             playMusic();
         }
-        backgroundMusic.addEventListener('ended', nextTrack);
 
+        // Événement pour passer à la piste suivante à la fin de la piste actuelle
+        backgroundMusic.addEventListener('ended', window.nextTrack);
 
-        function formatScore(num) {
-            if (num < 100000) return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            
-            const suffixes = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
-            const exp = Math.floor(Math.log(num) / Math.log(1000));
-            const suffix = suffixes[exp - 1];
-            const formatted = (num / Math.pow(1000, exp)).toFixed(2);
-            
-            return formatted.endsWith('.00') ? formatted.slice(0, -3) + suffix : formatted + suffix;
-        }
+        // --- Fonctions de Traduction (Language Functions) ---
 
-        function updateScoreDisplay() {
-            scoreDisplay.textContent = formatScore(score);
-            const t = translations[currentLang];
-            clickPowerDisplay.textContent = t.clickPowerDisplay(clickPower);
-        }
-
-        function updateTPSDisplay() {
-            const t = translations[currentLang];
-            const tpsValue = tps > 1000 ? tps.toFixed(1) : tps.toFixed(0); 
-            tpsDisplay.textContent = t.tpsDisplay(parseFloat(tpsValue));
-        }
-
-        function setLanguage(lang, updateSave = true) {
+        /**
+         * Change la langue et met à jour l'UI. 
+         * @param {string} lang Le code de langue ('fr', 'en', 'es').
+         * @param {boolean} updateSave Indique si la préférence doit être sauvegardée (maintenant lié à Firestore).
+         */
+        window.setLanguage = function(lang, updateSave = true) {
             if (!translations[lang]) return;
             currentLang = lang;
-            document.getElementById('language-selector').value = lang;
+            languageSelector.value = lang;
             
             updateUI(); 
             
-            if (updateSave && isAuthReady && currentUserId) {
-                 saveGame(false);
+            if (updateSave && isAuthReady) {
+                 saveGameState();
             }
         }
-        
+
         function updateUI() {
             const t = translations[currentLang];
 
             // Mise à jour des textes statiques
+            document.getElementById('lang-label').textContent = t.langLabel;
             document.getElementById('main-title').textContent = t.mainTitle;
             document.getElementById('music-label').textContent = t.musicLabel;
             document.getElementById('tibos-owned-label').textContent = t.tibosOwnedLabel;
             document.getElementById('upgrades-title').textContent = t.upgradesTitle;
-            
+
             // Mise à jour des statistiques dynamiques
             updateScoreDisplay(); 
             updateTPSDisplay();
@@ -881,6 +812,7 @@
             // Mise à jour de tous les boutons d'amélioration
             upgradeButtons.forEach(button => {
                 const upgradeKey = button.getAttribute('data-upgrade-key');
+                // L'attribut data-count DOIT être à jour suite à loadGame
                 const count = parseInt(button.getAttribute('data-count') || 0); 
                 const isPurchased = button.getAttribute('data-purchased') === 'true';
 
@@ -892,6 +824,7 @@
                     
                     const cost = calculateCost(button);
 
+                    // Mise à jour des textes de titre/description
                     if (titleElement) titleElement.textContent = t[`${upgradeKey}Title`];
                     if (descElement) descElement.textContent = t[`${upgradeKey}Description`];
                     
@@ -900,100 +833,157 @@
                             costElement.textContent = `✅ ${t.purchasedText}`;
                             button.disabled = true;
                         } else {
+                            // Le coût est formaté, car il peut être grand
                             costElement.textContent = t.costText(cost);
                         }
                     }
 
+                    // SYNCHRONISATION DU COMPTEUR VISUEL
                     if (countElement) {
-                        if (!isPurchased) {
+                        if (!button.hasAttribute('data-add-bonus')) { // Seulement pour les upgrades répétables
                            countElement.textContent = t.countText(count); 
                            countElement.style.display = 'block';
                         } else {
+                            // C'est un upgrade unique, cacher le compteur "Possédé: 0"
                            countElement.style.display = 'none';
                         }
                     }
                 }
             });
-            checkUpgradeCosts(); 
+            checkUpgradeCosts(); // Vérifie l'état disabled/enabled
+        }
+        
+        // --- Fonctions Utilitaire de Score ---
+
+        // Formatage du score pour afficher K, M, B...
+        function formatScore(num) {
+            if (num < 10000) return Math.floor(num).toLocaleString(currentLang); // Affichage sans suffixe pour les petits nombres
+            
+            const suffixes = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+            const exp = Math.floor(Math.log(num) / Math.log(1000));
+            if (exp > suffixes.length) {
+                return num.toExponential(2); // Pour les très grands nombres
+            }
+            const suffix = suffixes[exp - 1];
+            const formatted = (num / Math.pow(1000, exp)).toFixed(2);
+            
+            // Supprimer le .00 si c'est un entier
+            return formatted.endsWith('.00') ? formatted.slice(0, -3) + suffix : formatted + suffix;
+        }
+
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = formatScore(score);
+            const t = translations[currentLang];
+            clickPowerDisplay.textContent = t.clickPowerDisplay(clickPower);
+        }
+
+        function updateTPSDisplay() {
+            const t = translations[currentLang];
+            // Utilise toFixed(0) si TPS est petit, toFixed(1) si TPS est grand pour rester lisible et précis.
+            tpsDisplay.textContent = t.tpsDisplay(tps);
         }
 
         function calculateCost(button) {
             const isPurchased = button.getAttribute('data-purchased') === 'true';
             
             if (isPurchased) {
-                return parseInt(button.getAttribute('data-cost') || button.getAttribute('data-base-cost'));
+                return Infinity; // Désactive le bouton si déjà acheté
             }
 
             const baseCost = parseInt(button.getAttribute('data-base-cost') || button.getAttribute('data-cost'));
             const count = parseInt(button.getAttribute('data-count') || 0);
 
-            if (!button.hasAttribute('data-count')) {
+            // Achat Unique (pas de data-count) ou count = 0 (première fois)
+            if (!button.hasAttribute('data-count') || count === 0) {
                 return baseCost;
             }
             
+            // Logique d'augmentation exponentielle pour les améliorations répétables
             const calculatedCost = Math.floor(baseCost * Math.pow(GROWTH_FACTOR, count));
             return calculatedCost;
         }
 
+
+        // --- Logique du Clic ---
+
         tiboImage.addEventListener('click', function(e) {
+            if (!isAuthReady) return; // Ne pas cliquer si pas chargé
+
+            // Ajout du score (en utilisant Math.ceil pour éviter les problèmes de flottants)
             score += clickPower;
-            updateScoreDisplay();
+            
+            // Animation du texte flottant
             createFloatingText(clickPower, e);
-            checkUpgradeCosts();
+
+            // Mise à jour et vérifications
+            updateUI(); 
             checkUpgradeVisibility();
+
+            saveGameState(false); // Sauvegarde après chaque clic (léger)
         });
 
         function createFloatingText(amount, event) {
-            // ... (logique de texte flottant inchangée)
             const text = document.createElement('div');
             text.classList.add('floating-text');
             text.textContent = `+${formatScore(amount)}`;
             
+            // Positionnement basé sur le clic
             const rect = tiboImage.getBoundingClientRect();
             text.style.left = `${event.clientX - rect.left + tiboImage.offsetWidth / 2}px`;
             text.style.top = `${event.clientY - rect.top + tiboImage.offsetHeight / 2}px`;
 
+            // Ajout au DOM
             tiboImage.parentElement.appendChild(text);
 
+            // Nettoyage après l'animation
             text.addEventListener('animationend', () => {
                 text.remove();
             });
         }
 
+        // --- Logique des Améliorations ---
+
         upgradeButtons.forEach(button => {
-            button.addEventListener('click', () => buyUpgrade(button));
+            button.addEventListener('click', () => {
+                if (!isAuthReady) return; // Ne pas acheter si pas chargé
+                buyUpgrade(button)
+            });
         });
 
         function buyUpgrade(button) {
+            const t = translations[currentLang];
             const cost = calculateCost(button);
             
             if (score >= cost) {
                 score -= cost;
                 
-                if (button.hasAttribute('data-count')) {
-                    let count = parseInt(button.getAttribute('data-count'));
-                    button.setAttribute('data-count', ++count);
-                }
-                
+                // 1. Mise à jour de la puissance de clic / TPS
                 if (button.hasAttribute('data-add-bonus')) {
+                    // Clics uniques (Mindset, Ultra Sale, Cheat Meal)
                     const bonus = parseInt(button.getAttribute('data-add-bonus'));
                     clickPower += bonus; 
                     button.setAttribute('data-purchased', 'true');
                     
                 } else if (button.id === 'upgrade-addition') {
+                    // Clic répétable (Protéines)
                     const addition = parseInt(button.getAttribute('data-addition'));
                     clickPower += addition;
+                    let count = parseInt(button.getAttribute('data-count'));
+                    button.setAttribute('data-count', ++count);
                     
                 } else if (button.hasAttribute('data-tps')) {
-                    const passiveTps = parseInt(button.getAttribute('data-tps'));
+                    // Passifs (TPS)
+                    const passiveTps = parseFloat(button.getAttribute('data-tps'));
                     tps += passiveTps;
+                    let count = parseInt(button.getAttribute('data-count'));
+                    button.setAttribute('data-count', ++count);
                 }
 
+                // 2. Mise à jour de l'UI et de l'état
                 updateUI(); 
-                saveGame(true); 
+                saveGameState(); // Sauvegarde le jeu après l'achat
             } else {
-                // Utiliser une alerte visuelle au lieu de console.log
-                setStatus("Pas assez de Tibos !", true);
+                showMessage(t.notEnoughTibos, true);
             }
         }
 
@@ -1002,120 +992,206 @@
                 const cost = calculateCost(button);
                 const isPurchased = button.getAttribute('data-purchased') === 'true';
                 
+                // Mettre à jour le coût affiché (si non acheté)
                 const costElement = button.querySelector('.upgrade-cost');
-                if (costElement && !isPurchased) {
-                    costElement.textContent = translations[currentLang].costText(cost);
+                if (costElement) {
+                    if (isPurchased) {
+                        costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
+                    } else {
+                        costElement.textContent = translations[currentLang].costText(cost);
+                    }
                 }
                 
-                if (isPurchased) {
-                    button.disabled = true;
-                    if (costElement) costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
-                } else {
-                    button.disabled = score < cost;
-                }
+                button.disabled = isPurchased || score < cost;
             });
         }
         
+        // Rend visible les upgrades cachés une fois le score atteint
         function checkUpgradeVisibility() {
-            // Rendre visible les achats uniques si le score est proche du coût
-            [
-                document.getElementById('upgrade-click-2-new'), 
-                document.getElementById('upgrade-click-3-new')
-            ].forEach(btn => {
-                if (btn && btn.getAttribute('data-cost')) {
-                    const cost = parseInt(btn.getAttribute('data-cost'));
-                    if (btn.getAttribute('data-purchased') === 'true' || score >= cost * 0.8) {
-                        if (btn.classList.contains('hidden')) {
-                             btn.classList.remove('hidden');
-                             btn.style.opacity = 1;
-                        }
-                    }
+            // Logique pour révéler les upgrades uniques
+            // Les seuils sont basés sur le coût de l'upgrade (ex: 80% du coût)
+            if (score >= 400 * 0.8 && upgrade2_new && upgrade2_new.classList.contains('hidden')) {
+                upgrade2_new.classList.remove('hidden');
+                upgrade2_new.style.opacity = 1;
+            }
+             if (score >= 3000 * 0.8 && upgrade3_new && upgrade3_new.classList.contains('hidden')) {
+                upgrade3_new.classList.remove('hidden');
+                upgrade3_new.style.opacity = 1;
+            }
+            
+            // Assure que les upgrades sont visibles au rechargement si déjà achetés ou découverts
+            [upgrade2_new, upgrade3_new].forEach(btn => {
+                 if (btn && (btn.getAttribute('data-purchased') === 'true' || score >= parseInt(btn.getAttribute('data-cost')) * 0.8)) {
+                    btn.classList.remove('hidden');
+                    btn.style.opacity = 1;
                 }
             });
+
         }
 
         // --- Logique Passive (Game Loop) ---
 
         function gameLoop() {
+            if (!isAuthReady) return;
+
+            // 1. Calcul du score passif
             if (tps > 0) {
+                // Ajout du TPS (divisé par le nombre de cycles par seconde, ici 10)
+                // L'utilisation de tps / 10 pour un intervalle de 100ms donne tps / seconde
                 const addedScore = tps / 10; 
                 score += addedScore; 
             }
             
+            // 2. Affichage et vérification
             updateScoreDisplay();
             updateTPSDisplay(); 
             checkUpgradeCosts();
             checkUpgradeVisibility();
-
-            // Sauvegarde du jeu toutes les 10 secondes
-            if (window.saveCounter % 100 === 0 && isAuthReady && currentUserId) {
-                saveGame(false); // Sauvegarde silencieuse
-            }
-            window.saveCounter = (window.saveCounter + 1) % 1000; 
         }
+
+        // Exécution de la boucle toutes les 100ms (10 fois par seconde)
+        setInterval(gameLoop, 100); 
         
-        // --- Initialisation Firebase ---
+        // --- Fonctions Firestore ---
         
-        async function initializeFirebase() {
+        function getGameDocRef(currentUserId) {
+            const userPath = `/artifacts/${appId}/users/${currentUserId}/clicker_state`;
+            return doc(db, userPath, 'current_game');
+        }
+
+        /**
+         * Sauvegarde l'état actuel du jeu dans Firestore.
+         * @param {boolean} showToast Affiche une notification de sauvegarde si true (par défaut: true).
+         */
+        let isSaving = false;
+        async function saveGameState(showToast = true) {
+            if (!isAuthReady || !userId || isSaving) return; 
+            
+            isSaving = true;
+            if (showToast) {
+                showMessage(translations[currentLang].savingGame);
+            }
+
+            // Récupère l'état de chaque bouton
+            const upgradesState = upgradeButtons.map(button => ({
+                id: button.id,
+                count: parseInt(button.getAttribute('data-count') || 0),
+                purchased: button.getAttribute('data-purchased') === 'true'
+            }));
+
+            const gameState = {
+                score: score,
+                clickPower: clickPower,
+                tps: tps,
+                upgrades: upgradesState,
+                lang: currentLang
+            };
+
             try {
-                // Initialisation des services
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Gère l'authentification initiale (custom token du sandbox ou anonyme si non fourni)
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
+                await setDoc(getGameDocRef(userId), gameState, { merge: true });
+                if (showToast) {
+                    showMessage(translations[currentLang].gameSaved, false);
                 }
-                
-                // Listener d'état d'authentification pour gérer l'UI
-                onAuthStateChanged(auth, (user) => {
-                    isAuthReady = true;
-                    if (user) {
-                        currentUserId = user.uid;
-                        userDisplay.textContent = user.email ? `Connecté: ${user.email}` : `ID: ${user.uid.substring(0, 8)}...`;
-                        authContainer.classList.add('hidden');
-                        
-                        // Si l'utilisateur change (connexion/inscription), charger la nouvelle partie
-                        loadGame();
-                        
-                    } else {
-                        currentUserId = null;
-                        authContainer.classList.remove('hidden');
-                        setStatus("Déconnecté. Sauvegarde désactivée.", false);
-                        
-                        // Réinitialiser le jeu à l'état par défaut en cas de déconnexion
-                        score = 0;
-                        clickPower = 1;
-                        tps = 0;
-                        upgradeButtons.forEach(btn => {
-                            if(btn.hasAttribute('data-count')) btn.setAttribute('data-count', '0');
-                            if(btn.hasAttribute('data-purchased')) btn.setAttribute('data-purchased', 'false');
-                        });
-                        updateUI();
-                    }
-                });
-
-            } catch (error) {
-                console.error("Erreur lors de l'initialisation de Firebase:", error);
-                // Afficher le message d'erreur et forcer l'interface d'auth
-                authContainer.classList.remove('hidden');
-                showAuthMessage(`Erreur d'initialisation critique: ${error.message}. Vérifiez la console.`, 'error');
+            } catch (e) {
+                console.error("Erreur lors de la sauvegarde du jeu : ", e);
+                // Ne pas afficher d'erreur à l'utilisateur ici, car c'est une sauvegarde automatique
+            } finally {
+                isSaving = false;
             }
         }
-
-        // --- Démarrage ---
-        window.saveCounter = 0;
         
+        /**
+         * Chargement du jeu et écoute des changements en temps réel.
+         */
+        function initializeGameListener() {
+            const gameDocRef = getGameDocRef(userId);
+            
+            // Écoute en temps réel de la base de données
+            onSnapshot(gameDocRef, (docSnapshot) => {
+                let initialLoad = !isAuthReady;
+                
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    
+                    // Restauration des scores globaux
+                    score = data.score || 0;
+                    clickPower = data.clickPower || 1;
+                    tps = data.tps || 0;
+                    currentLang = data.lang || 'fr';
+                    
+                    // Restauration de l'état des boutons (set des attributs)
+                    if (data.upgrades) {
+                        data.upgrades.forEach(savedUpgrade => {
+                            const button = document.getElementById(savedUpgrade.id);
+                            if (button) {
+                                button.setAttribute('data-count', (savedUpgrade.count || 0).toString());
+                                button.setAttribute('data-purchased', (savedUpgrade.purchased || false).toString());
+                            }
+                        });
+                    }
+                    
+                    if (initialLoad) {
+                       showMessage(translations[currentLang].gameLoaded);
+                    }
+                    
+                } else if (initialLoad) {
+                    // Document n'existe pas, première partie, initialisation par défaut
+                    console.log("Aucune progression trouvée, début d'une nouvelle partie.");
+                    saveGameState(); // Créer le document initial
+                }
+
+                // Finalisation de l'initialisation après le chargement des données
+                isAuthReady = true;
+                setLanguage(currentLang, false); // Mettre à jour l'UI avec la langue chargée
+                checkUpgradeVisibility();
+                
+            }, (error) => {
+                console.error("Erreur lors de l'écoute Firestore: ", error);
+                showMessage("Erreur de chargement des données en temps réel.", true);
+            });
+            
+            // Démarrer la sauvegarde automatique toutes les 10 secondes
+            setInterval(saveGameState, 10000);
+        }
+
+        // --- Initialisation Firebase et Authentification ---
+
+        let appInstance;
+        try {
+            appInstance = initializeApp(firebaseConfig);
+            db = getFirestore(appInstance);
+            auth = getAuth(appInstance);
+        } catch (e) {
+            console.error("Erreur d'initialisation de Firebase: ", e);
+            showMessage("Erreur de connexion à la base de données.", true);
+        }
+        
+        // 1. Gérer l'authentification et le chargement du jeu
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                initializeGameListener(); // Démarrer l'écoute Firestore
+            } else {
+                // Tenter la connexion initiale (token ou anonyme)
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Erreur de connexion :", error);
+                    showMessage("Erreur de connexion au service d'authentification.", true);
+                }
+            }
+        });
+
+        // --- Initialisation de la Musique au Chargement de la Page ---
         window.onload = function() {
             loadTrack(currentTrackIndex); 
-            initializeFirebase();
-            setInterval(gameLoop, 100); 
         };
 
-        // Détection du clic sur l'image pour autoriser la lecture audio 
+        // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
         let hasInteracted = false;
         tiboImage.addEventListener('click', () => {
              if (!hasInteracted) {
