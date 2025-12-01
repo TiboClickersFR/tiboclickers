@@ -538,20 +538,23 @@
         // 1. App ID (Utilise celui de l'environnement Canvas par défaut)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // 2. CONFIGURATION DE SAUVEGARDE SUR GITHUB PAGES (Action Requise)
-        // ATTENTION: Si vous voulez que la SAUVEGARDE fonctionne sur GitHub Pages,
-        // vous DEVEZ remplacer les {} ci-dessous par la configuration PUBLIQUE
-        // de votre propre projet Firebase (API Key, projectId, etc.).
+        // 2. CONFIGURATION DE SAUVEGARDE SUR GITHUB PAGES (ACTION REQUISE PAR VOUS)
+        // ----------------------------------------------------------------------
+        // SI vous voulez que la SAUVEGARDE fonctionne sur GitHub Pages:
+        // - Allez sur votre console Firebase (Projet > Paramètres > Applications).
+        // - Copiez votre configuration publique et remplacez les {} ci-dessous.
+        // SI vous laissez le bloc vide, le jeu fonctionnera sans sauvegarde.
+        // ----------------------------------------------------------------------
         const GITHUB_FIREBASE_CONFIG = {
-            // apiKey: "VOTRE_API_KEY",
-            // authDomain: "VOTRE_DOMAINE.firebaseapp.com",
-            // projectId: "VOTRE_PROJECT_ID",
-            // storageBucket: "VOTRE_BUCKET.appspot.com",
-            // messagingSenderId: "VOTRE_SENDER_ID",
-            // appId: "VOTRE_APP_ID"
+            // apiKey: "VOTRE_API_KEY_ICI",
+            // authDomain: "VOTRE_DOMAINE_ICI.firebaseapp.com",
+            // projectId: "VOTRE_PROJECT_ID_ICI",
+            // storageBucket: "VOTRE_BUCKET_ICI.appspot.com",
+            // messagingSenderId: "VOTRE_SENDER_ID_ICI",
+            // appId: "VOTRE_APP_ID_ICI"
         };
         
-        // Si les clés Canvas sont présentes, nous les utilisons. Sinon, nous utilisons la config GITHUB.
+        // Le code utilise les clés du Canvas s'il est ici, sinon il utilise la configuration de GitHub Pages.
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config) 
             : GITHUB_FIREBASE_CONFIG;
@@ -991,19 +994,14 @@
         }
         
         function checkUpgradeVisibility() {
-            if (score >= 400 && upgrade2_new.classList.contains('hidden')) {
-                upgrade2_new.classList.remove('hidden');
-                upgrade2_new.style.opacity = 1;
-            }
-             if (score >= 2500 && upgrade3_new.classList.contains('hidden')) {
-                upgrade3_new.classList.remove('hidden');
-                upgrade3_new.style.opacity = 1;
-            }
-            
+            // Rendre visible les achats uniques si le score est proche du coût
             [upgrade2_new, upgrade3_new].forEach(btn => {
-                 if (btn.getAttribute('data-purchased') === 'true' || score >= parseInt(btn.getAttribute('data-cost')) * 0.8) {
-                    btn.classList.remove('hidden');
-                    btn.style.opacity = 1;
+                const cost = parseInt(btn.getAttribute('data-cost'));
+                if (btn.getAttribute('data-purchased') === 'true' || score >= cost * 0.8) {
+                    if (btn.classList.contains('hidden')) {
+                         btn.classList.remove('hidden');
+                         btn.style.opacity = 1;
+                    }
                 }
             });
         }
