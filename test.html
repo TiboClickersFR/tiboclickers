@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tibo Clicker - La Vraie Transfo' !</title>
-    <!-- Chargement de Tailwind CSS (utilisé ici pour la facilité de la mise en page de base, bien que le CSS customisé domine) -->
-    <script src="https://cdn.tailwindcss.com"></script> 
     <!-- AJOUT DE L'ICÔNE (FAVICON) POUR L'ONGLET DU NAVIGATOR. Remplacez 'tibo_icon.png' par le nom de votre fichier d'icône. -->
     <link rel="icon" type="image/png" href="tibo_icon.png">
     <style>
@@ -99,6 +97,12 @@
             font-size: 1.2em;
             margin-top: 5px;
             color: #ccc;
+        }
+        
+        #user-info {
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 10px;
         }
         
         /* ------------------------------------------------ */
@@ -251,31 +255,6 @@
             background-position: right 5px center;
             padding-right: 25px; 
         }
-        
-        /* ------------------------------------------------ */
-        /* Status/Message Box (non-alert) */
-        /* ------------------------------------------------ */
-        .status-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background-color: #4CAF50; /* Green */
-            color: white;
-            border-radius: 5px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.5s, top 0.5s;
-        }
-        .status-message.error {
-            background-color: #f44336; /* Red */
-        }
-        .status-message.show {
-            opacity: 1;
-            top: 50px;
-        }
-
 
         /* ------------------------------------------------ */
         /* Règles de Responsivité (Media Queries) */
@@ -359,7 +338,7 @@
         <!-- 2. Sélecteur de Langue -->
         <div id="language-selector-container">
             <span id="lang-label">🌐</span>
-            <select id="language-selector" onchange="setLanguage(this.value, true)">
+            <select id="language-selector" onchange="setLanguage(this.value, false)">
                 <option value="fr">Français</option>
                 <option value="en">English</option>
                 <option value="es">Español</option>
@@ -370,9 +349,6 @@
 
     <!-- 🎧 Élément Audio unique pour la lecture de la playlist -->
     <audio id="background-music" preload="auto"></audio>
-    
-    <!-- Zone de message (remplace alert() et console.log des erreurs d'achat) -->
-    <div id="statusMessage" class="status-message"></div>
 
     <div id="game-container">
         
@@ -383,6 +359,7 @@
                 <div id="score">0</div>
                 <div id="click-power-display">Puissance de Clic : 1 Tibo</div>
                 <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
+                <div id="user-info">Authentification en cours...</div>
             </div>
 
             <div id="tibo-image"></div>
@@ -531,75 +508,225 @@
         
     </div>
 
-    <!-- Dépendances Firebase -->
+    <!-- NOUVELLE SECTION POUR LES IMPORTS FIREBASE ET LE CODE JS -->
     <script type="module">
-        import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // Importations des modules Firebase (Auth et Firestore)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // --- Configuration Firebase (Variables Globales) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-tibo-clicker-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let db, auth, userId = null;
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- VARIABLES GLOBALES FIREBASE ---
+        let db;
+        let auth;
+        let userId = null;
         let isAuthReady = false;
 
-        setLogLevel('Debug'); // Active le logging pour le débogage
+        // ACCÈS AUX VARIABLES GLOBALES FOURNIES PAR L'ENVIRONNEMENT
+        // C'EST ICI QUE L'ID DE CONFIGURATION EST RÉCUPÉRÉ (dans __firebase_config)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        const SAVE_COLLECTION = 'game-saves';
+        const SAVE_DOCUMENT_ID = 'tiboClicker';
 
-        // --- Variables d'État du Jeu ---
+
+        /**
+         * Initialise Firebase et tente d'authentifier l'utilisateur.
+         */
+        async function initializeFirebase() {
+             if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config non trouvé. Vérifiez les variables globales.");
+                document.getElementById('user-info').textContent = "Erreur: Config Firebase manquante.";
+                return;
+            }
+            
+            try {
+                // 1. INITIALISATION DES SERVICES (avec la config cachée)
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // 2. TENTATIVE D'AUTHENTIFICATION
+                document.getElementById('user-info').textContent = "Connexion sécurisée en cours...";
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // 3. ÉCOUTE DE L'ÉTAT D'AUTHENTIFICATION
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        document.getElementById('user-info').textContent = `ID Utilisateur: ${userId}`;
+                        console.log("Authentification réussie. User ID:", userId);
+                        
+                        // Une fois l'authentification réussie, on charge le jeu
+                        loadGameFromFirestore();
+                    } else {
+                        userId = null;
+                        isAuthReady = true;
+                        document.getElementById('user-info').textContent = "Non connecté (anonyme).";
+                        console.warn("Utilisateur déconnecté ou échec de l'authentification.");
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erreur lors de l'initialisation de Firebase ou de l'authentification:", error);
+                document.getElementById('user-info').textContent = "Erreur d'Auth: " + error.message;
+                isAuthReady = true; // On considère prêt même en cas d'erreur pour que le jeu démarre
+                loadGameFromLocal(); // Tente la sauvegarde locale en cas d'échec
+            }
+        }
+        
+        // --- NOUVELLES FONCTIONS DE SAUVEGARDE ET CHARGEMENT FIREBASE ---
+
+        /**
+         * Sauvegarde l'état du jeu dans Firestore.
+         */
+        async function saveGameToFirestore() {
+            if (!isAuthReady || !userId) return; // Ne pas sauvegarder si pas prêt ou pas d'ID
+
+            const saveObject = getSaveObject(); // Récupère l'objet de sauvegarde
+            
+            // Chemin Firestore: /artifacts/{appId}/users/{userId}/game-saves/tiboClicker
+            const docRef = doc(db, 
+                `artifacts/${appId}/users/${userId}/${SAVE_COLLECTION}/${SAVE_DOCUMENT_ID}`
+            );
+            
+            try {
+                await setDoc(docRef, saveObject);
+                // console.log("Jeu sauvegardé dans Firestore.");
+            } catch (e) {
+                console.error("Erreur lors de la sauvegarde dans Firestore: ", e);
+            }
+        }
+
+        /**
+         * Charge l'état du jeu depuis Firestore.
+         */
+        async function loadGameFromFirestore() {
+             if (!isAuthReady || !userId) return;
+
+             // Chemin Firestore: /artifacts/{appId}/users/{userId}/game-saves/tiboClicker
+             const docRef = doc(db, 
+                `artifacts/${appId}/users/${userId}/${SAVE_COLLECTION}/${SAVE_DOCUMENT_ID}`
+            );
+            
+            try {
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const saveObject = docSnap.data();
+                    applySaveObject(saveObject);
+                    console.log("Jeu chargé depuis Firestore.");
+                } else {
+                    console.log("Aucune sauvegarde Firestore trouvée. Démarrage d'une nouvelle partie.");
+                    // Si pas de sauvegarde, on charge les valeurs par défaut (déjà fait par loadGameFromLocal)
+                }
+            } catch (e) {
+                console.error("Erreur lors du chargement depuis Firestore: ", e);
+            } finally {
+                 // Met à jour l'UI dans tous les cas pour être sûr que la langue et le reste s'affichent
+                 setLanguage(currentLang, false); 
+                 checkUpgradeVisibility();
+            }
+        }
+        
+        // --- FONCTIONS LOCAL STORAGE (FALLBACK) ---
+
+        // Ancien nom de la fonction loadGame, renommée pour être un fallback local
+        function loadGameFromLocal() {
+            const savedLang = localStorage.getItem('tiboClickerLang');
+            
+            // Initialisation des données par défaut
+            score = 0;
+            clickPower = 1;
+            tps = 0;
+            
+            // 1. Tente de charger l'ancienne sauvegarde local (si elle existe)
+            const savedGame = localStorage.getItem('tiboClickerSave');
+            if (savedGame) {
+                const saveObject = JSON.parse(savedGame);
+                applySaveObject(saveObject);
+                console.log("Jeu chargé depuis Local Storage (Fallback).");
+            }
+            
+            // 2. Chargement de la Langue
+            if (savedLang) {
+                currentLang = savedLang;
+            }
+            
+            // 3. Mise à jour UI
+            setLanguage(currentLang, false); 
+            checkUpgradeVisibility();
+        }
+
+        // --- PARTIE COMMUNE DE LA LOGIQUE DU JEU ---
+
+        // JavaScript pour la logique du jeu
         let score = 0;
         let clickPower = 1; // Puissance de clic totale (base + bonus)
-        let tps = 0; // Tibos Par Seconde (peut être flottant pour plus de précision)
+        let tps = 0; // Tibos Par Seconde
         let currentLang = 'fr'; // Langue par défaut
+        // Anciennes clés localStorage (maintenues pour le fallback)
+        // const GAME_STORAGE_KEY = 'tiboClickerSave'; 
+        const LANG_STORAGE_KEY = 'tiboClickerLang';
         const GROWTH_FACTOR = 1.15; // Facteur d'augmentation exponentiel
+        const FORMAT_THRESHOLD = 100000; // Constante : 100 000 Tibos (100K)
 
-        // --- Références DOM ---
         const scoreDisplay = document.getElementById('score');
         const tiboImage = document.getElementById('tibo-image');
         const clickPowerDisplay = document.getElementById('click-power-display');
         const tpsDisplay = document.getElementById('tps-display');
-        const statusMessage = document.getElementById('statusMessage');
-        const languageSelector = document.getElementById('language-selector');
         
         // Références aux boutons pour la gestion de l'apparition
+        const upgrade1 = document.getElementById('upgrade-click-1');
         const upgrade2_new = document.getElementById('upgrade-click-2-new'); 
         const upgrade3_new = document.getElementById('upgrade-click-3-new'); 
         
-        // Liste de tous les boutons
+        // Liste de tous les boutons (incluant les cachés pour la vérification des coûts)
         const upgradeButtons = [
-            document.getElementById('upgrade-click-1'),
+            upgrade1,
             upgrade2_new,
             upgrade3_new,
             document.getElementById('upgrade-addition'),
             document.getElementById('upgrade-passive-alessiode'),
             document.getElementById('upgrade-passive-justine'),
             document.getElementById('upgrade-passive-patate'),
+            // Nouveaux Personnages
             document.getElementById('upgrade-passive-nogode'), 
             document.getElementById('upgrade-passive-sachatte'),
             document.getElementById('upgrade-passive-milodes'),
             document.getElementById('upgrade-passive-thomas'),
             document.getElementById('upgrade-passive-lenaik'),
+            // NOUVEAU: Rodrigues
             document.getElementById('upgrade-passive-rodrigues')
-        ].filter(b => b != null); // S'assurer qu'il n'y a pas de nulls
-
+        ];
+        
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
-        // (Le dictionnaire de traduction reste inchangé, car il était très complet)
         const translations = {
             fr: {
+                // Général
                 langLabel: "🌐", 
                 mainTitle: "Tibo Clicker - La Vraie Transfo' ! 💪",
                 musicLabel: "Musique", 
                 tibosOwnedLabel: "Tibos Possédés :",
                 clickPowerDisplay: (power) => `Puissance de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
+                // MISE À JOUR : TPS affiché en valeur précise
                 tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Améliorations",
+                // Upgrades Multiplicateurs (Achat Unique)
                 mindsetTitle: "Mise en Place du \"Mindset\"",
                 mindsetDescription: "Ajoute +1 TPC de base (Achat Unique)",
                 ultrasaleTitle: "Tibo Ultra Sale 💥",
                 ultrasaleDescription: "Ajoute +3 TPC de base (Achat Unique)",
                 cheatmealTitle: "Le Cheat Meal Ultime 🍕",
                 cheatmealDescription: "Ajoute +6 TPC de base (Achat Unique)",
+                // Upgrades Répétables
                 proteinesTitle: "Déverrouillage des Protéines",
                 proteinesDescription: "Ajoute +5 Tibos par Clic",
                 alessioTitle: "Alessiode - Coach Personnel 🏋️",
@@ -618,30 +745,32 @@
                 thomasDescription: "Génère 50,000 Tibos/s",
                 lenaikTitle: "Lenaik - La Gardienne Hyper-Protectrice 🛡️",
                 lenaikDescription: "Génère 200,000 Tibos/s",
+                // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - Le Bâton de Pèlerin 💫",
                 rodriguesDescription: "Génère 1,000,000 Tibos/s",
+                // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Acheté",
-                notEnoughTibos: "Pas assez de Tibos pour cette amélioration!",
-                savingGame: "Sauvegarde en cours...",
-                gameSaved: "Jeu sauvegardé dans le Cloud!",
-                gameLoaded: "Progression chargée!"
+                purchasedText: "Acheté" // Nouvelle chaîne pour l'achat
             },
             en: {
+                // General
                 langLabel: "🌐", 
                 mainTitle: "Tibo Clicker - The Real Transformation! 💪",
                 musicLabel: "Music", 
                 tibosOwnedLabel: "Tibos Owned:",
                 clickPowerDisplay: (power) => `Click Power: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
+                // MISE À JOUR : TPS affiché en valeur précise
                 tpsDisplay: (tps) => `Tibos Per Second (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Upgrades",
+                // Multiplier Upgrades (One-Time Purchase)
                 mindsetTitle: "\"Mindset\" Implementation",
                 mindsetDescription: "Adds +1 base TPC (One-Time Purchase)",
                 ultrasaleTitle: "Tibo Ultra Sale 💥",
                 ultrasaleDescription: "Adds +3 base TPC (One-Time Purchase)",
                 cheatmealTitle: "The Ultimate Cheat Meal 🍕",
                 cheatmealDescription: "Adds +6 base TPC (One-Time Purchase)",
+                // Repeatable Upgrades
                 proteinesTitle: "Protein Unlock",
                 proteinesDescription: "Adds +5 Tibos per Click",
                 alessioTitle: "Alessiode - Personal Coach 🏋️",
@@ -660,30 +789,32 @@
                 thomasDescription: "Generates 50,000 Tibos/s",
                 lenaikTitle: "Lenaik - The Hyper-Protective Guardian 🛡️",
                 lenaikDescription: "Generates 200,000 Tibos/s",
+                 // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - The Pilgrim's Staff 💫",
                 rodriguesDescription: "Generates 1,000,000 Tibos/s",
+                // Secondary Text
                 countText: (count) => `Owned: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Purchased",
-                notEnoughTibos: "Not enough Tibos for this upgrade!",
-                savingGame: "Saving game...",
-                gameSaved: "Game saved to Cloud!",
-                gameLoaded: "Progress loaded!"
+                purchasedText: "Purchased"
             },
             es: {
+                 // General
                 langLabel: "🌐", 
                 mainTitle: "Tibo Clicker - ¡La Verdadera Transformación! 💪",
                 musicLabel: "Música", 
                 tibosOwnedLabel: "Tibos Poseídos:",
                 clickPowerDisplay: (power) => `Poder de Clic: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
+                // MISE À JOUR : TPS affiché en valeur précise
                 tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Mejoras",
+                // Upgrades Multiplicadores (Compra Única)
                 mindsetTitle: "Implementación del \"Mindset\"",
                 mindsetDescription: "Añade +1 TPC base (Compra Única)",
                 ultrasaleTitle: "Tibo Ultra Sucio 💥",
                 ultrasaleDescription: "Añade +3 TPC base (Compra Única)",
                 cheatmealTitle: "La Comida Trampa Definitiva 🍕",
                 cheatmealDescription: "Añade +6 TPC base (Compra Única)",
+                // Upgrades Repetibles
                 proteinesTitle: "Desbloqueo de Proteínas",
                 proteinesDescription: "Añade +5 Tibos por Clic",
                 alessioTitle: "Alessiode - Entrenador Personal 🏋️",
@@ -702,15 +833,13 @@
                 thomasDescription: "Genera 50,000 Tibos/s",
                 lenaikTitle: "Lenaik - La Gardiana Hiperprotectora 🛡️",
                 lenaikDescription: "Genera 200,000 Tibos/s",
+                 // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - El Bastón del Peregrino 💫",
                 rodriguesDescription: "Genera 1,000,000 Tibos/s",
+                // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Comprado",
-                notEnoughTibos: "¡No hay suficientes Tibos para esta mejora!",
-                savingGame: "Guardando partida...",
-                gameSaved: "¡Partida guardada en la Nube!",
-                gameLoaded: "¡Progreso cargado!"
+                purchasedText: "Comprado"
             }
         };
 
@@ -729,21 +858,6 @@
             { url: 'Tableaux_de_Provences-Paule_Maurice.mp3', title: 'Tableaux de Provences (Maurice)' }
         ];
 
-        // --- Fonctions Utilitaire (Messages) ---
-        function showMessage(msg, isError = false) {
-            statusMessage.textContent = msg;
-            statusMessage.classList.remove('error');
-            if (isError) {
-                statusMessage.classList.add('error');
-            }
-            statusMessage.classList.add('show');
-            
-            // Masquer après 3 secondes
-            setTimeout(() => {
-                statusMessage.classList.remove('show');
-            }, 3000);
-        }
-
         // --- Fonctions de Musique ---
 
         function loadTrack(index) {
@@ -759,7 +873,7 @@
             });
         }
 
-        window.toggleMusic = function() {
+        function toggleMusic() {
             if (backgroundMusic.paused) {
                 playMusic();
             } else {
@@ -767,31 +881,32 @@
             }
         }
 
-        window.nextTrack = function() {
+        function nextTrack() {
             currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
             loadTrack(currentTrackIndex);
             playMusic();
         }
 
         // Événement pour passer à la piste suivante à la fin de la piste actuelle
-        backgroundMusic.addEventListener('ended', window.nextTrack);
+        backgroundMusic.addEventListener('ended', nextTrack);
 
         // --- Fonctions de Traduction (Language Functions) ---
 
         /**
          * Change la langue et met à jour l'UI. 
          * @param {string} lang Le code de langue ('fr', 'en', 'es').
-         * @param {boolean} updateSave Indique si la préférence doit être sauvegardée (maintenant lié à Firestore).
+         * @param {boolean} updateSave Indique si la préférence doit être sauvegardée (false pour le chargement initial).
          */
-        window.setLanguage = function(lang, updateSave = true) {
+        function setLanguage(lang, updateSave = true) {
             if (!translations[lang]) return;
             currentLang = lang;
-            languageSelector.value = lang;
+            document.getElementById('language-selector').value = lang;
             
+            // On met à jour l'UI UNIQUEMENT ici.
             updateUI(); 
             
-            if (updateSave && isAuthReady) {
-                 saveGameState();
+            if (updateSave) {
+                 saveLanguage();
             }
         }
 
@@ -819,6 +934,7 @@
                 if (upgradeKey) {
                     const titleElement = button.querySelector('.upgrade-title');
                     const descElement = button.querySelector('.upgrade-description');
+                    // On utilise le sélecteur de classe pour trouver l'élément du compteur
                     const countElement = button.querySelector('.upgrade-count'); 
                     const costElement = button.querySelector('.upgrade-cost');
                     
@@ -838,13 +954,13 @@
                         }
                     }
 
-                    // SYNCHRONISATION DU COMPTEUR VISUEL
+                    // *** POINT CLÉ : SYNCHRONISATION DU COMPTEUR VISUEL ***
                     if (countElement) {
-                        if (!button.hasAttribute('data-add-bonus')) { // Seulement pour les upgrades répétables
+                        if (!isPurchased) {
+                           // Lit le data-count qui a été restauré dans loadGame
                            countElement.textContent = t.countText(count); 
                            countElement.style.display = 'block';
                         } else {
-                            // C'est un upgrade unique, cacher le compteur "Possédé: 0"
                            countElement.style.display = 'none';
                         }
                     }
@@ -857,13 +973,10 @@
 
         // Formatage du score pour afficher K, M, B...
         function formatScore(num) {
-            if (num < 10000) return Math.floor(num).toLocaleString(currentLang); // Affichage sans suffixe pour les petits nombres
+            if (num < 1000) return Math.floor(num).toString();
             
             const suffixes = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
             const exp = Math.floor(Math.log(num) / Math.log(1000));
-            if (exp > suffixes.length) {
-                return num.toExponential(2); // Pour les très grands nombres
-            }
             const suffix = suffixes[exp - 1];
             const formatted = (num / Math.pow(1000, exp)).toFixed(2);
             
@@ -877,28 +990,42 @@
             clickPowerDisplay.textContent = t.clickPowerDisplay(clickPower);
         }
 
+        // CORRECTION DE LA FONCTION : Le TPS doit s'afficher en valeur brute ou avec une décimale pour la précision
         function updateTPSDisplay() {
             const t = translations[currentLang];
             // Utilise toFixed(0) si TPS est petit, toFixed(1) si TPS est grand pour rester lisible et précis.
-            tpsDisplay.textContent = t.tpsDisplay(tps);
+            // Le toFixed(0) est une troncature simple pour éviter d'afficher "0.0 Tibos"
+            const tpsValue = tps > 1000 ? tps.toFixed(1) : tps.toFixed(0); 
+            tpsDisplay.textContent = t.tpsDisplay(parseFloat(tpsValue));
         }
 
+        /**
+         * Calcule le coût d'une amélioration en fonction de son type (unique ou répétable).
+         * @param {HTMLElement} button Le bouton de l'amélioration.
+         * @returns {number} Le coût actuel de l'amélioration.
+         */
         function calculateCost(button) {
             const isPurchased = button.getAttribute('data-purchased') === 'true';
             
+            // Si c'est un achat unique déjà fait, le prix reste l'original (mais le bouton est désactivé plus tard)
             if (isPurchased) {
-                return Infinity; // Désactive le bouton si déjà acheté
+                // Utilise data-cost si disponible (pour les achats uniques) ou base-cost
+                return parseInt(button.getAttribute('data-cost') || button.getAttribute('data-base-cost'));
             }
 
+            // Pour tous les autres cas (achat unique non fait, ou achat répétable)
+            
+            // 1. Détermine le coût de base
+            // Utilise data-base-cost pour les répétables, data-cost pour les uniques.
             const baseCost = parseInt(button.getAttribute('data-base-cost') || button.getAttribute('data-cost'));
             const count = parseInt(button.getAttribute('data-count') || 0);
 
-            // Achat Unique (pas de data-count) ou count = 0 (première fois)
-            if (!button.hasAttribute('data-count') || count === 0) {
+            // 2. Si l'amélioration n'est PAS répétable (pas de data-count), retourne le coût de base
+            if (!button.hasAttribute('data-count')) {
                 return baseCost;
             }
             
-            // Logique d'augmentation exponentielle pour les améliorations répétables
+            // 3. Logique d'augmentation exponentielle pour les améliorations répétables
             const calculatedCost = Math.floor(baseCost * Math.pow(GROWTH_FACTOR, count));
             return calculatedCost;
         }
@@ -907,19 +1034,18 @@
         // --- Logique du Clic ---
 
         tiboImage.addEventListener('click', function(e) {
-            if (!isAuthReady) return; // Ne pas cliquer si pas chargé
-
-            // Ajout du score (en utilisant Math.ceil pour éviter les problèmes de flottants)
+            // Ajout du score
             score += clickPower;
+            updateScoreDisplay();
             
             // Animation du texte flottant
             createFloatingText(clickPower, e);
 
-            // Mise à jour et vérifications
-            updateUI(); 
+            // Vérification des coûts et de l'affichage des nouveaux upgrades
+            checkUpgradeCosts();
             checkUpgradeVisibility();
 
-            saveGameState(false); // Sauvegarde après chaque clic (léger)
+            saveGameToFirestore(); // Sauvegarde après chaque clic (ou après l'achat)
         });
 
         function createFloatingText(amount, event) {
@@ -944,18 +1070,20 @@
         // --- Logique des Améliorations ---
 
         upgradeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                if (!isAuthReady) return; // Ne pas acheter si pas chargé
-                buyUpgrade(button)
-            });
+            button.addEventListener('click', () => buyUpgrade(button));
         });
 
         function buyUpgrade(button) {
-            const t = translations[currentLang];
             const cost = calculateCost(button);
             
             if (score >= cost) {
                 score -= cost;
+                
+                // Incrémente le compteur pour l'achat suivant (seulement si c'est répétable)
+                if (button.hasAttribute('data-count')) {
+                    let count = parseInt(button.getAttribute('data-count'));
+                    button.setAttribute('data-count', ++count);
+                }
                 
                 // 1. Mise à jour de la puissance de clic / TPS
                 if (button.hasAttribute('data-add-bonus')) {
@@ -968,22 +1096,22 @@
                     // Clic répétable (Protéines)
                     const addition = parseInt(button.getAttribute('data-addition'));
                     clickPower += addition;
-                    let count = parseInt(button.getAttribute('data-count'));
-                    button.setAttribute('data-count', ++count);
+                    // L'incrémentation du count est faite au début
                     
                 } else if (button.hasAttribute('data-tps')) {
                     // Passifs (TPS)
-                    const passiveTps = parseFloat(button.getAttribute('data-tps'));
+                    const passiveTps = parseInt(button.getAttribute('data-tps'));
                     tps += passiveTps;
-                    let count = parseInt(button.getAttribute('data-count'));
-                    button.setAttribute('data-count', ++count);
+                    // L'incrémentation du count est faite au début
                 }
 
                 // 2. Mise à jour de l'UI et de l'état
-                updateUI(); 
-                saveGameState(); // Sauvegarde le jeu après l'achat
+                updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
+                saveGameToFirestore(); // Sauvegarde le jeu après l'achat
             } else {
-                showMessage(t.notEnoughTibos, true);
+                // console.log(translations[currentLang].notEnoughTibos); // Non défini, utiliser la console
+                console.log("Pas assez de Tibos !");
+                // Optionnel: Ajouter une animation "argent insuffisant"
             }
         }
 
@@ -994,34 +1122,38 @@
                 
                 // Mettre à jour le coût affiché (si non acheté)
                 const costElement = button.querySelector('.upgrade-cost');
-                if (costElement) {
-                    if (isPurchased) {
-                        costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
-                    } else {
-                        costElement.textContent = translations[currentLang].costText(cost);
-                    }
+                if (costElement && !isPurchased) {
+                     // Utilise la traduction pour formater le coût
+                    costElement.textContent = translations[currentLang].costText(cost);
                 }
                 
-                button.disabled = isPurchased || score < cost;
+                if (isPurchased) {
+                    button.disabled = true;
+                    // Assure que le coût affiche "Acheté"
+                    if (costElement) costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
+                } else {
+                    button.disabled = score < cost;
+                }
             });
         }
         
         // Rend visible les upgrades cachés une fois le score atteint
         function checkUpgradeVisibility() {
             // Logique pour révéler les upgrades uniques
-            // Les seuils sont basés sur le coût de l'upgrade (ex: 80% du coût)
-            if (score >= 400 * 0.8 && upgrade2_new && upgrade2_new.classList.contains('hidden')) {
+            // Note: On utilise le score actuel (qui est chargé) pour vérifier
+            if (score >= 400 && upgrade2_new.classList.contains('hidden')) {
                 upgrade2_new.classList.remove('hidden');
                 upgrade2_new.style.opacity = 1;
             }
-             if (score >= 3000 * 0.8 && upgrade3_new && upgrade3_new.classList.contains('hidden')) {
+             if (score >= 2500 && upgrade3_new.classList.contains('hidden')) {
                 upgrade3_new.classList.remove('hidden');
                 upgrade3_new.style.opacity = 1;
             }
             
             // Assure que les upgrades sont visibles au rechargement si déjà achetés ou découverts
             [upgrade2_new, upgrade3_new].forEach(btn => {
-                 if (btn && (btn.getAttribute('data-purchased') === 'true' || score >= parseInt(btn.getAttribute('data-cost')) * 0.8)) {
+                 // Révéler si acheté OU si le score atteint 80% du coût initial (découverte)
+                 if (btn.getAttribute('data-purchased') === 'true' || score >= parseInt(btn.getAttribute('data-cost')) * 0.8) {
                     btn.classList.remove('hidden');
                     btn.style.opacity = 1;
                 }
@@ -1032,9 +1164,7 @@
         // --- Logique Passive (Game Loop) ---
 
         function gameLoop() {
-            if (!isAuthReady) return;
-
-            // 1. Calcul du score passif
+            // Vérifie si le TPS est > 0 avant d'ajouter le score
             if (tps > 0) {
                 // Ajout du TPS (divisé par le nombre de cycles par seconde, ici 10)
                 // L'utilisation de tps / 10 pour un intervalle de 100ms donne tps / seconde
@@ -1042,153 +1172,107 @@
                 score += addedScore; 
             }
             
-            // 2. Affichage et vérification
+            // Affichage et vérification
             updateScoreDisplay();
-            updateTPSDisplay(); 
+            updateTPSDisplay(); // Assure la mise à jour constante du TPS
             checkUpgradeCosts();
             checkUpgradeVisibility();
+
+            // Sauvegarde du jeu toutes les 10 secondes (pour ne pas surcharger)
+            // Utiliser un drapeau pour ne pas sauvegarder 10 fois par seconde
+            const now = Math.floor(performance.now() / 1000);
+            if (now % 10 === 0 && !window.hasSavedThisSecond) {
+                // Sauvegarde via Firestore
+                if (isAuthReady && userId) {
+                    saveGameToFirestore();
+                } else {
+                    // Sauvegarde locale en cas de problème de connexion
+                    saveGameLocalFallback();
+                }
+                window.hasSavedThisSecond = true;
+            } else if (now % 10 !== 0) {
+                 window.hasSavedThisSecond = false;
+            }
         }
 
         // Exécution de la boucle toutes les 100ms (10 fois par seconde)
         setInterval(gameLoop, 100); 
-        
-        // --- Fonctions Firestore ---
-        
-        function getGameDocRef(currentUserId) {
-            const userPath = `/artifacts/${appId}/users/${currentUserId}/clicker_state`;
-            return doc(db, userPath, 'current_game');
-        }
 
+        // --- Fonctions d'Objet de Sauvegarde ---
+        
         /**
-         * Sauvegarde l'état actuel du jeu dans Firestore.
-         * @param {boolean} showToast Affiche une notification de sauvegarde si true (par défaut: true).
+         * Construit l'objet de sauvegarde à partir des variables globales et des attributs des boutons.
+         * @returns {Object} L'objet de sauvegarde.
          */
-        let isSaving = false;
-        async function saveGameState(showToast = true) {
-            if (!isAuthReady || !userId || isSaving) return; 
-            
-            isSaving = true;
-            if (showToast) {
-                showMessage(translations[currentLang].savingGame);
-            }
-
-            // Récupère l'état de chaque bouton
-            const upgradesState = upgradeButtons.map(button => ({
-                id: button.id,
-                count: parseInt(button.getAttribute('data-count') || 0),
-                purchased: button.getAttribute('data-purchased') === 'true'
-            }));
-
-            const gameState = {
-                score: score,
+        function getSaveObject() {
+            const saveObject = {
+                score: score, 
                 clickPower: clickPower,
                 tps: tps,
-                upgrades: upgradesState,
-                lang: currentLang
+                upgrades: [],
+                lang: currentLang,
+                timestamp: Date.now() // Ajout d'un timestamp pour le débug
             };
 
-            try {
-                await setDoc(getGameDocRef(userId), gameState, { merge: true });
-                if (showToast) {
-                    showMessage(translations[currentLang].gameSaved, false);
-                }
-            } catch (e) {
-                console.error("Erreur lors de la sauvegarde du jeu : ", e);
-                // Ne pas afficher d'erreur à l'utilisateur ici, car c'est une sauvegarde automatique
-            } finally {
-                isSaving = false;
-            }
+            // Sauvegarde de l'état de chaque bouton
+            upgradeButtons.forEach(button => {
+                saveObject.upgrades.push({
+                    id: button.id,
+                    count: parseInt(button.getAttribute('data-count') || 0),
+                    purchased: button.getAttribute('data-purchased') === 'true'
+                });
+            });
+            return saveObject;
         }
         
         /**
-         * Chargement du jeu et écoute des changements en temps réel.
+         * Applique l'objet de sauvegarde chargé (depuis Firestore ou Local) à l'état du jeu.
+         * @param {Object} saveObject L'objet de sauvegarde.
          */
-        function initializeGameListener() {
-            const gameDocRef = getGameDocRef(userId);
+        function applySaveObject(saveObject) {
+            score = saveObject.score || 0;
+            clickPower = saveObject.clickPower || 1;
+            tps = saveObject.tps || 0; 
             
-            // Écoute en temps réel de la base de données
-            onSnapshot(gameDocRef, (docSnapshot) => {
-                let initialLoad = !isAuthReady;
-                
-                if (docSnapshot.exists()) {
-                    const data = docSnapshot.data();
-                    
-                    // Restauration des scores globaux
-                    score = data.score || 0;
-                    clickPower = data.clickPower || 1;
-                    tps = data.tps || 0;
-                    currentLang = data.lang || 'fr';
-                    
-                    // Restauration de l'état des boutons (set des attributs)
-                    if (data.upgrades) {
-                        data.upgrades.forEach(savedUpgrade => {
-                            const button = document.getElementById(savedUpgrade.id);
-                            if (button) {
-                                button.setAttribute('data-count', (savedUpgrade.count || 0).toString());
-                                button.setAttribute('data-purchased', (savedUpgrade.purchased || false).toString());
-                            }
-                        });
-                    }
-                    
-                    if (initialLoad) {
-                       showMessage(translations[currentLang].gameLoaded);
-                    }
-                    
-                } else if (initialLoad) {
-                    // Document n'existe pas, première partie, initialisation par défaut
-                    console.log("Aucune progression trouvée, début d'une nouvelle partie.");
-                    saveGameState(); // Créer le document initial
+            if (saveObject.lang) {
+                currentLang = saveObject.lang;
+            }
+
+            // Restauration de l'état des boutons (set des attributs)
+            saveObject.upgrades.forEach(savedUpgrade => {
+                const button = document.getElementById(savedUpgrade.id);
+                if (button) {
+                    // Assure que les nombres sont stockés correctement comme chaînes dans les attributs HTML
+                    button.setAttribute('data-count', savedUpgrade.count.toString());
+                    button.setAttribute('data-purchased', savedUpgrade.purchased.toString());
                 }
-
-                // Finalisation de l'initialisation après le chargement des données
-                isAuthReady = true;
-                setLanguage(currentLang, false); // Mettre à jour l'UI avec la langue chargée
-                checkUpgradeVisibility();
-                
-            }, (error) => {
-                console.error("Erreur lors de l'écoute Firestore: ", error);
-                showMessage("Erreur de chargement des données en temps réel.", true);
             });
-            
-            // Démarrer la sauvegarde automatique toutes les 10 secondes
-            setInterval(saveGameState, 10000);
-        }
-
-        // --- Initialisation Firebase et Authentification ---
-
-        let appInstance;
-        try {
-            appInstance = initializeApp(firebaseConfig);
-            db = getFirestore(appInstance);
-            auth = getAuth(appInstance);
-        } catch (e) {
-            console.error("Erreur d'initialisation de Firebase: ", e);
-            showMessage("Erreur de connexion à la base de données.", true);
         }
         
-        // 1. Gérer l'authentification et le chargement du jeu
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                initializeGameListener(); // Démarrer l'écoute Firestore
-            } else {
-                // Tenter la connexion initiale (token ou anonyme)
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Erreur de connexion :", error);
-                    showMessage("Erreur de connexion au service d'authentification.", true);
-                }
-            }
-        });
+        /**
+         * Sauvegarde locale de secours (seulement le score et les upgrades).
+         */
+        function saveGameLocalFallback() {
+             const saveObject = getSaveObject();
+             // Suppression du timestamp et de la langue pour la sauvegarde locale
+             delete saveObject.timestamp; 
+             localStorage.setItem('tiboClickerSave', JSON.stringify(saveObject));
+             // console.log("Sauvegarde locale effectuée.");
+        }
 
-        // --- Initialisation de la Musique au Chargement de la Page ---
+
+        function saveLanguage() {
+            localStorage.setItem(LANG_STORAGE_KEY, currentLang);
+            // Pas de sauvegarde dans Firestore ici, car la langue est sauvegardée dans le saveGameToFirestore
+        }
+
+        // --- Initialisation ---
+
         window.onload = function() {
+            // 1. Initialisation de la Musique
             loadTrack(currentTrackIndex); 
+            // 2. Initialisation de Firebase (qui gère le chargement du jeu via loadGameFromFirestore)
+            initializeFirebase(); 
         };
 
         // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
