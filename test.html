@@ -534,7 +534,10 @@
         let isAuthReady = false;
         
         // Configuration Canvas
+        // Si __app_id n'est pas défini (comme sur GitHub Pages), nous utilisons un ID par défaut.
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Si __firebase_config n'est pas défini, nous utilisons une configuration vide.
+        // Cela empêchera le crash critique, mais la connexion à Firestore échouera (ce qui est normal sans les clés).
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
@@ -631,7 +634,9 @@
                 statusLoading: "Connexion et chargement de la partie...",
                 statusLoadError: "Erreur de chargement de la partie. Partie par défaut démarrée.",
                 statusAuthError: "Erreur d'authentification Firebase.",
-                statusReady: "Prêt !"
+                statusReady: "Prêt !",
+                // Statut pour les environnements sans configuration Firebase
+                statusNoFirebase: "Mode déconnecté. Sauvegarde désactivée (Clés Firebase manquantes).",
             },
             en: {
                  // ... [Translations en anglais] ... (Omis pour la brièveté, mais inclus dans le code généré)
@@ -676,7 +681,8 @@
                 statusLoading: "Connecting and loading game...",
                 statusLoadError: "Error loading game. Default game started.",
                 statusAuthError: "Firebase authentication error.",
-                statusReady: "Ready!"
+                statusReady: "Ready!",
+                statusNoFirebase: "Disconnected Mode. Saving disabled (Missing Firebase keys).",
             },
             es: {
                  // ... [Translations en espagnol] ... (Omis pour la brièveté, mais inclus dans le code généré)
@@ -721,7 +727,8 @@
                 statusLoading: "Conectando y cargando partida...",
                 statusLoadError: "Error al cargar la partida. Partida por defecto iniciada.",
                 statusAuthError: "Error de autenticación de Firebase.",
-                statusReady: "¡Listo!"
+                statusReady: "¡Listo!",
+                statusNoFirebase: "Modo desconectado. Guardado desactivado (Faltan claves de Firebase).",
             }
         };
 
@@ -1013,6 +1020,10 @@
             statusMessage.style.color = isError ? '#ff6b6b' : '#ffcc00';
             console.log(`[STATUS] ${statusMessage.textContent}`);
         }
+        
+        // Nouvelle variable pour vérifier si Firebase est correctement configuré
+        const IS_FIREBASE_CONFIGURED = Object.keys(firebaseConfig).length > 0;
+
 
         function updateUserIdDisplay(id) {
             userIdDisplay.textContent = `UID: ${id}`;
@@ -1023,8 +1034,11 @@
          * @param {boolean} showSuccessMessage - Afficher le message "Saved!".
          */
         async function saveGame(showSuccessMessage) {
-            if (!isAuthReady) {
-                console.warn("Impossible de sauvegarder : l'authentification n'est pas prête.");
+            // Si Firebase n'est pas configuré, nous sortons et affichons le statut.
+            if (!IS_FIREBASE_CONFIGURED || !isAuthReady) {
+                if (showSuccessMessage) {
+                    setStatus('statusNoFirebase', true); 
+                }
                 return;
             }
             
@@ -1055,6 +1069,7 @@
                 }
             } catch (error) {
                 console.error("Erreur lors de la sauvegarde Firestore:", error);
+                // Si la sauvegarde échoue (par exemple, règles de sécurité non permises), nous mettons un message d'erreur.
                 setStatus('statusSavingError', true);
             }
         }
@@ -1063,11 +1078,21 @@
          * Charge les données du jeu depuis Firestore.
          */
         async function loadGame() {
-            if (!isAuthReady) {
-                console.error("Impossible de charger : l'authentification n'est pas prête.");
+             // Si Firebase n'est pas configuré, on charge seulement la langue et on s'arrête là.
+            if (!IS_FIREBASE_CONFIGURED || !isAuthReady) {
+                const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+                if (savedLang) {
+                    currentLang = savedLang;
+                    setLanguage(currentLang, false);
+                }
+                setStatus('statusNoFirebase', true); 
+                updateUserIdDisplay('Déconnecté');
+                updateUI();
+                checkUpgradeVisibility();
                 return;
             }
             
+            // Si nous sommes ici, Firebase est configuré et Auth est prêt.
             setStatus('statusLoading');
             
             // 1. Chargement de la Langue (depuis localStorage - non critique)
@@ -1109,8 +1134,6 @@
                     // Si aucun document n'existe, nous démarrons une nouvelle partie et la sauvegardons immédiatement
                     console.log("Aucune sauvegarde Firestore trouvée. Démarrage d'une nouvelle partie.");
                     setStatus('statusReady');
-                    // Assure que les variables de jeu sont à l'état par défaut (score=0, clickPower=1, tps=0)
-                    // La fonction `loadGame` initialise déjà ces valeurs au début.
                     await saveGame(false); 
                 }
 
@@ -1132,6 +1155,12 @@
          * Initialise Firebase et authentifie l'utilisateur.
          */
         async function initializeAndAuthenticate() {
+            // Si la configuration est vide (clés non injectées), on ne fait rien avec Firebase.
+            if (!IS_FIREBASE_CONFIGURED) {
+                loadGame(); // Lance le jeu en mode déconnecté
+                return;
+            }
+            
             try {
                 // setLogLevel('debug'); // Décommenter pour le débogage Firebase
 
@@ -1168,6 +1197,7 @@
                         } catch (error) {
                             console.error("Erreur d'authentification:", error);
                             setStatus('statusAuthError', true);
+                            loadGame(); // Tente de continuer sans Auth s'il y a un échec
                         }
                     }
                 });
@@ -1175,6 +1205,7 @@
             } catch (error) {
                 console.error("Erreur lors de l'initialisation de Firebase:", error);
                 setStatus('Erreur critique Firebase', true);
+                loadGame(); // Tente de continuer si l'initialisation a un problème
             }
         }
 
