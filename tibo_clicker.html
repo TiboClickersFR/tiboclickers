@@ -250,6 +250,66 @@
             padding-right: 25px; 
         }
 
+        /* NOUVEAU: Style pour la zone de sauvegarde */
+        #save-load-container {
+            max-width: 1000px;
+            margin: 15px auto 0;
+            padding: 15px 20px;
+            background-color: #1a1a1a;
+            border: 2px solid #5a5a5a;
+            border-radius: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Permet le retour à la ligne sur mobile */
+            justify-content: space-between;
+        }
+        
+        #save-load-container button {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            min-width: 150px;
+        }
+        
+        #save-btn {
+            background-color: #2a6f2a; /* Vert */
+        }
+        #save-btn:hover {
+            background-color: #3b8e3b;
+        }
+        
+        #load-btn {
+            background-color: #8b4513; /* Marron/Orange */
+        }
+        #load-btn:hover {
+            background-color: #a0522d;
+        }
+        
+        /* NOUVEAU: Style pour les messages de statut */
+        #status-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Caché par défaut */
+        }
+        
+        .status-success {
+            background-color: #4CAF50; /* Vert succès */
+            color: white;
+        }
+
+        .status-error {
+            background-color: #f44336; /* Rouge erreur */
+            color: white;
+        }
+
+
         /* ------------------------------------------------ */
         /* Règles de Responsivité (Media Queries) */
         /* ------------------------------------------------ */
@@ -309,6 +369,11 @@
             
             #language-selector-container {
                 justify-content: flex-end; 
+            }
+            
+            #save-load-container {
+                padding: 10px;
+                flex-direction: column; /* Les boutons sont empilés sur mobile */
             }
         }
     </style>
@@ -501,6 +566,17 @@
         
     </div>
 
+    <!-- NOUVEAU CONTENEUR DE SAUVEGARDE ET RESTAURATION -->
+    <div id="save-load-container">
+        <button id="save-btn">Télécharger la Sauvegarde (.tibo)</button>
+        <button id="load-btn">Charger une Sauvegarde (.tibo)</button>
+        <!-- Champ de fichier caché pour l'import -->
+        <input type="file" id="file-input" accept=".tibo" style="display: none;">
+        <!-- Message de statut -->
+        <div id="status-message" style="display: none;"></div>
+    </div>
+
+
     <script>
         // JavaScript pour la logique du jeu
         let score = 0;
@@ -585,7 +661,15 @@
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Acheté" // Nouvelle chaîne pour l'achat
+                purchasedText: "Acheté", // Nouvelle chaîne pour l'achat
+                // NOUVEAU: Textes de Sauvegarde/Restauration
+                saveButton: "Télécharger la Sauvegarde (.tibo)",
+                loadButton: "Charger une Sauvegarde (.tibo)",
+                saveSuccess: "Sauvegarde téléchargée avec succès !",
+                loadSuccess: "Jeu restauré avec succès depuis le fichier !",
+                loadCorrupted: "Erreur : Le fichier de sauvegarde est corrompu ou invalide.",
+                loadFileError: "Erreur lors de la lecture du fichier.",
+                fileTypeWrong: "Erreur : Veuillez sélectionner un fichier de sauvegarde Tibo Clicker (.tibo)."
             },
             en: {
                 // General
@@ -628,8 +712,16 @@
                 rodriguesDescription: "Generates 1,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
-                costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Purchased"
+                costText: (count) => `${formatScore(count)} Tibos`,
+                purchasedText: "Purchased",
+                // NOUVEAU: Textes de Sauvegarde/Restauration
+                saveButton: "Download Save (.tibo)",
+                loadButton: "Load Save (.tibo)",
+                saveSuccess: "Save file successfully downloaded!",
+                loadSuccess: "Game successfully restored from file!",
+                loadCorrupted: "Error: The save file is corrupted or invalid.",
+                loadFileError: "Error reading the file.",
+                fileTypeWrong: "Error: Please select a Tibo Clicker save file (.tibo)."
             },
             es: {
                  // General
@@ -638,7 +730,7 @@
                 musicLabel: "Música", 
                 tibosOwnedLabel: "Tibos Poseídos:",
                 clickPowerDisplay: (power) => `Poder de Clic: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                // MISE À JOUR : TPS affiché en valeur précise
+                // MISE À JOUR : TPS affiché en valor precisa
                 tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Mejoras",
                 // Upgrades Multiplicadores (Compra Única)
@@ -672,8 +764,16 @@
                 rodriguesDescription: "Genera 1,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
-                costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Comprado"
+                costText: (count) => `${formatScore(count)} Tibos`,
+                purchasedText: "Comprado",
+                // NOUVEAU: Textes de Sauvegarde/Restauration
+                saveButton: "Descargar Guardado (.tibo)",
+                loadButton: "Cargar Guardado (.tibo)",
+                saveSuccess: "¡Archivo de guardado descargado exitosamente!",
+                loadSuccess: "¡Juego restaurado exitosamente desde el archivo!",
+                loadCorrupted: "Error: El archivo de guardado está corrupto o es inválido.",
+                loadFileError: "Error al leer el archivo.",
+                fileTypeWrong: "Error: Por favor, seleccione un archivo de guardado de Tibo Clicker (.tibo)."
             }
         };
 
@@ -736,6 +836,10 @@
             currentLang = lang;
             document.getElementById('language-selector').value = lang;
             
+            // Mise à jour des boutons de Sauvegarde/Restauration
+            document.getElementById('save-btn').textContent = translations[currentLang].saveButton;
+            document.getElementById('load-btn').textContent = translations[currentLang].loadButton;
+
             // On met à jour l'UI UNIQUEMENT ici. Si cette fonction est appelée après
             // le chargement des données, tout sera à jour.
             updateUI(); 
@@ -944,8 +1048,8 @@
                 updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
                 saveGame(); // Sauvegarde le jeu après l'achat
             } else {
-                console.log(translations[currentLang].notEnoughTibos);
-                // Optionnel: Ajouter une animation "argent insuffisant"
+                // NE PAS UTILISER alert()
+                showStatusMessage(translations[currentLang].notEnoughTibos || "Pas assez de Tibos !", true);
             }
         }
 
@@ -1025,7 +1129,7 @@
         // Exécution de la boucle toutes les 100ms (10 fois par seconde)
         setInterval(gameLoop, 100); 
 
-        // --- Sauvegarde et Chargement ---
+        // --- Sauvegarde et Chargement (Local Storage) ---
 
         function saveGame() {
             const saveObject = {
@@ -1051,9 +1155,21 @@
 
         /**
          * Charge le jeu en restaurant toutes les données avant de mettre à jour l'UI.
+         * Cette fonction est appelée au démarrage et lors d'une restauration par fichier.
+         * @param {object|null} loadedSaveObject L'objet de sauvegarde à charger (si restauration par fichier).
          */
-        function loadGame() {
-            const savedGame = localStorage.getItem(GAME_STORAGE_KEY);
+        function loadGame(loadedSaveObject = null) {
+            let saveObject;
+            
+            if (loadedSaveObject) {
+                // Chargement à partir d'un fichier fourni
+                saveObject = loadedSaveObject;
+            } else {
+                // Chargement depuis le Local Storage
+                const savedGame = localStorage.getItem(GAME_STORAGE_KEY);
+                saveObject = savedGame ? JSON.parse(savedGame) : null;
+            }
+
             const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
 
             // 1. Initialisation des données par défaut
@@ -1061,26 +1177,25 @@
             clickPower = 1;
             tps = 0;
             
-            // 2. Chargement de la Sauvegarde (si elle existe)
-            if (savedGame) {
-                const saveObject = JSON.parse(savedGame);
+            // 2. Restauration de l'état
+            if (saveObject) {
                 
                 // Restauration des scores globaux
                 score = saveObject.score || 0;
                 clickPower = saveObject.clickPower || 1;
-                // Le TPS est restauré en nombre flottant
                 tps = saveObject.tps || 0; 
 
                 // Restauration de l'état des boutons (set des attributs)
                 saveObject.upgrades.forEach(savedUpgrade => {
                     const button = document.getElementById(savedUpgrade.id);
                     if (button) {
-                        button.setAttribute('data-count', savedUpgrade.count);
-                        button.setAttribute('data-purchased', savedUpgrade.purchased.toString());
+                        // Assurez-vous que les données sont des nombres/booléens pour éviter les erreurs
+                        button.setAttribute('data-count', parseInt(savedUpgrade.count || 0));
+                        button.setAttribute('data-purchased', (savedUpgrade.purchased === true || savedUpgrade.purchased === 'true').toString());
                     }
                 });
                 
-                // Restauration de la langue à partir de la sauvegarde du jeu
+                // Restauration de la langue
                 if (saveObject.lang) {
                     currentLang = saveObject.lang;
                 }
@@ -1092,22 +1207,138 @@
             }
             
             // 4. Mise à jour finale et unique de l'interface et de l'état.
-            // setLanguage va appeler updateUI, et l'UI lira les attributs data-count qui sont maintenant corrects.
-            setLanguage(currentLang, false); // 'false' pour ne pas sauvegarder la langue pendant le chargement
-            checkUpgradeVisibility(); // Assure la visibilité des upgrades débloqués
+            setLanguage(currentLang, false); 
+            checkUpgradeVisibility(); 
         }
         
         function saveLanguage() {
             localStorage.setItem(LANG_STORAGE_KEY, currentLang);
         }
+        
+        // --- NOUVELLES FONCTIONS : Sauvegarde Manuelle et Restauration par Fichier ---
+        
+        /**
+         * Affiche un message de statut temporaire à l'utilisateur.
+         * @param {string} message Le message à afficher (traduit).
+         * @param {boolean} isError Vrai si c'est une erreur, Faux si c'est un succès.
+         */
+        function showStatusMessage(message, isError) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
 
-        // --- Initialisation ---
+            // Gérer les classes de style
+            statusDiv.classList.remove('status-success', 'status-error');
+            if (isError) {
+                statusDiv.classList.add('status-error');
+            } else {
+                statusDiv.classList.add('status-success');
+            }
+
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        /**
+         * Télécharge l'état actuel du jeu dans un fichier .tibo.
+         */
+        function downloadGameSave() {
+            // 1. Assurez-vous que la sauvegarde locale est à jour avant d'exporter
+            saveGame();
+            
+            // 2. Récupérer les données brutes du localStorage
+            const dataToSave = localStorage.getItem(GAME_STORAGE_KEY);
+            
+            if (!dataToSave) {
+                 showStatusMessage("Erreur: Aucune donnée de jeu à sauvegarder.", true);
+                 return;
+            }
+
+            // 3. Créer un Blob (Binary Large Object)
+            const blob = new Blob([dataToSave], { type: 'application/json' });
+            
+            // 4. Créer et cliquer sur un lien de téléchargement invisible
+            const a = document.createElement('a');
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `tibo-clicker-save-${date}.tibo`; // Nom du fichier avec extension
+            a.href = URL.createObjectURL(blob);
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showStatusMessage(translations[currentLang].saveSuccess, false);
+        }
+
+        /**
+         * Lit le fichier de sauvegarde et restaure l'état du jeu.
+         */
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 1. Vérification du type de fichier
+            if (!file.name.endsWith('.tibo')) {
+                showStatusMessage(translations[currentLang].fileTypeWrong, true);
+                event.target.value = ''; // Réinitialiser le champ pour permettre un nouveau chargement
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    const loadedState = JSON.parse(content);
+
+                    // 2. Validation de base de la structure du fichier
+                    if (typeof loadedState.score !== 'number' || !Array.isArray(loadedState.upgrades)) {
+                        showStatusMessage(translations[currentLang].loadCorrupted, true);
+                        event.target.value = '';
+                        return;
+                    }
+
+                    // 3. Appliquer la nouvelle sauvegarde (met à jour les variables globales)
+                    loadGame(loadedState); 
+                    
+                    // 4. Mettre à jour la sauvegarde locale pour la persistance
+                    saveGame(); 
+
+                    showStatusMessage(translations[currentLang].loadSuccess, false);
+                    event.target.value = ''; // Réinitialiser le champ
+                } catch (error) {
+                    showStatusMessage(translations[currentLang].loadFileError, true);
+                    console.error("File loading error:", error);
+                    event.target.value = '';
+                }
+            };
+
+            reader.onerror = function() {
+                showStatusMessage(translations[currentLang].loadFileError, true);
+                event.target.value = '';
+            };
+
+            reader.readAsText(file);
+        }
+        
+        // --- Initialisation et Événements ---
 
         window.onload = function() {
             // 1. Initialisation de la Musique
             loadTrack(currentTrackIndex); 
             // 2. Chargement du jeu (qui met à jour l'UI à la fin)
             loadGame(); 
+            
+            // 3. Événements pour la Sauvegarde/Restauration
+            document.getElementById('save-btn').addEventListener('click', downloadGameSave);
+            
+            const fileInput = document.getElementById('file-input');
+            document.getElementById('load-btn').addEventListener('click', () => {
+                fileInput.click(); // Déclenche le clic sur l'input de fichier caché
+            });
+            fileInput.addEventListener('change', handleFileUpload);
         };
 
         // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
