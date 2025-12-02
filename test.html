@@ -170,6 +170,11 @@
             color: #aaa;
             margin-top: 4px;
         }
+        
+        /* NOUVEAU: Classe pour cacher définitivement l'amélioration */
+        .hidden-maxed {
+            display: none !important;
+        }
 
         /* ------------------------------------------------ */
         /* Animations/Flottants */
@@ -470,7 +475,7 @@
             <div id="click-multiplier-container" class="new-upgrade-container">
                 <!-- Upgrade 1 initiale -->
                 <!-- Ces achats sont uniques, ils utilisent data-cost -->
-                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset">
+                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset" data-max-once="true">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Mise en Place du "Mindset"</span>
                         <br><span class="upgrade-description">Ajoute +1 TPC de base (Achat Unique)</span>
@@ -479,7 +484,7 @@
                 </button>
                 
                 <!-- Upgrade 2 -->
-                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale">
+                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale" data-max-once="true">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Tibo Ultra Sale 💥</span>
                         <br><span class="upgrade-description">Ajoute +3 TPC de base (Achat Unique)</span>
@@ -488,7 +493,7 @@
                 </button>
                 
                 <!-- Upgrade 3 -->
-                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal">
+                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal" data-max-once="true">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
                         <br><span class="upgrade-description">Ajoute +6 TPC de base (Achat Unique)</span>
@@ -673,6 +678,7 @@
         
         // Ancienne constante GROWTH_FACTOR (1.15) est maintenant utilisée dans data-growth pour les upgrades passifs
         const CRIT_GROWTH_FACTOR = 1.3; // Facteur d'augmentation pour les upgrades critiques (plus rapide)
+        const MAX_CRIT_CHANCE = 100; // La chance critique maximale est 100%
 
         let currentLang = 'fr'; // Langue par défaut
         const GAME_STORAGE_KEY = 'tiboClickerSave';
@@ -863,7 +869,7 @@
                 ultrasaleDescription: "Añade +3 TPC base (Compra Única)",
                 cheatmealTitle: "La Comida Trampa Definitiva 🍕",
                 cheatmealDescription: "Añade +6 TPC base (Compra Única)",
-                // MODIFICATION: Description avec 0.5%
+                // MODIFICACION: Description avec 0.5%
                 critChanceTitle: "Probabilidad de Transfo' Crítica 📈",
                 critChanceDescription: `Aumenta la probabilidad de boost en ${critChancePerUpgrade.toFixed(1)}%`,
                 critPowerTitle: "Poder de Transfo' Crítica 🔥",
@@ -1025,9 +1031,13 @@
                     }
                     
                     if (costElement) {
-                         if (isPurchased) {
+                         if (isPurchased && button.hasAttribute('data-max-once')) {
+                            // C'est un achat unique MAXÉ. Le bouton doit disparaître, mais on met le texte au cas où il serait forcé.
                             costElement.textContent = `✅ ${t.purchasedText}`;
-                            button.disabled = true;
+                            button.disabled = true; // Reste désactivé
+                        } else if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
+                            costElement.textContent = t.maxCritChanceReached;
+                            button.disabled = true; // Reste désactivé
                         } else {
                             // Le coût est formaté, car il peut être grand
                             costElement.textContent = t.costText(cost);
@@ -1036,7 +1046,7 @@
 
                     // *** POINT CLÉ : SYNCHRONISATION DU COMPTEUR VISUEL ***
                     if (countElement) {
-                        if (!isPurchased) {
+                        if (!button.hasAttribute('data-max-once') && totalCritChance < MAX_CRIT_CHANCE) {
                            // Lit le data-count qui a été restauré dans loadGame
                            countElement.textContent = t.countText(count); 
                            countElement.style.display = 'block';
@@ -1045,15 +1055,15 @@
                         }
                     }
                     
-                    // MODIFICATION : Retire la logique de désactivation basée sur MAX_CRIT_CHANCE
-                    // L'affichage du message de max est désormais dans checkUpgradeCosts()
-                    if (button.id === 'upgrade-crit-chance' && totalCritChance >= 100) {
+                    // Gère le texte affiché quand on a atteint le maximum de chance critique
+                    if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
                          // Affiche un message spécial si le max 100% est atteint
                          if (descElement) descElement.textContent = t.maxCritChanceReached;
                     }
                 }
             });
             checkUpgradeCosts(); // Vérifie l'état disabled/enabled
+            updateUpgradeVisibility(); // NOUVEAU: Gère la visibilité après la mise à jour des stats
         }
         
         // --- Fonctions Utilitaire de Score ---
@@ -1087,7 +1097,7 @@
         function updateCritStatsDisplay() {
              const t = translations[currentLang];
              // La chance critique ne doit jamais être affichée au-dessus de 100%
-             const displayChance = Math.min(totalCritChance, 100); 
+             const displayChance = Math.min(totalCritChance, MAX_CRIT_CHANCE); 
              critStatsDisplay.textContent = t.critStatsDisplay(displayChance, totalCritPower);
         }
 
@@ -1130,7 +1140,7 @@
             // NOUVEAU: Logique de Boost Critique
             // Math.random() génère [0, 1). On compare avec la chance en décimal (e.g., 0.005)
             // On utilise Math.min(totalCritChance, 100) / 100 pour que le taux ne dépasse jamais 100% dans la probabilité
-            const actualCritChance = Math.min(totalCritChance, 100) / 100;
+            const actualCritChance = Math.min(totalCritChance, MAX_CRIT_CHANCE) / 100;
             
             if (Math.random() < actualCritChance) { 
                  scoreToAdd *= totalCritPower;
@@ -1187,25 +1197,20 @@
         function buyUpgrade(button) {
             const cost = calculateCost(button);
             
+            // Vérifie si le bouton est l'upgrade critique et si on a atteint 100%
+            if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
+                 showStatusMessage(translations[currentLang].maxCritChanceReached, true);
+                 return; 
+            }
+            
             if (score >= cost) {
-                // MODIFICATION : Vérifie si le bouton est l'upgrade critique et si on a atteint 100%
-                if (button.id === 'upgrade-crit-chance' && totalCritChance >= 100) {
-                     showStatusMessage(translations[currentLang].maxCritChanceReached, true);
-                     return; 
-                }
-                
                 score -= cost;
                 
                 // Incrémente le compteur pour l'achat suivant (seulement si c'est répétable)
                 if (button.hasAttribute('data-count')) {
                     let count = parseInt(button.getAttribute('data-count'));
                     button.setAttribute('data-count', ++count);
-                    
-                    // MODIFICATION : La logique de désactivation pour 100% est désormais dans checkUpgradeCosts()
                 }
-                
-                // 1. Mise à jour de la puissance de clic / TPS
-                // On met à jour l'attribut directement dans le DOM, puis on recalcule le total
                 
                 // Si c'est un achat unique (Mindset, Ultra Sale, Cheat Meal)
                 if (button.hasAttribute('data-add-bonus')) {
@@ -1286,16 +1291,14 @@
                     costElement.textContent = translations[currentLang].costText(cost);
                 }
                 
-                // Désactivation si déjà acheté
-                if (isPurchased) {
+                // Désactivation si déjà acheté (pour les achats uniques)
+                if (isPurchased && button.hasAttribute('data-max-once')) {
                     button.disabled = true;
-                    if (costElement) costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
-                } 
-                // MODIFICATION : Désactivation si chance max (100%) atteinte pour l'upgrade chance critique
-                else if (button.id === 'upgrade-crit-chance' && totalCritChance >= 100) {
+                }
+                // Désactivation si chance max (100%) atteinte pour l'upgrade chance critique
+                else if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
                     button.disabled = true;
-                    // Mise à jour de l'affichage du coût pour indiquer "Max"
-                    if (costElement) costElement.textContent = translations[currentLang].maxCritChanceReached; 
+                    // Le texte du coût est mis à jour dans updateUI()
                 }
                 // Désactivation si score insuffisant
                 else {
@@ -1324,8 +1327,34 @@
                     btn.style.opacity = 1;
                 }
             });
-
         }
+        
+        /**
+         * NOUVEAU: Gère l'ajout/retrait de la classe 'hidden-maxed' pour faire disparaître les upgrades.
+         */
+        function updateUpgradeVisibility() {
+            // 1. Améliorations à Achat Unique (data-max-once="true")
+            [upgrade1, upgrade2_new, upgrade3_new].forEach(button => {
+                const isPurchased = button.getAttribute('data-purchased') === 'true';
+                
+                // Si acheté, on ajoute la classe hidden-maxed pour masquer complètement
+                if (isPurchased) {
+                    button.classList.add('hidden-maxed');
+                } else {
+                    // Si pas acheté, on gère la visibilité basée sur le score (classe 'hidden')
+                    // et on s'assure que hidden-maxed n'est pas là
+                    button.classList.remove('hidden-maxed');
+                }
+            });
+            
+            // 2. Amélioration de Chance Critique (Maximum 100%)
+            if (totalCritChance >= MAX_CRIT_CHANCE) {
+                critChanceUpgradeBtn.classList.add('hidden-maxed');
+            } else {
+                critChanceUpgradeBtn.classList.remove('hidden-maxed');
+            }
+        }
+
 
         // --- Logique Passive (Game Loop) ---
 
@@ -1343,6 +1372,7 @@
             updateTPSDisplay(); 
             updateCritStatsDisplay(); // NOUVEAU
             checkUpgradeCosts();
+            // Mise à jour de la visibilité des nouveaux upgrades (basé sur le score qui monte)
             checkUpgradeVisibility();
 
             // Sauvegarde du jeu toutes les 10 secondes (pour ne pas surcharger)
@@ -1441,7 +1471,8 @@
             
             // 4. Mise à jour finale et unique de l'interface et de l'état.
             setLanguage(currentLang, false); 
-            checkUpgradeVisibility(); 
+            // Mise à jour de la visibilité initiale, y compris les upgrades cachés au max
+            updateUpgradeVisibility(); 
         }
         
         function saveLanguage() {
