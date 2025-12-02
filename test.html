@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tibo Clicker - La Vraie Transfo' !</title>
-    <!-- AJOUT DE L'ICÔNE (FAVICON) POUR L'ONGLET DU NAVIGATOR. Remplacez 'tibo_icon.png' par le nom de votre fichier d'icône. -->
-    <link rel="icon" type="image/png" href="tibo_icon.png">
+    <!-- MISE À JOUR : Le fichier "icon.png" est défini comme icône. Assurez-vous que ce fichier est disponible dans l'environnement d'exécution. -->
+    <link rel="icon" type="image/png" href="icon.png"> 
     <style>
         /* CSS pour le style du jeu */
         body {
@@ -97,12 +97,6 @@
             font-size: 1.2em;
             margin-top: 5px;
             color: #ccc;
-        }
-        
-        #user-info {
-            font-size: 0.8em;
-            color: #777;
-            margin-top: 10px;
         }
         
         /* ------------------------------------------------ */
@@ -256,6 +250,66 @@
             padding-right: 25px; 
         }
 
+        /* NOUVEAU: Style pour la zone de sauvegarde */
+        #save-load-container {
+            max-width: 1000px;
+            margin: 15px auto 0;
+            padding: 15px 20px;
+            background-color: #1a1a1a;
+            border: 2px solid #5a5a5a;
+            border-radius: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Permet le retour à la ligne sur mobile */
+            justify-content: space-between;
+        }
+        
+        #save-load-container button {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            min-width: 150px;
+        }
+        
+        #save-btn {
+            background-color: #2a6f2a; /* Vert */
+        }
+        #save-btn:hover {
+            background-color: #3b8e3b;
+        }
+        
+        #load-btn {
+            background-color: #8b4513; /* Marron/Orange */
+        }
+        #load-btn:hover {
+            background-color: #a0522d;
+        }
+        
+        /* NOUVEAU: Style pour les messages de statut */
+        #status-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Caché par défaut */
+        }
+        
+        .status-success {
+            background-color: #4CAF50; /* Vert succès */
+            color: white;
+        }
+
+        .status-error {
+            background-color: #f44336; /* Rouge erreur */
+            color: white;
+        }
+
+
         /* ------------------------------------------------ */
         /* Règles de Responsivité (Media Queries) */
         /* ------------------------------------------------ */
@@ -316,6 +370,11 @@
             #language-selector-container {
                 justify-content: flex-end; 
             }
+            
+            #save-load-container {
+                padding: 10px;
+                flex-direction: column; /* Les boutons sont empilés sur mobile */
+            }
         }
     </style>
 </head>
@@ -359,7 +418,6 @@
                 <div id="score">0</div>
                 <div id="click-power-display">Puissance de Clic : 1 Tibo</div>
                 <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
-                <div id="user-info">Authentification en cours...</div>
             </div>
 
             <div id="tibo-image"></div>
@@ -508,180 +566,24 @@
         
     </div>
 
-    <!-- NOUVELLE SECTION POUR LES IMPORTS FIREBASE ET LE CODE JS -->
-    <script type="module">
-        // Importations des modules Firebase (Auth et Firestore)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- VARIABLES GLOBALES FIREBASE ---
-        let db;
-        let auth;
-        let userId = null;
-        let isAuthReady = false;
-
-        // ACCÈS AUX VARIABLES GLOBALES FOURNIES PAR L'ENVIRONNEMENT
-        // C'EST ICI QUE L'ID DE CONFIGURATION EST RÉCUPÉRÉ (dans __firebase_config)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        const SAVE_COLLECTION = 'game-saves';
-        const SAVE_DOCUMENT_ID = 'tiboClicker';
+    <!-- NOUVEAU CONTENEUR DE SAUVEGARDE ET RESTAURATION -->
+    <div id="save-load-container">
+        <button id="save-btn">Télécharger la Sauvegarde (.tibo)</button>
+        <button id="load-btn">Charger une Sauvegarde (.tibo)</button>
+        <!-- Champ de fichier caché pour l'import -->
+        <input type="file" id="file-input" accept=".tibo" style="display: none;">
+        <!-- Message de statut -->
+        <div id="status-message" style="display: none;"></div>
+    </div>
 
 
-        /**
-         * Initialise Firebase et tente d'authentifier l'utilisateur.
-         */
-        async function initializeFirebase() {
-             // VERIFICATION CRUCIALE DE L'OBJET firebaseConfig
-             // Le parse d'une chaîne vide donne un objet vide {}, d'où la vérification.
-             if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.projectId) {
-                console.error("Firebase config non trouvé. Vérifiez les variables globales et l'état de l'artefact.");
-                document.getElementById('user-info').textContent = "Erreur: Config Firebase manquante.";
-                return; // ARRÊT SI CONFIG MANQUANTE
-            }
-            
-            try {
-                // 1. INITIALISATION DES SERVICES (avec la config cachée)
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // 2. TENTATIVE D'AUTHENTIFICATION
-                document.getElementById('user-info').textContent = "Connexion sécurisée en cours...";
-
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // 3. ÉCOUTE DE L'ÉTAT D'AUTHENTIFICATION
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        isAuthReady = true;
-                        document.getElementById('user-info').textContent = `ID Utilisateur: ${userId}`;
-                        console.log("Authentification réussie. User ID:", userId);
-                        
-                        // Une fois l'authentification réussie, on charge le jeu
-                        loadGameFromFirestore();
-                    } else {
-                        userId = null;
-                        isAuthReady = true;
-                        document.getElementById('user-info').textContent = "Non connecté (anonyme).";
-                        console.warn("Utilisateur déconnecté ou échec de l'authentification.");
-                        loadGameFromLocal(); // On charge le local si l'auth échoue
-                    }
-                });
-
-            } catch (error) {
-                console.error("Erreur lors de l'initialisation de Firebase ou de l'authentification:", error);
-                document.getElementById('user-info').textContent = "Erreur d'Auth: " + error.message;
-                isAuthReady = true; // On considère prêt même en cas d'erreur pour que le jeu démarre
-                loadGameFromLocal(); // Tente la sauvegarde locale en cas d'échec
-            }
-        }
-        
-        // --- NOUVELLES FONCTIONS DE SAUVEGARDE ET CHARGEMENT FIREBASE ---
-
-        /**
-         * Sauvegarde l'état du jeu dans Firestore.
-         */
-        async function saveGameToFirestore() {
-            if (!isAuthReady || !userId) return; // Ne pas sauvegarder si pas prêt ou pas d'ID
-
-            const saveObject = getSaveObject(); // Récupère l'objet de sauvegarde
-            
-            // Chemin Firestore: /artifacts/{appId}/users/{userId}/game-saves/tiboClicker
-            const docRef = doc(db, 
-                `artifacts/${appId}/users/${userId}/${SAVE_COLLECTION}/${SAVE_DOCUMENT_ID}`
-            );
-            
-            try {
-                await setDoc(docRef, saveObject);
-                // console.log("Jeu sauvegardé dans Firestore.");
-            } catch (e) {
-                console.error("Erreur lors de la sauvegarde dans Firestore: ", e);
-            }
-        }
-
-        /**
-         * Charge l'état du jeu depuis Firestore.
-         */
-        async function loadGameFromFirestore() {
-             if (!isAuthReady || !userId) {
-                 // Si auth n'est pas prêt, on charge le local en attendant la résolution
-                 loadGameFromLocal();
-                 return; 
-             }
-
-             // Chemin Firestore: /artifacts/{appId}/users/{userId}/game-saves/tiboClicker
-             const docRef = doc(db, 
-                `artifacts/${appId}/users/${userId}/${SAVE_COLLECTION}/${SAVE_DOCUMENT_ID}`
-            );
-            
-            try {
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const saveObject = docSnap.data();
-                    applySaveObject(saveObject);
-                    console.log("Jeu chargé depuis Firestore.");
-                } else {
-                    console.log("Aucune sauvegarde Firestore trouvée. Démarrage d'une nouvelle partie ou chargement local.");
-                    loadGameFromLocal(); // Tente de charger du local s'il n'y a rien en ligne
-                }
-            } catch (e) {
-                console.error("Erreur lors du chargement depuis Firestore: ", e);
-                loadGameFromLocal(); // Charge le local en cas d'erreur de connexion/lecture
-            } finally {
-                 // Met à jour l'UI dans tous les cas pour être sûr que la langue et le reste s'affichent
-                 setLanguage(currentLang, false); 
-                 checkUpgradeVisibility();
-            }
-        }
-        
-        // --- FONCTIONS LOCAL STORAGE (FALLBACK) ---
-
-        // Ancien nom de la fonction loadGame, renommée pour être un fallback local
-        function loadGameFromLocal() {
-            const savedLang = localStorage.getItem('tiboClickerLang');
-            
-            // Initialisation des données par défaut
-            score = 0;
-            clickPower = 1;
-            tps = 0;
-            
-            // 1. Tente de charger l'ancienne sauvegarde local (si elle existe)
-            const savedGame = localStorage.getItem('tiboClickerSave');
-            if (savedGame) {
-                const saveObject = JSON.parse(savedGame);
-                applySaveObject(saveObject);
-                console.log("Jeu chargé depuis Local Storage (Fallback).");
-            }
-            
-            // 2. Chargement de la Langue
-            if (savedLang) {
-                currentLang = savedLang;
-            }
-            
-            // 3. Mise à jour UI
-            setLanguage(currentLang, false); 
-            checkUpgradeVisibility();
-        }
-
-        // --- PARTIE COMMUNE DE LA LOGIQUE DU JEU ---
-
+    <script>
         // JavaScript pour la logique du jeu
         let score = 0;
         let clickPower = 1; // Puissance de clic totale (base + bonus)
         let tps = 0; // Tibos Par Seconde
         let currentLang = 'fr'; // Langue par défaut
-        // Anciennes clés localStorage (maintenues pour le fallback)
-        // const GAME_STORAGE_KEY = 'tiboClickerSave'; 
+        const GAME_STORAGE_KEY = 'tiboClickerSave';
         const LANG_STORAGE_KEY = 'tiboClickerLang';
         const GROWTH_FACTOR = 1.15; // Facteur d'augmentation exponentiel
         const FORMAT_THRESHOLD = 100000; // Constante : 100 000 Tibos (100K)
@@ -759,7 +661,15 @@
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Acheté" // Nouvelle chaîne pour l'achat
+                purchasedText: "Acheté", // Nouvelle chaîne pour l'achat
+                // NOUVEAU: Textes de Sauvegarde/Restauration
+                saveButton: "Télécharger la Sauvegarde (.tibo)",
+                loadButton: "Charger une Sauvegarde (.tibo)",
+                saveSuccess: "Sauvegarde téléchargée avec succès !",
+                loadSuccess: "Jeu restauré avec succès depuis le fichier !",
+                loadCorrupted: "Erreur : Le fichier de sauvegarde est corrompu ou invalide.",
+                loadFileError: "Erreur lors de la lecture du fichier.",
+                fileTypeWrong: "Erreur : Veuillez sélectionner un fichier de sauvegarde Tibo Clicker (.tibo)."
             },
             en: {
                 // General
@@ -784,26 +694,34 @@
                 alessioTitle: "Alessiode - Personal Coach 🏋️",
                 alessioDescription: "Generates 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
-                justineDescription: "Generates 10 Tibos/s",
+                justineDescription: "Generates 10 Tibo/s",
                 patatesTitle: "The COSMIC Sweet Potato Factory 🍠🚀",
-                patatesDescription: "Generates 150 Tibos/s",
+                patatesDescription: "Generates 150 Tibo/s",
                 nogodeTitle: "Nogode - The Dark Disruptor 🖤",
-                nogodeDescription: "Generates 500 Tibos/s",
+                nogodeDescription: "Generates 500 Tibo/s",
                 sachatteTitle: "Sachatte - The Mystic Scout ✨",
-                sachatteDescription: "Generates 2,000 Tibos/s",
+                sachatteDescription: "Generates 2,000 Tibo/s",
                 milodesTitle: "Milodes - The Instant Mobilizer 🚀",
-                milodesDescription: "Generates 10,000 Tibos/s",
+                milodesDescription: "Generates 10,000 Tibo/s",
                 thomasTitle: "Thomas - The Resource Architect 💰",
-                thomasDescription: "Generates 50,000 Tibos/s",
+                thomasDescription: "Generates 50,000 Tibo/s",
                 lenaikTitle: "Lenaik - The Hyper-Protective Guardian 🛡️",
-                lenaikDescription: "Generates 200,000 Tibos/s",
+                lenaikDescription: "Generates 200,000 Tibo/s",
                  // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - The Pilgrim's Staff 💫",
-                rodriguesDescription: "Generates 1,000,000 Tibos/s",
+                rodriguesDescription: "Generates 1,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
-                costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Purchased"
+                costText: (count) => `${formatScore(count)} Tibos`,
+                purchasedText: "Purchased",
+                // NOUVEAU: Textes de Sauvegarde/Restauration
+                saveButton: "Download Save (.tibo)",
+                loadButton: "Load Save (.tibo)",
+                saveSuccess: "Save file successfully downloaded!",
+                loadSuccess: "Game successfully restored from file!",
+                loadCorrupted: "Error: The save file is corrupted or invalid.",
+                loadFileError: "Error reading the file.",
+                fileTypeWrong: "Error: Please select a Tibo Clicker save file (.tibo)."
             },
             es: {
                  // General
@@ -812,7 +730,7 @@
                 musicLabel: "Música", 
                 tibosOwnedLabel: "Tibos Poseídos:",
                 clickPowerDisplay: (power) => `Poder de Clic: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                // MISE À JOUR : TPS affiché en valeur précise
+                // MISE À JOUR : TPS affiché en valor precisa
                 tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
                 upgradesTitle: "Mejoras",
                 // Upgrades Multiplicadores (Compra Única)
@@ -828,26 +746,34 @@
                 alessioTitle: "Alessiode - Entrenador Personal 🏋️",
                 alessioDescription: "Genera 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
-                justineDescription: "Genera 10 Tibos/s",
+                justineDescription: "Genera 10 Tibo/s",
                 patatesTitle: "La Fábrica Cósmica de Patatas Dulces 🍠🚀",
-                patatesDescription: "Genera 150 Tibos/s",
+                patatesDescription: "Genera 150 Tibo/s",
                 nogodeTitle: "Nogode - El Disruptor Oscuro 🖤",
-                nogodeDescription: "Genera 500 Tibos/s",
+                nogodeDescription: "Genera 500 Tibo/s",
                 sachatteTitle: "Sachatte - La Exploradora Mística ✨",
-                sachatteDescription: "Genera 2,000 Tibos/s",
+                sachatteDescription: "Genera 2,000 Tibo/s",
                 milodesTitle: "Milodes - El Movilizador Instantáneo 🚀",
-                milodesDescription: "Genera 10,000 Tibos/s",
+                milodesDescription: "Genera 10,000 Tibo/s",
                 thomasTitle: "Thomas - El Arquitecto de Recursos 💰",
-                thomasDescription: "Genera 50,000 Tibos/s",
+                thomasDescription: "Genera 50,000 Tibo/s",
                 lenaikTitle: "Lenaik - La Gardiana Hiperprotectora 🛡️",
-                lenaikDescription: "Genera 200,000 Tibos/s",
+                lenaikDescription: "Genera 200,000 Tibo/s",
                  // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - El Bastón del Peregrino 💫",
-                rodriguesDescription: "Genera 1,000,000 Tibos/s",
+                rodriguesDescription: "Genera 1,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
-                costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Comprado"
+                costText: (count) => `${formatScore(count)} Tibos`,
+                purchasedText: "Comprado",
+                // NOUVEAU: Textes de Sauvegarde/Restauration
+                saveButton: "Descargar Guardado (.tibo)",
+                loadButton: "Cargar Guardado (.tibo)",
+                saveSuccess: "¡Archivo de guardado descargado exitosamente!",
+                loadSuccess: "¡Juego restaurado exitosamente desde el archivo!",
+                loadCorrupted: "Error: El archivo de guardado está corrupto o es inválido.",
+                loadFileError: "Error al leer el archivo.",
+                fileTypeWrong: "Error: Por favor, seleccione un archivo de guardado de Tibo Clicker (.tibo)."
             }
         };
 
@@ -910,7 +836,12 @@
             currentLang = lang;
             document.getElementById('language-selector').value = lang;
             
-            // On met à jour l'UI UNIQUEMENT ici.
+            // Mise à jour des boutons de Sauvegarde/Restauration
+            document.getElementById('save-btn').textContent = translations[currentLang].saveButton;
+            document.getElementById('load-btn').textContent = translations[currentLang].loadButton;
+
+            // On met à jour l'UI UNIQUEMENT ici. Si cette fonction est appelée après
+            // le chargement des données, tout sera à jour.
             updateUI(); 
             
             if (updateSave) {
@@ -1053,14 +984,8 @@
             checkUpgradeCosts();
             checkUpgradeVisibility();
 
-            // La sauvegarde est faite dans la boucle gameLoop toutes les 10 secondes
-            // On peut ajouter une sauvegarde ici après 2 clics pour être réactif
-            if (window.clickCount % 2 === 0) {
-                 saveGameToFirestore(); 
-            }
-            window.clickCount++;
+            saveGame(); // Sauvegarde après chaque clic
         });
-        window.clickCount = 0; // Compteur pour la sauvegarde rapide
 
         function createFloatingText(amount, event) {
             const text = document.createElement('div');
@@ -1121,11 +1046,10 @@
 
                 // 2. Mise à jour de l'UI et de l'état
                 updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
-                saveGameToFirestore(); // Sauvegarde le jeu après l'achat
+                saveGame(); // Sauvegarde le jeu après l'achat
             } else {
-                // console.log(translations[currentLang].notEnoughTibos); // Non défini, utiliser la console
-                console.log("Pas assez de Tibos !");
-                // Optionnel: Ajouter une animation "argent insuffisant"
+                // NE PAS UTILISER alert()
+                showStatusMessage(translations[currentLang].notEnoughTibos || "Pas assez de Tibos !", true);
             }
         }
 
@@ -1166,7 +1090,6 @@
             
             // Assure que les upgrades sont visibles au rechargement si déjà achetés ou découverts
             [upgrade2_new, upgrade3_new].forEach(btn => {
-                 // Révéler si acheté OU si le score atteint 80% du coût initial (découverte)
                  if (btn.getAttribute('data-purchased') === 'true' || score >= parseInt(btn.getAttribute('data-cost')) * 0.8) {
                     btn.classList.remove('hidden');
                     btn.style.opacity = 1;
@@ -1196,13 +1119,7 @@
             // Utiliser un drapeau pour ne pas sauvegarder 10 fois par seconde
             const now = Math.floor(performance.now() / 1000);
             if (now % 10 === 0 && !window.hasSavedThisSecond) {
-                // Sauvegarde via Firestore
-                if (isAuthReady && userId) {
-                    saveGameToFirestore();
-                } else {
-                    // Sauvegarde locale en cas de problème de connexion
-                    saveGameLocalFallback();
-                }
+                saveGame();
                 window.hasSavedThisSecond = true;
             } else if (now % 10 !== 0) {
                  window.hasSavedThisSecond = false;
@@ -1212,20 +1129,16 @@
         // Exécution de la boucle toutes les 100ms (10 fois par seconde)
         setInterval(gameLoop, 100); 
 
-        // --- Fonctions d'Objet de Sauvegarde ---
-        
-        /**
-         * Construit l'objet de sauvegarde à partir des variables globales et des attributs des boutons.
-         * @returns {Object} L'objet de sauvegarde.
-         */
-        function getSaveObject() {
+        // --- Sauvegarde et Chargement (Local Storage) ---
+
+        function saveGame() {
             const saveObject = {
+                // Le score est stocké en décimal, il est tronqué seulement à l'affichage
                 score: score, 
                 clickPower: clickPower,
                 tps: tps,
                 upgrades: [],
-                lang: currentLang,
-                timestamp: Date.now() // Ajout d'un timestamp pour le débug
+                lang: currentLang
             };
 
             // Sauvegarde de l'état de chaque bouton
@@ -1236,58 +1149,196 @@
                     purchased: button.getAttribute('data-purchased') === 'true'
                 });
             });
-            return saveObject;
+
+            localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(saveObject));
         }
-        
+
         /**
-         * Applique l'objet de sauvegarde chargé (depuis Firestore ou Local) à l'état du jeu.
-         * @param {Object} saveObject L'objet de sauvegarde.
+         * Charge le jeu en restaurant toutes les données avant de mettre à jour l'UI.
+         * Cette fonction est appelée au démarrage et lors d'une restauration par fichier.
+         * @param {object|null} loadedSaveObject L'objet de sauvegarde à charger (si restauration par fichier).
          */
-        function applySaveObject(saveObject) {
-            // Assurez-vous que les nombres sont bien parsés
-            score = Number(saveObject.score) || 0;
-            clickPower = Number(saveObject.clickPower) || 1;
-            tps = Number(saveObject.tps) || 0; 
+        function loadGame(loadedSaveObject = null) {
+            let saveObject;
             
-            if (saveObject.lang) {
-                currentLang = saveObject.lang;
+            if (loadedSaveObject) {
+                // Chargement à partir d'un fichier fourni
+                saveObject = loadedSaveObject;
+            } else {
+                // Chargement depuis le Local Storage
+                const savedGame = localStorage.getItem(GAME_STORAGE_KEY);
+                saveObject = savedGame ? JSON.parse(savedGame) : null;
             }
 
-            // Restauration de l'état des boutons (set des attributs)
-            saveObject.upgrades.forEach(savedUpgrade => {
-                const button = document.getElementById(savedUpgrade.id);
-                if (button) {
-                    // Assure que les nombres sont stockés correctement comme chaînes dans les attributs HTML
-                    button.setAttribute('data-count', savedUpgrade.count.toString());
-                    button.setAttribute('data-purchased', savedUpgrade.purchased.toString());
+            const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+
+            // 1. Initialisation des données par défaut
+            score = 0;
+            clickPower = 1;
+            tps = 0;
+            
+            // 2. Restauration de l'état
+            if (saveObject) {
+                
+                // Restauration des scores globaux
+                score = saveObject.score || 0;
+                clickPower = saveObject.clickPower || 1;
+                tps = saveObject.tps || 0; 
+
+                // Restauration de l'état des boutons (set des attributs)
+                saveObject.upgrades.forEach(savedUpgrade => {
+                    const button = document.getElementById(savedUpgrade.id);
+                    if (button) {
+                        // Assurez-vous que les données sont des nombres/booléens pour éviter les erreurs
+                        button.setAttribute('data-count', parseInt(savedUpgrade.count || 0));
+                        button.setAttribute('data-purchased', (savedUpgrade.purchased === true || savedUpgrade.purchased === 'true').toString());
+                    }
+                });
+                
+                // Restauration de la langue
+                if (saveObject.lang) {
+                    currentLang = saveObject.lang;
                 }
-            });
+            }
+            
+            // 3. Chargement de la Langue (si elle est définie indépendamment de la save)
+            if (savedLang) {
+                currentLang = savedLang;
+            }
+            
+            // 4. Mise à jour finale et unique de l'interface et de l'état.
+            setLanguage(currentLang, false); 
+            checkUpgradeVisibility(); 
         }
         
-        /**
-         * Sauvegarde locale de secours (seulement le score et les upgrades).
-         */
-        function saveGameLocalFallback() {
-             const saveObject = getSaveObject();
-             // Suppression du timestamp et de la langue pour la sauvegarde locale
-             delete saveObject.timestamp; 
-             localStorage.setItem('tiboClickerSave', JSON.stringify(saveObject));
-             // console.log("Sauvegarde locale effectuée.");
-        }
-
-
         function saveLanguage() {
             localStorage.setItem(LANG_STORAGE_KEY, currentLang);
-            // Pas de sauvegarde dans Firestore ici, car la langue est sauvegardée dans le saveGameToFirestore
+        }
+        
+        // --- NOUVELLES FONCTIONS : Sauvegarde Manuelle et Restauration par Fichier ---
+        
+        /**
+         * Affiche un message de statut temporaire à l'utilisateur.
+         * @param {string} message Le message à afficher (traduit).
+         * @param {boolean} isError Vrai si c'est une erreur, Faux si c'est un succès.
+         */
+        function showStatusMessage(message, isError) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+
+            // Gérer les classes de style
+            statusDiv.classList.remove('status-success', 'status-error');
+            if (isError) {
+                statusDiv.classList.add('status-error');
+            } else {
+                statusDiv.classList.add('status-success');
+            }
+
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
         }
 
-        // --- Initialisation ---
+        /**
+         * Télécharge l'état actuel du jeu dans un fichier .tibo.
+         */
+        function downloadGameSave() {
+            // 1. Assurez-vous que la sauvegarde locale est à jour avant d'exporter
+            saveGame();
+            
+            // 2. Récupérer les données brutes du localStorage
+            const dataToSave = localStorage.getItem(GAME_STORAGE_KEY);
+            
+            if (!dataToSave) {
+                 showStatusMessage("Erreur: Aucune donnée de jeu à sauvegarder.", true);
+                 return;
+            }
+
+            // 3. Créer un Blob (Binary Large Object)
+            const blob = new Blob([dataToSave], { type: 'application/json' });
+            
+            // 4. Créer et cliquer sur un lien de téléchargement invisible
+            const a = document.createElement('a');
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `tibo-clicker-save-${date}.tibo`; // Nom du fichier avec extension
+            a.href = URL.createObjectURL(blob);
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showStatusMessage(translations[currentLang].saveSuccess, false);
+        }
+
+        /**
+         * Lit le fichier de sauvegarde et restaure l'état du jeu.
+         */
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 1. Vérification du type de fichier
+            if (!file.name.endsWith('.tibo')) {
+                showStatusMessage(translations[currentLang].fileTypeWrong, true);
+                event.target.value = ''; // Réinitialiser le champ pour permettre un nouveau chargement
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    const loadedState = JSON.parse(content);
+
+                    // 2. Validation de base de la structure du fichier
+                    if (typeof loadedState.score !== 'number' || !Array.isArray(loadedState.upgrades)) {
+                        showStatusMessage(translations[currentLang].loadCorrupted, true);
+                        event.target.value = '';
+                        return;
+                    }
+
+                    // 3. Appliquer la nouvelle sauvegarde (met à jour les variables globales)
+                    loadGame(loadedState); 
+                    
+                    // 4. Mettre à jour la sauvegarde locale pour la persistance
+                    saveGame(); 
+
+                    showStatusMessage(translations[currentLang].loadSuccess, false);
+                    event.target.value = ''; // Réinitialiser le champ
+                } catch (error) {
+                    showStatusMessage(translations[currentLang].loadFileError, true);
+                    console.error("File loading error:", error);
+                    event.target.value = '';
+                }
+            };
+
+            reader.onerror = function() {
+                showStatusMessage(translations[currentLang].loadFileError, true);
+                event.target.value = '';
+            };
+
+            reader.readAsText(file);
+        }
+        
+        // --- Initialisation et Événements ---
 
         window.onload = function() {
             // 1. Initialisation de la Musique
             loadTrack(currentTrackIndex); 
-            // 2. Initialisation de Firebase (qui gère le chargement du jeu via loadGameFromFirestore)
-            initializeFirebase(); 
+            // 2. Chargement du jeu (qui met à jour l'UI à la fin)
+            loadGame(); 
+            
+            // 3. Événements pour la Sauvegarde/Restauration
+            document.getElementById('save-btn').addEventListener('click', downloadGameSave);
+            
+            const fileInput = document.getElementById('file-input');
+            document.getElementById('load-btn').addEventListener('click', () => {
+                fileInput.click(); // Déclenche le clic sur l'input de fichier caché
+            });
+            fileInput.addEventListener('change', handleFileUpload);
         };
 
         // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
