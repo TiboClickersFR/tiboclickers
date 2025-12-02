@@ -562,15 +562,24 @@
                 <span class="upgrade-cost">1000000000 Tibos</span>
             </button>
             
-            <!-- NOUVELLE AMÉLIORATION : Minotaure 🐂 (MAJ : PLUS FORT QUE RODRIGUES) -->
+            <!-- NOUVELLE AMÉLIORATION : Minotaure 🐂 -->
             <button id="upgrade-passive-minotaure" class="upgrade-button" data-base-cost="5000000000" data-tps="5000000" data-count="0" data-upgrade-key="minotaure">
                 <div class="upgrade-details">
-                    <!-- MISE À JOUR DU TITRE SELON LA DEMANDE -->
                     <span class="upgrade-title">Minotaure - Tu veux qu'il te fasse quoi ? 🐂</span>
                     <br><span class="upgrade-description">Le Taureau de Crète. Génère 5,000,000 Tibos/s</span>
                     <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">5000000000 Tibos</span>
+            </button>
+            
+            <!-- NOUVELLE AMÉLIORATION : BoomFred (LE PLUS PUISSANT) -->
+            <button id="upgrade-passive-boomfred" class="upgrade-button" data-base-cost="25000000000" data-tps="25000000" data-count="0" data-upgrade-key="boomfred">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">BoomFred - Le goat du sax et de Glazunov 🎷</span>
+                    <br><span class="upgrade-description">Génère 25,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">25000000000 Tibos</span>
             </button>
             
         </div>
@@ -625,8 +634,9 @@
             document.getElementById('upgrade-passive-thomas'),
             document.getElementById('upgrade-passive-lenaik'),
             document.getElementById('upgrade-passive-rodrigues'),
-            // NOUVEAU: Minotaure (Maintenant le dernier)
-            document.getElementById('upgrade-passive-minotaure')
+            document.getElementById('upgrade-passive-minotaure'),
+            // NOUVEAU : BoomFred
+            document.getElementById('upgrade-passive-boomfred')
         ];
         
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
@@ -669,9 +679,11 @@
                 lenaikDescription: "Génère 200,000 Tibos/s",
                 rodriguesTitle: "Rodrigues - Le Bâton de Pèlerin 💫",
                 rodriguesDescription: "Génère 1,000,000 Tibos/s",
-                // NOUVEAU/MAJ: Minotaure
-                minotaureTitle: "Minotaure - Tu veux qu'il te fasse quoi ? 🐂", // Mise à jour ici
+                minotaureTitle: "Minotaure - Tu veux qu'il te fasse quoi ? 🐂",
                 minotaureDescription: "Le Taureau de Crète. Génère 5,000,000 Tibos/s",
+                // NOUVEAU: BoomFred
+                boomfredTitle: "BoomFred - Le goat du sax et de Glazunov 🎷",
+                boomfredDescription: "Génère 25,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
@@ -723,9 +735,11 @@
                 lenaikDescription: "Generates 200,000 Tibo/s",
                 rodriguesTitle: "Rodrigues - The Pilgrim's Staff 💫",
                 rodriguesDescription: "Generates 1,000,000 Tibo/s",
-                // NOUVEAU/MAJ: Minotaure
-                minotaureTitle: "Minotaur - What do you want him to do? 🐂", // Mise à jour ici
+                minotaureTitle: "Minotaur - What do you want him to do? 🐂",
                 minotaureDescription: "The Cretan Bull. Generates 5,000,000 Tibo/s",
+                // NOUVEAU: BoomFred
+                boomfredTitle: "BoomFred - The Sax and Glazunov GOAT 🎷",
+                boomfredDescription: "Generates 25,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -777,9 +791,11 @@
                 lenaikDescription: "Genera 200,000 Tibo/s",
                 rodriguesTitle: "Rodrigues - El Bastón del Peregrino 💫",
                 rodriguesDescription: "Genera 1,000,000 Tibo/s",
-                // NOUVEAU/MAJ: Minotaure
-                minotaureTitle: "Minotauro - ¿Qué quieres que te haga? 🐂", // Mise à jour ici
+                minotaureTitle: "Minotauro - ¿Qué quieres que te haga? 🐂",
                 minotaureDescription: "El Minotauro de Creta. Genera 5,000,000 Tibo/s",
+                // NOUVEAU: BoomFred
+                boomfredTitle: "BoomFred - El GOAT del saxo y Glazunov 🎷",
+                boomfredDescription: "Genera 25,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -1083,7 +1099,7 @@
                     const addition = parseInt(button.getAttribute('data-addition'));
                     totalClickPower += addition * count;
                 }
-                // 3. Passifs (TPS, incluant le Minotaure)
+                // 3. Passifs (TPS, incluant le Minotaure et BoomFred)
                 else if (button.hasAttribute('data-tps')) {
                     const passiveTps = parseInt(button.getAttribute('data-tps'));
                     totalTps += passiveTps * count;
