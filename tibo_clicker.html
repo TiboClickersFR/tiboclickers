@@ -99,6 +99,14 @@
             color: #ccc;
         }
         
+        /* NOUVEAU : Affichage des stats critiques */
+        #crit-stats-display {
+            font-size: 1em;
+            margin-top: 10px;
+            color: #e74c3c; /* Couleur rouge/critique */
+            font-weight: bold;
+        }
+        
         /* ------------------------------------------------ */
         /* Mise à jour des Améliorations */
         /* ------------------------------------------------ */
@@ -142,6 +150,11 @@
             color: #ffcc00;
             font-size: 1.1em;
         }
+        
+        /* Style spécifique pour les upgrades critiques */
+        .crit-upgrade .upgrade-title {
+            color: #e74c3c; /* Rouge vif pour le critique */
+        }
 
         .upgrade-cost {
             font-weight: bold;
@@ -156,6 +169,11 @@
             font-size: 0.8em;
             color: #aaa;
             margin-top: 4px;
+        }
+        
+        /* NOUVEAU: Classe pour cacher définitivement l'amélioration */
+        .hidden-maxed {
+            display: none !important;
         }
 
         /* ------------------------------------------------ */
@@ -172,14 +190,37 @@
             animation: floatUp 0.8s ease-out;
             text-shadow: 1px 1px 2px #000;
         }
+        
+        /* NOUVEAU: Style spécifique pour le boost critique */
+        .floating-text.crit {
+            color: #e74c3c; /* Rouge vif */
+            font-size: 3em; 
+            animation: floatUpCrit 1s ease-out; /* Animation plus longue */
+            z-index: 10;
+        }
 
         @keyframes floatUp {
             0% {
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
                 opacity: 1;
             }
             100% {
-                transform: translateY(-50px);
+                transform: translateY(-50px) scale(0.8);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes floatUpCrit {
+            0% {
+                transform: translateY(0) scale(1.2);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-25px) scale(1.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-70px) scale(1);
                 opacity: 0;
             }
         }
@@ -418,6 +459,8 @@
                 <div id="score">0</div>
                 <div id="click-power-display">Puissance de Clic : 1 Tibo</div>
                 <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
+                <!-- NOUVEAU: Affichage des statistiques de boost critique -->
+                <div id="crit-stats-display">Transfo' Critique : 0.0% (x2)</div>
             </div>
 
             <div id="tibo-image"></div>
@@ -432,7 +475,7 @@
             <div id="click-multiplier-container" class="new-upgrade-container">
                 <!-- Upgrade 1 initiale -->
                 <!-- Ces achats sont uniques, ils utilisent data-cost -->
-                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset">
+                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset" data-max-once="true">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Mise en Place du "Mindset"</span>
                         <br><span class="upgrade-description">Ajoute +1 TPC de base (Achat Unique)</span>
@@ -441,7 +484,7 @@
                 </button>
                 
                 <!-- Upgrade 2 -->
-                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale">
+                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale" data-max-once="true">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Tibo Ultra Sale 💥</span>
                         <br><span class="upgrade-description">Ajoute +3 TPC de base (Achat Unique)</span>
@@ -450,7 +493,7 @@
                 </button>
                 
                 <!-- Upgrade 3 -->
-                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal">
+                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal" data-max-once="true">
                     <div class="upgrade-details">
                         <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
                         <br><span class="upgrade-description">Ajoute +6 TPC de base (Achat Unique)</span>
@@ -461,9 +504,30 @@
             
             <hr style="border-color: #5a5a5a; margin: 15px 0;">
 
+            <!-- NOUVELLES AMÉLIORATIONS CRITIQUES -->
+             <button id="upgrade-crit-chance" class="upgrade-button crit-upgrade" data-base-cost="20000" data-growth="1.3" data-crit-chance-add="0.5" data-count="0" data-upgrade-key="critChance">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Chance de Transfo' Critique 📈</span>
+                    <br><span class="upgrade-description">Augmente la chance de boost de 0.5%</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">20000 Tibos</span>
+            </button>
+            
+            <button id="upgrade-crit-power" class="upgrade-button crit-upgrade" data-base-cost="50000" data-growth="1.3" data-crit-power-add="1" data-count="0" data-upgrade-key="critPower">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Puissance de Transfo' Critique 🔥</span>
+                    <br><span class="upgrade-description">Augmente le multiplicateur de boost de x1 (base x2)</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">50000 Tibos</span>
+            </button>
+            
+            <hr style="border-color: #5a5a5a; margin: 15px 0;">
+
             <!-- Amélioration du Clic (Ajout) - Prix exponentiel -->
             <!-- Ces achats sont répétables, ils utilisent data-base-cost -->
-            <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-addition="5" data-count="0" data-upgrade-key="proteines">
+            <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-growth="1.15" data-addition="5" data-count="0" data-upgrade-key="proteines">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Déverrouillage des Protéines</span>
                     <br><span class="upgrade-description">Ajoute +5 Tibos par Clic</span>
@@ -473,7 +537,7 @@
             </button>
 
             <!-- Amélioration Passive 1 - Alessio -->
-            <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-tps="1" data-count="0" data-upgrade-key="alessio">
+            <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-growth="1.15" data-tps="1" data-count="0" data-upgrade-key="alessio">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
                     <br><span class="upgrade-description">Génère 1 Tibo/s</span>
@@ -483,7 +547,7 @@
             </button>
             
             <!-- Amélioration Passive 2 - Justine -->
-            <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-tps="10" data-count="0" data-upgrade-key="justine">
+            <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-growth="1.15" data-tps="10" data-count="0" data-upgrade-key="justine">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Justine - Community Manager 📸</span>
                     <br><span class="upgrade-description">Génère 10 Tibos/s</span>
@@ -493,7 +557,7 @@
             </button>
             
             <!-- Amélioration Passive 3 - Patate Douce (CHEATEE: 150 TPS) -->
-            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-tps="150" data-count="0" data-upgrade-key="patates">
+            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-growth="1.15" data-tps="150" data-count="0" data-upgrade-key="patates">
                 <div class="upgrade-details">
                     <span class="upgrade-title">L'Usine à Patates Douces COSMIQUE 🍠🚀</span>
                     <br><span class="upgrade-description">Génère 150 Tibos/s</span>
@@ -503,7 +567,7 @@
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Nogode -->
-            <button id="upgrade-passive-nogode" class="upgrade-button" data-base-cost="200000" data-tps="500" data-count="0" data-upgrade-key="nogode">
+            <button id="upgrade-passive-nogode" class="upgrade-button" data-base-cost="200000" data-growth="1.15" data-tps="500" data-count="0" data-upgrade-key="nogode">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Nogode - Le Disrupteur Sombre 🖤</span>
                     <br><span class="upgrade-description">Génère 500 Tibos/s</span>
@@ -513,7 +577,7 @@
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Sachatte -->
-            <button id="upgrade-passive-sachatte" class="upgrade-button" data-base-cost="1000000" data-tps="2000" data-count="0" data-upgrade-key="sachatte">
+            <button id="upgrade-passive-sachatte" class="upgrade-button" data-base-cost="1000000" data-growth="1.15" data-tps="2000" data-count="0" data-upgrade-key="sachatte">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Sachatte - L'Éclaireuse Mystique ✨</span>
                     <br><span class="upgrade-description">Génère 2,000 Tibos/s</span>
@@ -523,7 +587,7 @@
             </button>
             
             <!-- AMÉLIORATION CORRIGÉE : Milodes (Le style est géré par la classe .upgrade-button) -->
-            <button id="upgrade-passive-milodes" class="upgrade-button" data-base-cost="8000000" data-tps="10000" data-count="0" data-upgrade-key="milodes">
+            <button id="upgrade-passive-milodes" class="upgrade-button" data-base-cost="8000000" data-growth="1.15" data-tps="10000" data-count="0" data-upgrade-key="milodes">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Milodes - Le Mobilisateur Instantané 🚀</span>
                     <br><span class="upgrade-description">Génère 10,000 Tibos/s</span>
@@ -533,7 +597,7 @@
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Thomas -->
-            <button id="upgrade-passive-thomas" class="upgrade-button" data-base-cost="50000000" data-tps="50000" data-count="0" data-upgrade-key="thomas">
+            <button id="upgrade-passive-thomas" class="upgrade-button" data-base-cost="50000000" data-growth="1.15" data-tps="50000" data-count="0" data-upgrade-key="thomas">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Thomas - L'Architecte des Ressources 💰</span>
                     <br><span class="upgrade-description">Génère 50,000 Tibos/s</span>
@@ -543,7 +607,7 @@
             </button>
 
             <!-- NOUVELLE AMÉLIORATION : Lenaik -->
-            <button id="upgrade-passive-lenaik" class="upgrade-button" data-base-cost="200000000" data-tps="200000" data-count="0" data-upgrade-key="lenaik">
+            <button id="upgrade-passive-lenaik" class="upgrade-button" data-base-cost="200000000" data-growth="1.15" data-tps="200000" data-count="0" data-upgrade-key="lenaik">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Lenaik - La Gardienne Hyper-Protectrice 🛡️</span>
                     <br><span class="upgrade-description">Génère 200,000 Tibos/s</span>
@@ -553,7 +617,7 @@
             </button>
             
             <!-- NOUVELLE AMÉLIORATION : Rodrigues -->
-            <button id="upgrade-passive-rodrigues" class="upgrade-button" data-base-cost="1000000000" data-tps="1000000" data-count="0" data-upgrade-key="rodrigues">
+            <button id="upgrade-passive-rodrigues" class="upgrade-button" data-base-cost="1000000000" data-growth="1.15" data-tps="1000000" data-count="0" data-upgrade-key="rodrigues">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Rodrigues - Le Bâton de Pèlerin 💫</span>
                     <br><span class="upgrade-description">Génère 1,000,000 Tibos/s</span>
@@ -563,7 +627,7 @@
             </button>
             
             <!-- NOUVELLE AMÉLIORATION : Minotaure 🐂 -->
-            <button id="upgrade-passive-minotaure" class="upgrade-button" data-base-cost="5000000000" data-tps="5000000" data-count="0" data-upgrade-key="minotaure">
+            <button id="upgrade-passive-minotaure" class="upgrade-button" data-base-cost="5000000000" data-growth="1.15" data-tps="5000000" data-count="0" data-upgrade-key="minotaure">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Minotaure - Tu veux qu'il te fasse quoi ? 🐂</span>
                     <br><span class="upgrade-description">Le Taureau de Crète. Génère 5,000,000 Tibos/s</span>
@@ -572,8 +636,8 @@
                 <span class="upgrade-cost">5000000000 Tibos</span>
             </button>
             
-            <!-- NOUVELLE AMÉLIORATION : BoomFred (LE PLUS PUISSANT) -->
-            <button id="upgrade-passive-boomfred" class="upgrade-button" data-base-cost="25000000000" data-tps="25000000" data-count="0" data-upgrade-key="boomfred">
+            <!-- AMÉLIORATION : BoomFred (LE PLUS PUISSANT) -->
+            <button id="upgrade-passive-boomfred" class="upgrade-button" data-base-cost="25000000000" data-growth="1.15" data-tps="25000000" data-count="0" data-upgrade-key="boomfred">
                 <div class="upgrade-details">
                     <span class="upgrade-title">BoomFred - Le goat du sax et de Glazunov 🎷</span>
                     <br><span class="upgrade-description">Génère 25,000,000 Tibos/s</span>
@@ -602,27 +666,46 @@
         let score = 0;
         let clickPower = 1; // Puissance de clic totale (base + bonus)
         let tps = 0; // Tibos Par Seconde
+        
+        // NOUVEAU: Statistiques Critiques
+        let baseCritChance = 0; // MODIFICATION: 0% de base
+        let critChancePerUpgrade = 0.5; // MODIFICATION: 0.5% ajouté par achat
+        
+        let totalCritChance = baseCritChance; // Chance actuelle en pourcentage (e.g., 0.5, 1.0, ...)
+        
+        let totalCritPower = 2; // Multiplicateur de base (x2)
+        let critPowerPerUpgrade = 1; // x1 ajouté par achat (x2, x3, x4, ...)
+        
+        // Ancienne constante GROWTH_FACTOR (1.15) est maintenant utilisée dans data-growth pour les upgrades passifs
+        const CRIT_GROWTH_FACTOR = 1.3; // Facteur d'augmentation pour les upgrades critiques (plus rapide)
+        const MAX_CRIT_CHANCE = 100; // La chance critique maximale est 100%
+
         let currentLang = 'fr'; // Langue par défaut
         const GAME_STORAGE_KEY = 'tiboClickerSave';
         const LANG_STORAGE_KEY = 'tiboClickerLang';
-        const GROWTH_FACTOR = 1.15; // Facteur d'augmentation exponentiel
-        const FORMAT_THRESHOLD = 100000; // Constante : 100 000 Tibos (100K)
-
+        
         const scoreDisplay = document.getElementById('score');
         const tiboImage = document.getElementById('tibo-image');
         const clickPowerDisplay = document.getElementById('click-power-display');
         const tpsDisplay = document.getElementById('tps-display');
+        const critStatsDisplay = document.getElementById('crit-stats-display'); // NOUVEAU
         
         // Références aux boutons pour la gestion de l'apparition
         const upgrade1 = document.getElementById('upgrade-click-1');
         const upgrade2_new = document.getElementById('upgrade-click-2-new'); 
         const upgrade3_new = document.getElementById('upgrade-click-3-new'); 
         
+        // Références aux upgrades critiques
+        const critChanceUpgradeBtn = document.getElementById('upgrade-crit-chance');
+        const critPowerUpgradeBtn = document.getElementById('upgrade-crit-power');
+        
         // Liste de tous les boutons (incluant les cachés pour la vérification des coûts)
         const upgradeButtons = [
             upgrade1,
             upgrade2_new,
             upgrade3_new,
+            critChanceUpgradeBtn,
+            critPowerUpgradeBtn,
             document.getElementById('upgrade-addition'),
             document.getElementById('upgrade-passive-alessiode'),
             document.getElementById('upgrade-passive-justine'),
@@ -648,8 +731,10 @@
                 musicLabel: "Musique", 
                 tibosOwnedLabel: "Tibos Possédés :",
                 clickPowerDisplay: (power) => `Puissance de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                // MISE À JOUR : TPS affiché en valeur précise
-                tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                // NOUVEAU: Affichage Critiques
+                // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
+                critStatsDisplay: (chance, power) => `Transfo' Critique : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Améliorations",
                 // Upgrades Multiplicateurs (Achat Unique)
                 mindsetTitle: "Mise en Place du \"Mindset\"",
@@ -658,6 +743,11 @@
                 ultrasaleDescription: "Ajoute +3 TPC de base (Achat Unique)",
                 cheatmealTitle: "Le Cheat Meal Ultime 🍕",
                 cheatmealDescription: "Ajoute +6 TPC de base (Achat Unique)",
+                // MODIFICATION: Description avec 0.5%
+                critChanceTitle: "Chance de Transfo' Critique 📈",
+                critChanceDescription: `Augmente la chance de boost de ${critChancePerUpgrade.toFixed(1)}%`,
+                critPowerTitle: "Puissance de Transfo' Critique 🔥",
+                critPowerDescription: "Augmente le multiplicateur de boost de x1 (base x2)",
                 // Upgrades Répétables
                 proteinesTitle: "Déverrouillage des Protéines",
                 proteinesDescription: "Ajoute +5 Tibos par Clic",
@@ -681,13 +771,12 @@
                 rodriguesDescription: "Génère 1,000,000 Tibos/s",
                 minotaureTitle: "Minotaure - Tu veux qu'il te fasse quoi ? 🐂",
                 minotaureDescription: "Le Taureau de Crète. Génère 5,000,000 Tibos/s",
-                // NOUVEAU: BoomFred
                 boomfredTitle: "BoomFred - Le goat du sax et de Glazunov 🎷",
                 boomfredDescription: "Génère 25,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
-                purchasedText: "Acheté", // Nouvelle chaîne pour l'achat
+                purchasedText: "Acheté", 
                 // NOUVEAU: Textes de Sauvegarde/Restauration
                 saveButton: "Télécharger la Sauvegarde (.tibo)",
                 loadButton: "Charger une Sauvegarde (.tibo)",
@@ -695,7 +784,8 @@
                 loadSuccess: "Jeu restauré avec succès depuis le fichier !",
                 loadCorrupted: "Erreur : Le fichier de sauvegarde est corrompu ou invalide.",
                 loadFileError: "Erreur lors de la lecture du fichier.",
-                fileTypeWrong: "Erreur : Veuillez sélectionner un fichier de sauvegarde Tibo Clicker (.tibo)."
+                fileTypeWrong: "Erreur : Veuillez sélectionner un fichier de sauvegarde Tibo Clicker (.tibo).",
+                maxCritChanceReached: "Chance Max atteinte (100%)" 
             },
             en: {
                 // General
@@ -704,8 +794,10 @@
                 musicLabel: "Music", 
                 tibosOwnedLabel: "Tibos Owned:",
                 clickPowerDisplay: (power) => `Click Power: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                // MISE À JOUR : TPS affiché en valeur précise
-                tpsDisplay: (tps) => `Tibos Per Second (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                tpsDisplay: (tps) => `Tibos Per Second (TPS): ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                // NOUVEAU: Affichage Critiques
+                // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
+                critStatsDisplay: (chance, power) => `Critical Transfo' : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Upgrades",
                 // Multiplier Upgrades (One-Time Purchase)
                 mindsetTitle: "\"Mindset\" Implementation",
@@ -714,6 +806,11 @@
                 ultrasaleDescription: "Adds +3 base TPC (One-Time Purchase)",
                 cheatmealTitle: "The Ultimate Cheat Meal 🍕",
                 cheatmealDescription: "Adds +6 base TPC (One-Time Purchase)",
+                // MODIFICATION: Description avec 0.5%
+                critChanceTitle: "Critical Transfo' Chance 📈",
+                critChanceDescription: `Increases boost chance by ${critChancePerUpgrade.toFixed(1)}%`,
+                critPowerTitle: "Critical Transfo' Power 🔥",
+                critPowerDescription: "Increases boost multiplier by x1 (base x2)",
                 // Repeatable Upgrades
                 proteinesTitle: "Protein Unlock",
                 proteinesDescription: "Adds +5 Tibos per Click",
@@ -737,7 +834,6 @@
                 rodriguesDescription: "Generates 1,000,000 Tibo/s",
                 minotaureTitle: "Minotaur - What do you want him to do? 🐂",
                 minotaureDescription: "The Cretan Bull. Generates 5,000,000 Tibo/s",
-                // NOUVEAU: BoomFred
                 boomfredTitle: "BoomFred - The Sax and Glazunov GOAT 🎷",
                 boomfredDescription: "Generates 25,000,000 Tibo/s",
                 // Secondary Text
@@ -751,7 +847,8 @@
                 loadSuccess: "Game successfully restored from file!",
                 loadCorrupted: "Error: The save file is corrupted or invalid.",
                 loadFileError: "Error reading the file.",
-                fileTypeWrong: "Error: Please select a Tibo Clicker save file (.tibo)."
+                fileTypeWrong: "Error: Please select a Tibo Clicker save file (.tibo).",
+                maxCritChanceReached: "Max Chance Reached (100%)" 
             },
             es: {
                  // General
@@ -760,8 +857,10 @@
                 musicLabel: "Música", 
                 tibosOwnedLabel: "Tibos Poseídos:",
                 clickPowerDisplay: (power) => `Poder de Clic: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                // MISE À JOUR : TPS affiché en valor precisa
-                tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 100 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                // NOUVEAU: Affichage Critiques
+                // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
+                critStatsDisplay: (chance, power) => `Transfo' Crítica : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Mejoras",
                 // Upgrades Multiplicadores (Compra Única)
                 mindsetTitle: "Implementación del \"Mindset\"",
@@ -770,6 +869,11 @@
                 ultrasaleDescription: "Añade +3 TPC base (Compra Única)",
                 cheatmealTitle: "La Comida Trampa Definitiva 🍕",
                 cheatmealDescription: "Añade +6 TPC base (Compra Única)",
+                // MODIFICACION: Description avec 0.5%
+                critChanceTitle: "Probabilidad de Transfo' Crítica 📈",
+                critChanceDescription: `Aumenta la probabilidad de boost en ${critChancePerUpgrade.toFixed(1)}%`,
+                critPowerTitle: "Poder de Transfo' Crítica 🔥",
+                critPowerDescription: "Aumenta el multiplicador de boost en x1 (base x2)",
                 // Upgrades Repetibles
                 proteinesTitle: "Desbloqueo de Proteínas",
                 proteinesDescription: "Añade +5 Tibos por Clic",
@@ -793,7 +897,6 @@
                 rodriguesDescription: "Genera 1,000,000 Tibo/s",
                 minotaureTitle: "Minotauro - ¿Qué quieres que te haga? 🐂",
                 minotaureDescription: "El Minotauro de Creta. Genera 5,000,000 Tibo/s",
-                // NOUVEAU: BoomFred
                 boomfredTitle: "BoomFred - El GOAT del saxo y Glazunov 🎷",
                 boomfredDescription: "Genera 25,000,000 Tibo/s",
                 // Secondary Text
@@ -807,7 +910,8 @@
                 loadSuccess: "¡Juego restaurado exitosamente desde el archivo!",
                 loadCorrupted: "Error: El archivo de guardado está corrupto o es inválido.",
                 loadFileError: "Error al leer el archivo.",
-                fileTypeWrong: "Error: Por favor, seleccione un archivo de guardado de Tibo Clicker (.tibo)."
+                fileTypeWrong: "Error: Por favor, seleccione un archivo de guardado de Tibo Clicker (.tibo).",
+                maxCritChanceReached: "Probabilidad Máx Alcanzada (100%)" 
             }
         };
 
@@ -896,6 +1000,7 @@
             // Mise à jour des statistiques dynamiques
             updateScoreDisplay(); 
             updateTPSDisplay();
+            updateCritStatsDisplay(); // NOUVEAU
 
             // Mise à jour de tous les boutons d'amélioration
             upgradeButtons.forEach(button => {
@@ -915,12 +1020,24 @@
 
                     // Mise à jour des textes de titre/description
                     if (titleElement) titleElement.textContent = t[`${upgradeKey}Title`];
-                    if (descElement) descElement.textContent = t[`${upgradeKey}Description`];
+                    
+                    // Gestion spéciale de la description de chance critique
+                    if (button.id === 'upgrade-crit-chance') {
+                        // Utilise la fonction de traduction pour la description mise à jour
+                        if (descElement) descElement.textContent = t[`${upgradeKey}Description`];
+                    } else if (descElement) {
+                        // Pour les autres descriptions
+                        descElement.textContent = t[`${upgradeKey}Description`];
+                    }
                     
                     if (costElement) {
-                         if (isPurchased) {
+                         if (isPurchased && button.hasAttribute('data-max-once')) {
+                            // C'est un achat unique MAXÉ. Le bouton doit disparaître, mais on met le texte au cas où il serait forcé.
                             costElement.textContent = `✅ ${t.purchasedText}`;
-                            button.disabled = true;
+                            button.disabled = true; // Reste désactivé
+                        } else if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
+                            costElement.textContent = t.maxCritChanceReached;
+                            button.disabled = true; // Reste désactivé
                         } else {
                             // Le coût est formaté, car il peut être grand
                             costElement.textContent = t.costText(cost);
@@ -929,7 +1046,7 @@
 
                     // *** POINT CLÉ : SYNCHRONISATION DU COMPTEUR VISUEL ***
                     if (countElement) {
-                        if (!isPurchased) {
+                        if (!button.hasAttribute('data-max-once') && totalCritChance < MAX_CRIT_CHANCE) {
                            // Lit le data-count qui a été restauré dans loadGame
                            countElement.textContent = t.countText(count); 
                            countElement.style.display = 'block';
@@ -937,9 +1054,16 @@
                            countElement.style.display = 'none';
                         }
                     }
+                    
+                    // Gère le texte affiché quand on a atteint le maximum de chance critique
+                    if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
+                         // Affiche un message spécial si le max 100% est atteint
+                         if (descElement) descElement.textContent = t.maxCritChanceReached;
+                    }
                 }
             });
             checkUpgradeCosts(); // Vérifie l'état disabled/enabled
+            updateUpgradeVisibility(); // NOUVEAU: Gère la visibilité après la mise à jour des stats
         }
         
         // --- Fonctions Utilitaire de Score ---
@@ -963,13 +1087,18 @@
             clickPowerDisplay.textContent = t.clickPowerDisplay(clickPower);
         }
 
-        // CORRECTION DE LA FONCTION : Le TPS doit s'afficher en valeur brute ou avec une décimale pour la précision
         function updateTPSDisplay() {
             const t = translations[currentLang];
-            // Utilise toFixed(0) si TPS est petit, toFixed(1) si TPS est grand pour rester lisible et précis.
-            // Le toFixed(0) est une troncature simple pour éviter d'afficher "0.0 Tibos"
             const tpsValue = tps > 1000 ? tps.toFixed(1) : tps.toFixed(0); 
             tpsDisplay.textContent = t.tpsDisplay(parseFloat(tpsValue));
+        }
+        
+        // NOUVEAU: Mise à jour de l'affichage des stats critiques
+        function updateCritStatsDisplay() {
+             const t = translations[currentLang];
+             // La chance critique ne doit jamais être affichée au-dessus de 100%
+             const displayChance = Math.min(totalCritChance, MAX_CRIT_CHANCE); 
+             critStatsDisplay.textContent = t.critStatsDisplay(displayChance, totalCritPower);
         }
 
         /**
@@ -980,26 +1109,24 @@
         function calculateCost(button) {
             const isPurchased = button.getAttribute('data-purchased') === 'true';
             
-            // Si c'est un achat unique déjà fait, le prix reste l'original (mais le bouton est désactivé plus tard)
             if (isPurchased) {
-                // Utilise data-cost si disponible (pour les achats uniques) ou base-cost
                 return parseInt(button.getAttribute('data-cost') || button.getAttribute('data-base-cost'));
             }
 
-            // Pour tous les autres cas (achat unique non fait, ou achat répétable)
-            
             // 1. Détermine le coût de base
-            // Utilise data-base-cost pour les répétables, data-cost pour les uniques.
             const baseCost = parseInt(button.getAttribute('data-base-cost') || button.getAttribute('data-cost'));
             const count = parseInt(button.getAttribute('data-count') || 0);
-
+            
             // 2. Si l'amélioration n'est PAS répétable (pas de data-count), retourne le coût de base
             if (!button.hasAttribute('data-count')) {
                 return baseCost;
             }
             
             // 3. Logique d'augmentation exponentielle pour les améliorations répétables
-            const calculatedCost = Math.floor(baseCost * Math.pow(GROWTH_FACTOR, count));
+            // Utilise le data-growth spécifié, sinon utilise le facteur standard CRIT_GROWTH_FACTOR (1.3)
+            const growthFactor = parseFloat(button.getAttribute('data-growth')) || CRIT_GROWTH_FACTOR;
+
+            const calculatedCost = Math.floor(baseCost * Math.pow(growthFactor, count));
             return calculatedCost;
         }
 
@@ -1007,12 +1134,25 @@
         // --- Logique du Clic ---
 
         tiboImage.addEventListener('click', function(e) {
+            let scoreToAdd = clickPower;
+            let isCrit = false;
+
+            // NOUVEAU: Logique de Boost Critique
+            // Math.random() génère [0, 1). On compare avec la chance en décimal (e.g., 0.005)
+            // On utilise Math.min(totalCritChance, 100) / 100 pour que le taux ne dépasse jamais 100% dans la probabilité
+            const actualCritChance = Math.min(totalCritChance, MAX_CRIT_CHANCE) / 100;
+            
+            if (Math.random() < actualCritChance) { 
+                 scoreToAdd *= totalCritPower;
+                 isCrit = true;
+            }
+
             // Ajout du score
-            score += clickPower;
+            score += scoreToAdd;
             updateScoreDisplay();
             
             // Animation du texte flottant
-            createFloatingText(clickPower, e);
+            createFloatingText(scoreToAdd, e, isCrit);
 
             // Vérification des coûts et de l'affichage des nouveaux upgrades
             checkUpgradeCosts();
@@ -1021,14 +1161,22 @@
             saveGame(); // Sauvegarde après chaque clic
         });
 
-        function createFloatingText(amount, event) {
+        function createFloatingText(amount, event, isCrit) {
             const text = document.createElement('div');
             text.classList.add('floating-text');
-            text.textContent = `+${formatScore(amount)}`;
+            
+            if (isCrit) {
+                text.classList.add('crit');
+                // Texte du critique: le montant total + le multiplicateur
+                text.textContent = `CRIT! x${totalCritPower.toFixed(0)}`;
+            } else {
+                text.textContent = `+${formatScore(amount)}`;
+            }
             
             // Positionnement basé sur le clic
             const rect = tiboImage.getBoundingClientRect();
-            text.style.left = `${event.clientX - rect.left + tiboImage.offsetWidth / 2}px`;
+            // Positionnement au centre du clic
+            text.style.left = `${event.clientX - rect.left + tiboImage.offsetWidth / 2}px`; 
             text.style.top = `${event.clientY - rect.top + tiboImage.offsetHeight / 2}px`;
 
             // Ajout au DOM
@@ -1049,6 +1197,12 @@
         function buyUpgrade(button) {
             const cost = calculateCost(button);
             
+            // Vérifie si le bouton est l'upgrade critique et si on a atteint 100%
+            if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
+                 showStatusMessage(translations[currentLang].maxCritChanceReached, true);
+                 return; 
+            }
+            
             if (score >= cost) {
                 score -= cost;
                 
@@ -1057,9 +1211,6 @@
                     let count = parseInt(button.getAttribute('data-count'));
                     button.setAttribute('data-count', ++count);
                 }
-                
-                // 1. Mise à jour de la puissance de clic / TPS
-                // On met à jour l'attribut directement dans le DOM, puis on recalcule le total
                 
                 // Si c'est un achat unique (Mindset, Ultra Sale, Cheat Meal)
                 if (button.hasAttribute('data-add-bonus')) {
@@ -1079,12 +1230,15 @@
         }
         
         /**
-         * NOUVEAU : Recalcule les statistiques globales (clickPower et tps) en parcourant tous les upgrades
-         * Doit être appelé après le chargement d'une sauvegarde ou l'achat d'un upgrade.
+         * NOUVEAU : Recalcule les statistiques globales (clickPower, tps, critChance, critPower) 
+         * en parcourant tous les upgrades
          */
         function recalculateStatsFromUpgrades() {
             let totalClickPower = 1; // Base de 1 TPC
             let totalTps = 0;
+            
+            let critChanceCount = 0;
+            let critPowerCount = 0;
 
             upgradeButtons.forEach(button => {
                 const count = parseInt(button.getAttribute('data-count') || 0);
@@ -1104,11 +1258,24 @@
                     const passiveTps = parseInt(button.getAttribute('data-tps'));
                     totalTps += passiveTps * count;
                 }
+                // 4. Crit Chance
+                else if (button.id === 'upgrade-crit-chance') {
+                    critChanceCount = count;
+                }
+                // 5. Crit Power
+                else if (button.id === 'upgrade-crit-power') {
+                    critPowerCount = count;
+                }
             });
 
             // Mise à jour des variables globales
             clickPower = totalClickPower;
             tps = totalTps;
+            
+            // Mise à jour des stats critiques
+            // totalCritChance commence à 0 (baseCritChance) et ajoute 0.5% par achat
+            totalCritChance = baseCritChance + (critChanceCount * critChancePerUpgrade);
+            totalCritPower = 2 + (critPowerCount * critPowerPerUpgrade);
         }
 
 
@@ -1124,11 +1291,17 @@
                     costElement.textContent = translations[currentLang].costText(cost);
                 }
                 
-                if (isPurchased) {
+                // Désactivation si déjà acheté (pour les achats uniques)
+                if (isPurchased && button.hasAttribute('data-max-once')) {
                     button.disabled = true;
-                    // Assure que le coût affiche "Acheté"
-                    if (costElement) costElement.textContent = `✅ ${translations[currentLang].purchasedText}`;
-                } else {
+                }
+                // Désactivation si chance max (100%) atteinte pour l'upgrade chance critique
+                else if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
+                    button.disabled = true;
+                    // Le texte du coût est mis à jour dans updateUI()
+                }
+                // Désactivation si score insuffisant
+                else {
                     button.disabled = score < cost;
                 }
             });
@@ -1154,8 +1327,34 @@
                     btn.style.opacity = 1;
                 }
             });
-
         }
+        
+        /**
+         * NOUVEAU: Gère l'ajout/retrait de la classe 'hidden-maxed' pour faire disparaître les upgrades.
+         */
+        function updateUpgradeVisibility() {
+            // 1. Améliorations à Achat Unique (data-max-once="true")
+            [upgrade1, upgrade2_new, upgrade3_new].forEach(button => {
+                const isPurchased = button.getAttribute('data-purchased') === 'true';
+                
+                // Si acheté, on ajoute la classe hidden-maxed pour masquer complètement
+                if (isPurchased) {
+                    button.classList.add('hidden-maxed');
+                } else {
+                    // Si pas acheté, on gère la visibilité basée sur le score (classe 'hidden')
+                    // et on s'assure que hidden-maxed n'est pas là
+                    button.classList.remove('hidden-maxed');
+                }
+            });
+            
+            // 2. Amélioration de Chance Critique (Maximum 100%)
+            if (totalCritChance >= MAX_CRIT_CHANCE) {
+                critChanceUpgradeBtn.classList.add('hidden-maxed');
+            } else {
+                critChanceUpgradeBtn.classList.remove('hidden-maxed');
+            }
+        }
+
 
         // --- Logique Passive (Game Loop) ---
 
@@ -1170,8 +1369,10 @@
             
             // Affichage et vérification
             updateScoreDisplay();
-            updateTPSDisplay(); // Assure la mise à jour constante du TPS
+            updateTPSDisplay(); 
+            updateCritStatsDisplay(); // NOUVEAU
             checkUpgradeCosts();
+            // Mise à jour de la visibilité des nouveaux upgrades (basé sur le score qui monte)
             checkUpgradeVisibility();
 
             // Sauvegarde du jeu toutes les 10 secondes (pour ne pas surcharger)
@@ -1191,12 +1392,13 @@
         // --- Sauvegarde et Chargement (Local Storage) ---
 
         function saveGame() {
-            // Pas besoin de sauvegarder clickPower et tps, ils sont recalculés
+            // Sauvegarde des stats critiques
+            // MODIFICATION: Met à jour l'attribut data-crit-chance-add du bouton
+            critChanceUpgradeBtn.setAttribute('data-crit-chance-add', critChancePerUpgrade); 
+            critPowerUpgradeBtn.setAttribute('data-crit-power-add', critPowerPerUpgrade);
+            
             const saveObject = {
-                // Le score est stocké en décimal, il est tronqué seulement à l'affichage
                 score: score, 
-                // clickPower: clickPower, <-- SUPPRIMÉ
-                // tps: tps, <-- SUPPRIMÉ
                 upgrades: [],
                 lang: currentLang
             };
@@ -1234,15 +1436,14 @@
 
             // 1. Initialisation des données par défaut
             score = 0;
-            clickPower = 1; // Réinitialisé à la base
-            tps = 0; // Réinitialisé à zéro
+            clickPower = 1; 
+            tps = 0; 
             
             // 2. Restauration de l'état
             if (saveObject) {
                 
                 // Restauration du score
                 score = saveObject.score || 0;
-                // clickPower et tps sont restaurés via recalculateStatsFromUpgrades()
 
                 // Restauration de l'état des boutons (set des attributs)
                 saveObject.upgrades.forEach(savedUpgrade => {
@@ -1270,7 +1471,8 @@
             
             // 4. Mise à jour finale et unique de l'interface et de l'état.
             setLanguage(currentLang, false); 
-            checkUpgradeVisibility(); 
+            // Mise à jour de la visibilité initiale, y compris les upgrades cachés au max
+            updateUpgradeVisibility(); 
         }
         
         function saveLanguage() {
