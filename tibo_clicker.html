@@ -562,6 +562,26 @@
                 <span class="upgrade-cost">1000000000 Tibos</span>
             </button>
             
+            <!-- NOUVELLE AMÉLIORATION : Minotaure 🐂 -->
+            <button id="upgrade-passive-minotaure" class="upgrade-button" data-base-cost="5000000000" data-tps="5000000" data-count="0" data-upgrade-key="minotaure">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Minotaure - Tu veux qu'il te fasse quoi ? 🐂</span>
+                    <br><span class="upgrade-description">Le Taureau de Crète. Génère 5,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">5000000000 Tibos</span>
+            </button>
+            
+            <!-- NOUVELLE AMÉLIORATION : BoomFred (LE PLUS PUISSANT) -->
+            <button id="upgrade-passive-boomfred" class="upgrade-button" data-base-cost="25000000000" data-tps="25000000" data-count="0" data-upgrade-key="boomfred">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">BoomFred - Le goat du sax et de Glazunov 🎷</span>
+                    <br><span class="upgrade-description">Génère 25,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">25000000000 Tibos</span>
+            </button>
+            
         </div>
         
     </div>
@@ -613,8 +633,10 @@
             document.getElementById('upgrade-passive-milodes'),
             document.getElementById('upgrade-passive-thomas'),
             document.getElementById('upgrade-passive-lenaik'),
-            // NOUVEAU: Rodrigues
-            document.getElementById('upgrade-passive-rodrigues')
+            document.getElementById('upgrade-passive-rodrigues'),
+            document.getElementById('upgrade-passive-minotaure'),
+            // NOUVEAU : BoomFred
+            document.getElementById('upgrade-passive-boomfred')
         ];
         
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
@@ -655,9 +677,13 @@
                 thomasDescription: "Génère 50,000 Tibos/s",
                 lenaikTitle: "Lenaik - La Gardienne Hyper-Protectrice 🛡️",
                 lenaikDescription: "Génère 200,000 Tibos/s",
-                // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - Le Bâton de Pèlerin 💫",
                 rodriguesDescription: "Génère 1,000,000 Tibos/s",
+                minotaureTitle: "Minotaure - Tu veux qu'il te fasse quoi ? 🐂",
+                minotaureDescription: "Le Taureau de Crète. Génère 5,000,000 Tibos/s",
+                // NOUVEAU: BoomFred
+                boomfredTitle: "BoomFred - Le goat du sax et de Glazunov 🎷",
+                boomfredDescription: "Génère 25,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
@@ -707,9 +733,13 @@
                 thomasDescription: "Generates 50,000 Tibo/s",
                 lenaikTitle: "Lenaik - The Hyper-Protective Guardian 🛡️",
                 lenaikDescription: "Generates 200,000 Tibo/s",
-                 // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - The Pilgrim's Staff 💫",
                 rodriguesDescription: "Generates 1,000,000 Tibo/s",
+                minotaureTitle: "Minotaur - What do you want him to do? 🐂",
+                minotaureDescription: "The Cretan Bull. Generates 5,000,000 Tibo/s",
+                // NOUVEAU: BoomFred
+                boomfredTitle: "BoomFred - The Sax and Glazunov GOAT 🎷",
+                boomfredDescription: "Generates 25,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -759,9 +789,13 @@
                 thomasDescription: "Genera 50,000 Tibo/s",
                 lenaikTitle: "Lenaik - La Gardiana Hiperprotectora 🛡️",
                 lenaikDescription: "Genera 200,000 Tibo/s",
-                 // NOUVEAU: Rodrigues
                 rodriguesTitle: "Rodrigues - El Bastón del Peregrino 💫",
                 rodriguesDescription: "Genera 1,000,000 Tibo/s",
+                minotaureTitle: "Minotauro - ¿Qué quieres que te haga? 🐂",
+                minotaureDescription: "El Minotauro de Creta. Genera 5,000,000 Tibo/s",
+                // NOUVEAU: BoomFred
+                boomfredTitle: "BoomFred - El GOAT del saxo y Glazunov 🎷",
+                boomfredDescription: "Genera 25,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -1025,26 +1059,17 @@
                 }
                 
                 // 1. Mise à jour de la puissance de clic / TPS
+                // On met à jour l'attribut directement dans le DOM, puis on recalcule le total
+                
+                // Si c'est un achat unique (Mindset, Ultra Sale, Cheat Meal)
                 if (button.hasAttribute('data-add-bonus')) {
-                    // Clics uniques (Mindset, Ultra Sale, Cheat Meal)
-                    const bonus = parseInt(button.getAttribute('data-add-bonus'));
-                    clickPower += bonus; 
                     button.setAttribute('data-purchased', 'true');
-                    
-                } else if (button.id === 'upgrade-addition') {
-                    // Clic répétable (Protéines)
-                    const addition = parseInt(button.getAttribute('data-addition'));
-                    clickPower += addition;
-                    // L'incrémentation du count est faite au début
-                    
-                } else if (button.hasAttribute('data-tps')) {
-                    // Passifs (TPS)
-                    const passiveTps = parseInt(button.getAttribute('data-tps'));
-                    tps += passiveTps;
-                    // L'incrémentation du count est faite au début
                 }
+                
+                // 2. Recalculer toutes les stats à partir des attributs des boutons
+                recalculateStatsFromUpgrades();
 
-                // 2. Mise à jour de l'UI et de l'état
+                // 3. Mise à jour de l'UI et de l'état
                 updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
                 saveGame(); // Sauvegarde le jeu après l'achat
             } else {
@@ -1052,6 +1077,40 @@
                 showStatusMessage(translations[currentLang].notEnoughTibos || "Pas assez de Tibos !", true);
             }
         }
+        
+        /**
+         * NOUVEAU : Recalcule les statistiques globales (clickPower et tps) en parcourant tous les upgrades
+         * Doit être appelé après le chargement d'une sauvegarde ou l'achat d'un upgrade.
+         */
+        function recalculateStatsFromUpgrades() {
+            let totalClickPower = 1; // Base de 1 TPC
+            let totalTps = 0;
+
+            upgradeButtons.forEach(button => {
+                const count = parseInt(button.getAttribute('data-count') || 0);
+                const isPurchased = button.getAttribute('data-purchased') === 'true';
+
+                // 1. Clics uniques (Bonus Additif)
+                if (button.hasAttribute('data-add-bonus') && isPurchased) {
+                    totalClickPower += parseInt(button.getAttribute('data-add-bonus'));
+                } 
+                // 2. Clics répétables (Protéines)
+                else if (button.id === 'upgrade-addition') {
+                    const addition = parseInt(button.getAttribute('data-addition'));
+                    totalClickPower += addition * count;
+                }
+                // 3. Passifs (TPS, incluant le Minotaure et BoomFred)
+                else if (button.hasAttribute('data-tps')) {
+                    const passiveTps = parseInt(button.getAttribute('data-tps'));
+                    totalTps += passiveTps * count;
+                }
+            });
+
+            // Mise à jour des variables globales
+            clickPower = totalClickPower;
+            tps = totalTps;
+        }
+
 
         function checkUpgradeCosts() {
             upgradeButtons.forEach(button => {
@@ -1132,11 +1191,12 @@
         // --- Sauvegarde et Chargement (Local Storage) ---
 
         function saveGame() {
+            // Pas besoin de sauvegarder clickPower et tps, ils sont recalculés
             const saveObject = {
                 // Le score est stocké en décimal, il est tronqué seulement à l'affichage
                 score: score, 
-                clickPower: clickPower,
-                tps: tps,
+                // clickPower: clickPower, <-- SUPPRIMÉ
+                // tps: tps, <-- SUPPRIMÉ
                 upgrades: [],
                 lang: currentLang
             };
@@ -1174,16 +1234,15 @@
 
             // 1. Initialisation des données par défaut
             score = 0;
-            clickPower = 1;
-            tps = 0;
+            clickPower = 1; // Réinitialisé à la base
+            tps = 0; // Réinitialisé à zéro
             
             // 2. Restauration de l'état
             if (saveObject) {
                 
-                // Restauration des scores globaux
+                // Restauration du score
                 score = saveObject.score || 0;
-                clickPower = saveObject.clickPower || 1;
-                tps = saveObject.tps || 0; 
+                // clickPower et tps sont restaurés via recalculateStatsFromUpgrades()
 
                 // Restauration de l'état des boutons (set des attributs)
                 saveObject.upgrades.forEach(savedUpgrade => {
@@ -1205,6 +1264,9 @@
             if (savedLang) {
                 currentLang = savedLang;
             }
+            
+            // NOUVEAU : Recalculer les stats globales après avoir appliqué les attributs des boutons
+            recalculateStatsFromUpgrades();
             
             // 4. Mise à jour finale et unique de l'interface et de l'état.
             setLanguage(currentLang, false); 
@@ -1294,6 +1356,7 @@
                     const loadedState = JSON.parse(content);
 
                     // 2. Validation de base de la structure du fichier
+                    // Le Minotaure est un upgrade, il doit faire partie du tableau 'upgrades'
                     if (typeof loadedState.score !== 'number' || !Array.isArray(loadedState.upgrades)) {
                         showStatusMessage(translations[currentLang].loadCorrupted, true);
                         event.target.value = '';
@@ -1328,7 +1391,7 @@
         window.onload = function() {
             // 1. Initialisation de la Musique
             loadTrack(currentTrackIndex); 
-            // 2. Chargement du jeu (qui met à jour l'UI à la fin)
+            // 2. Chargement du jeu (qui met à jour l'UI à la fin et appelle recalculateStatsFromUpgrades)
             loadGame(); 
             
             // 3. Événements pour la Sauvegarde/Restauration
