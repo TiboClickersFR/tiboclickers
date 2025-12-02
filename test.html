@@ -2,9 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tibo Clicker - La Vraie Transfo' !</title>
-    <!-- MISE À JOUR : Le fichier "icon.png" est défini comme icône. Assurez-vous que ce fichier est disponible dans l'environnement d'exécution. -->
+    <!-- MISE À JOUR : Le fichier "icon.png" est défini comme icône. -->
     <link rel="icon" type="image/png" href="icon.png"> 
     <style>
         /* CSS pour le style du jeu */
@@ -19,6 +19,9 @@
             overflow-x: hidden;
             background-image: radial-gradient(circle, #222222 1px, transparent 1px);
             background-size: 15px 15px;
+            /* Empêche la sélection de texte accidentelle sur mobile */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         #game-container {
@@ -36,17 +39,18 @@
 
         #clicker-area {
             flex: 2;
-            padding: 15px; /* Réduction du padding */
+            padding: 15px; 
             border-right: 2px solid #5a5a5a;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-around;
+            position: relative; /* Pour le positionnement absolu des textes */
         }
 
         #upgrades-area {
             flex: 1;
-            padding: 15px; /* Réduction du padding */
+            padding: 15px; 
             background-color: #2c2c2c;
             border-top-right-radius: 8px;
             border-bottom-right-radius: 8px;
@@ -61,36 +65,48 @@
         /* ------------------------------------------------ */
 
         #score-container {
-            margin-bottom: 15px; /* Réduction de la marge */
+            margin-bottom: 15px;
         }
 
         #score {
             font-size: 2.5em;
             font-weight: bold;
             color: #ffcc00; 
-            margin-bottom: 15px; /* Réduction de la marge */
+            margin-bottom: 15px;
             text-shadow: 2px 2px 4px #000;
         }
 
         #tibo-image {
-            width: 300px; /* Légère réduction pour PC */
-            height: 300px; /* Légère réduction pour PC */
+            width: 300px; 
+            height: 300px; 
             border-radius: 50%; 
             cursor: pointer;
             box-shadow: 0 0 15px #ffcc00, 0 0 30px rgba(255, 204, 0, 0.5);
-            transition: transform 0.1s;
-            user-select: none;
+            transition: transform 0.05s; /* Transition très rapide pour le clic */
             object-fit: cover;
             /* Utilisation d'une image de Tibo (assumée être 'Tibo.png' ou placeholder) */
             background-image: url('Tibo.png'); 
             background-size: cover;
             background-position: center;
             border: 5px solid #ffcc00;
-            margin-bottom: 15px; 
+            margin-bottom: 15px;
+            
+            /* OPTIMISATIONS MOBILE CRITIQUES */
+            touch-action: manipulation; /* Empêche le zoom/scroll navigateur sur l'image */
+            -webkit-tap-highlight-color: transparent; /* Enlève le flash bleu au clic */
+            user-select: none;
+            -webkit-user-select: none;
+            z-index: 5; /* S'assure que l'image est "au-dessus" du fond */
+            position: relative;
         }
 
         #tibo-image:active {
             transform: scale(0.95); 
+        }
+        
+        /* Classe active ajoutée via JS pour le tactile */
+        #tibo-image.active-touch {
+            transform: scale(0.95);
         }
         
         #click-power-display, #tps-display {
@@ -113,8 +129,8 @@
 
         .upgrade-button {
             width: 100%; 
-            padding: 10px; /* Légère réduction du padding */
-            margin: 6px 0; /* Légère réduction de la marge */
+            padding: 10px;
+            margin: 6px 0;
             /* COULEUR DE FOND GRIS FONCÉ UNIFORME */
             background-color: #3b3b3b;
             color: #f7f7f7;
@@ -127,6 +143,7 @@
             justify-content: space-between;
             align-items: center;
             text-align: left; 
+            touch-action: manipulation; /* Améliore la réponse tactile */
         }
 
         .upgrade-button:hover:not(:disabled) {
@@ -185,18 +202,23 @@
             font-size: 2em;
             color: #ffcc00;
             font-weight: bold;
-            pointer-events: none;
+            
+            /* CRUCIAL POUR LE PROBLÈME MOBILE : */
+            pointer-events: none !important; /* Force les clics à passer au travers */
+            
             opacity: 0;
             animation: floatUp 0.8s ease-out;
             text-shadow: 1px 1px 2px #000;
+            z-index: 100; /* Au-dessus de tout visuellement, mais intouchable grâce à pointer-events */
+            white-space: nowrap;
         }
         
         /* NOUVEAU: Style spécifique pour le boost critique */
         .floating-text.crit {
             color: #e74c3c; /* Rouge vif */
             font-size: 3em; 
-            animation: floatUpCrit 1s ease-out; /* Animation plus longue */
-            z-index: 10;
+            animation: floatUpCrit 1s ease-out; 
+            z-index: 101;
         }
 
         @keyframes floatUp {
@@ -216,11 +238,11 @@
                 opacity: 1;
             }
             50% {
-                transform: translateY(-25px) scale(1.5);
+                transform: translateY(-40px) scale(1.5); /* Monte un peu plus haut */
                 opacity: 1;
             }
             100% {
-                transform: translateY(-70px) scale(1);
+                transform: translateY(-100px) scale(1);
                 opacity: 0;
             }
         }
@@ -463,8 +485,8 @@
                 <div id="crit-stats-display">Transfo' Critique : 0.0% (x2)</div>
             </div>
 
+            <!-- Image de Tibo : Notez l'absence d'événement onclick inline, tout est géré en JS -->
             <div id="tibo-image"></div>
-            <!-- Image de Tibo -->
 
         </div>
 
@@ -1131,15 +1153,23 @@
         }
 
 
-        // --- Logique du Clic ---
+        // --- Logique du Clic (Mise à jour pour le Mobile) ---
 
-        tiboImage.addEventListener('click', function(e) {
+        function handleInteraction(e) {
+            // Empêche le comportement par défaut pour les événements tactiles
+            // afin d'éviter le zoom, le scroll ou les "clics fantômes"
+            if (e.type === 'touchstart') {
+                e.preventDefault(); 
+            }
+            
+            // Gestion de l'animation tactile
+            tiboImage.classList.add('active-touch');
+            setTimeout(() => tiboImage.classList.remove('active-touch'), 50);
+
+            // Calcul du score
             let scoreToAdd = clickPower;
             let isCrit = false;
 
-            // NOUVEAU: Logique de Boost Critique
-            // Math.random() génère [0, 1). On compare avec la chance en décimal (e.g., 0.005)
-            // On utilise Math.min(totalCritChance, 100) / 100 pour que le taux ne dépasse jamais 100% dans la probabilité
             const actualCritChance = Math.min(totalCritChance, MAX_CRIT_CHANCE) / 100;
             
             if (Math.random() < actualCritChance) { 
@@ -1147,40 +1177,57 @@
                  isCrit = true;
             }
 
-            // Ajout du score
             score += scoreToAdd;
             updateScoreDisplay();
             
-            // Animation du texte flottant
-            createFloatingText(scoreToAdd, e, isCrit);
+            // Déterminer les coordonnées (Souris ou Touch)
+            let clientX, clientY;
+            if (e.type === 'touchstart' && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
 
-            // Vérification des coûts et de l'affichage des nouveaux upgrades
+            // Animation du texte flottant
+            createFloatingText(scoreToAdd, clientX, clientY, isCrit);
+
             checkUpgradeCosts();
             checkUpgradeVisibility();
 
-            saveGame(); // Sauvegarde après chaque clic
-        });
+            saveGame(); 
+        }
 
-        function createFloatingText(amount, event, isCrit) {
+        // On écoute 'touchstart' en priorité pour la réactivité mobile
+        // { passive: false } est crucial pour pouvoir utiliser preventDefault()
+        tiboImage.addEventListener('touchstart', handleInteraction, { passive: false });
+        
+        // On garde 'mousedown' pour PC (plus réactif que 'click')
+        tiboImage.addEventListener('mousedown', handleInteraction);
+
+        function createFloatingText(amount, x, y, isCrit) {
             const text = document.createElement('div');
             text.classList.add('floating-text');
             
             if (isCrit) {
                 text.classList.add('crit');
-                // Texte du critique: le montant total + le multiplicateur
                 text.textContent = `CRIT! x${totalCritPower.toFixed(0)}`;
             } else {
                 text.textContent = `+${formatScore(amount)}`;
             }
             
-            // Positionnement basé sur le clic
+            // Positionnement
             const rect = tiboImage.getBoundingClientRect();
-            // Positionnement au centre du clic
-            text.style.left = `${event.clientX - rect.left + tiboImage.offsetWidth / 2}px`; 
-            text.style.top = `${event.clientY - rect.top + tiboImage.offsetHeight / 2}px`;
+            // On calcule le décalage pour centrer un peu
+            // Mais pour le mobile, on veut que ça apparaisse un peu au-dessus du doigt
+            const offsetY = isCrit ? -50 : -20; 
+            
+            text.style.left = `${x}px`; 
+            text.style.top = `${y + offsetY}px`;
 
-            // Ajout au DOM
-            tiboImage.parentElement.appendChild(text);
+            // On ajoute au body pour éviter les problèmes de débordement/coupure
+            document.body.appendChild(text);
 
             // Nettoyage après l'animation
             text.addEventListener('animationend', () => {
@@ -1608,12 +1655,15 @@
 
         // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
         let hasInteracted = false;
-        tiboImage.addEventListener('click', () => {
+        // Utilisez mousedown/touchstart pour initialiser l'audio plus rapidement
+        const initAudio = () => {
              if (!hasInteracted) {
                 playMusic();
                 hasInteracted = true;
             }
-        });
+        };
+        tiboImage.addEventListener('touchstart', initAudio, { passive: true });
+        tiboImage.addEventListener('mousedown', initAudio);
 
     </script>
 </body>
