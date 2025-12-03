@@ -696,7 +696,7 @@
         let totalCritChance = baseCritChance; // Chance actuelle en pourcentage (e.g., 0.5, 1.0, ...)
         
         let totalCritPower = 2; // Multiplicateur de base (x2)
-        let critPowerPerUpgrade = 1; // x1 ajouté par achat (x2, x3, x4, ...)
+        let critPowerPerUpgrade = 2; // x2 ajouté par achat (x2, x4, x6, ...)
         
         // Ancienne constante GROWTH_FACTOR (1.15) est maintenant utilisée dans data-growth pour les upgrades passifs
         const CRIT_GROWTH_FACTOR = 1.3; // Facteur d'augmentation pour les upgrades critiques (plus rapide)
@@ -769,7 +769,7 @@
                 critChanceTitle: "Chance de Transfo' Critique 📈",
                 critChanceDescription: `Augmente la chance de boost de ${critChancePerUpgrade.toFixed(1)}%`,
                 critPowerTitle: "Puissance de Transfo' Critique 🔥",
-                critPowerDescription: "Augmente le multiplicateur de boost de x1 (base x2)",
+                critPowerDescription: "Augmente le multiplicateur de boost de x2 (base x2)",
                 // Upgrades Répétables
                 proteinesTitle: "Déverrouillage des Protéines",
                 proteinesDescription: "Ajoute +5 Tibos par Clic",
@@ -832,7 +832,7 @@
                 critChanceTitle: "Critical Transfo' Chance 📈",
                 critChanceDescription: `Increases boost chance by ${critChancePerUpgrade.toFixed(1)}%`,
                 critPowerTitle: "Critical Transfo' Power 🔥",
-                critPowerDescription: "Increases boost multiplier by x1 (base x2)",
+                critPowerDescription: "Increases boost multiplier by x2 (base x2)",
                 // Repeatable Upgrades
                 proteinesTitle: "Protein Unlock",
                 proteinesDescription: "Adds +5 Tibos per Click",
@@ -895,7 +895,7 @@
                 critChanceTitle: "Probabilidad de Transfo' Crítica 📈",
                 critChanceDescription: `Aumenta la probabilidad de boost en ${critChancePerUpgrade.toFixed(1)}%`,
                 critPowerTitle: "Poder de Transfo' Crítica 🔥",
-                critPowerDescription: "Aumenta el multiplicador de boost en x1 (base x2)",
+                critPowerDescription: "Aumenta el multiplicador de boost en x2 (base x2)",
                 // Upgrades Repetibles
                 proteinesTitle: "Desbloqueo de Proteínas",
                 proteinesDescription: "Añade +5 Tibos por Clic",
