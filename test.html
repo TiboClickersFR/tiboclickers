@@ -667,6 +667,46 @@
                 </div>
                 <span class="upgrade-cost">25000000000 Tibos</span>
             </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Tomasi -->
+            <button id="upgrade-passive-tomasi" class="upgrade-button" data-base-cost="200000000000" data-growth="1.15" data-tps="150000000" data-count="0" data-upgrade-key="tomasi">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Tomasi - La Mélodie Divine 🎵</span>
+                    <br><span class="upgrade-description">Génère 150,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">200,000,000,000 Tibos</span>
+            </button>
+
+            <!-- NOUVELLE AMÉLIORATION : SperGabMaker -->
+            <button id="upgrade-passive-spergabmaker" class="upgrade-button" data-base-cost="2000000000000" data-growth="1.15" data-tps="1000000000" data-count="0" data-upgrade-key="spergabmaker">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">SperGabMaker - L'Alchimiste Suprême 🧬</span>
+                    <br><span class="upgrade-description">Génère 1,000,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">2,000,000,000,000 Tibos</span>
+            </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Timéto -->
+            <button id="upgrade-passive-timeto" class="upgrade-button" data-base-cost="25000000000000" data-growth="1.15" data-tps="10000000000" data-count="0" data-upgrade-key="timeto">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Timéto - Le Maître du Temps ⏳</span>
+                    <br><span class="upgrade-description">Génère 10,000,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">25,000,000,000,000 Tibos</span>
+            </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Boubou -->
+            <button id="upgrade-passive-boubou" class="upgrade-button" data-base-cost="500000000000000" data-growth="1.15" data-tps="200000000000" data-count="0" data-upgrade-key="boubou">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Boubou - Bienvenue chez nous frère 🤝</span>
+                    <br><span class="upgrade-description">Génère 200,000,000,000 Tibos/s</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">500,000,000,000,000 Tibos</span>
+            </button>
             
         </div>
         
@@ -741,7 +781,12 @@
             document.getElementById('upgrade-passive-rodrigues'),
             document.getElementById('upgrade-passive-minotaure'),
             // NOUVEAU : BoomFred
-            document.getElementById('upgrade-passive-boomfred')
+            document.getElementById('upgrade-passive-boomfred'),
+            // AJOUTS RÉCENTS
+            document.getElementById('upgrade-passive-tomasi'),
+            document.getElementById('upgrade-passive-boubou'),
+            document.getElementById('upgrade-passive-spergabmaker'),
+            document.getElementById('upgrade-passive-timeto')
         ];
         
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
@@ -795,6 +840,15 @@
                 minotaureDescription: "Le Taureau de Crète. Génère 5,000,000 Tibos/s",
                 boomfredTitle: "BoomFred - Le goat du sax et de Glazunov 🎷",
                 boomfredDescription: "Génère 25,000,000 Tibos/s",
+                // NOUVEAUX
+                tomasiTitle: "Tomasi - La Mélodie Divine 🎵",
+                tomasiDescription: "Génère 150,000,000 Tibos/s",
+                boubouTitle: "Boubou - Bienvenue chez nous frère 🤝",
+                boubouDescription: "Génère 200,000,000,000 Tibos/s",
+                spergabmakerTitle: "SperGabMaker - L'Alchimiste Suprême 🧬",
+                spergabmakerDescription: "Génère 1,000,000,000 Tibos/s",
+                timetoTitle: "Timéto - Le Maître du Temps ⏳",
+                timetoDescription: "Génère 10,000,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
@@ -858,6 +912,15 @@
                 minotaureDescription: "The Cretan Bull. Generates 5,000,000 Tibo/s",
                 boomfredTitle: "BoomFred - The Sax and Glazunov GOAT 🎷",
                 boomfredDescription: "Generates 25,000,000 Tibo/s",
+                // NEW
+                tomasiTitle: "Tomasi - The Divine Melody 🎵",
+                tomasiDescription: "Generates 150,000,000 Tibo/s",
+                boubouTitle: "Boubou - Welcome home brother 🤝",
+                boubouDescription: "Generates 200,000,000,000 Tibo/s",
+                spergabmakerTitle: "SperGabMaker - The Supreme Alchemist 🧬",
+                spergabmakerDescription: "Generates 1,000,000,000 Tibo/s",
+                timetoTitle: "Timéto - The Time Master ⏳",
+                timetoDescription: "Generates 10,000,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -921,6 +984,15 @@
                 minotaureDescription: "El Minotauro de Creta. Genera 5,000,000 Tibo/s",
                 boomfredTitle: "BoomFred - El GOAT del saxo y Glazunov 🎷",
                 boomfredDescription: "Genera 25,000,000 Tibo/s",
+                // NEW
+                tomasiTitle: "Tomasi - La Melodía Divina 🎵",
+                tomasiDescription: "Genera 150,000,000 Tibo/s",
+                boubouTitle: "Boubou - Bienvenido a casa hermano 🤝",
+                boubouDescription: "Genera 200,000,000,000 Tibo/s",
+                spergabmakerTitle: "SperGabMaker - El Alquimista Supremo 🧬",
+                spergabmakerDescription: "Genera 1,000,000,000 Tibo/s",
+                timetoTitle: "Timéto - El Maestro del Tiempo ⏳",
+                timetoDescription: "Genera 10,000,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
