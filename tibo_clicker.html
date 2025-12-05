@@ -173,6 +173,17 @@
             color: #e74c3c; /* Rouge vif pour le critique */
         }
 
+        /* Style spécifique pour l'upgrade DIVIN */
+        .god-upgrade {
+            border: 2px solid #ffd700;
+            background-color: #2a2002;
+            box-shadow: 0 0 10px #ffd700;
+        }
+        .god-upgrade .upgrade-title {
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffd700;
+        }
+
         .upgrade-cost {
             font-weight: bold;
             color: #ffcc00;
@@ -522,6 +533,16 @@
                     </div>
                     <span class="upgrade-cost">3000 Tibos</span>
                 </button>
+
+                <!-- NOUVELLE UPGRADE ULTIME : MULTIPLICATEUR X5000 -->
+                 <button id="upgrade-click-god" class="upgrade-button god-upgrade hidden" data-cost="1000000000000" data-multiplier="5000" data-purchased="false" data-upgrade-key="godmode" data-max-once="true">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">La Transfo Divine ⚡</span>
+                        <br><span class="upgrade-description">Multiplie le clic par 5000 (Achat Unique)</span>
+                    </div>
+                    <span class="upgrade-cost">1T Tibos</span>
+                </button>
+
             </div>
             
             <hr style="border-color: #5a5a5a; margin: 15px 0;">
@@ -756,6 +777,7 @@
         const upgrade1 = document.getElementById('upgrade-click-1');
         const upgrade2_new = document.getElementById('upgrade-click-2-new'); 
         const upgrade3_new = document.getElementById('upgrade-click-3-new'); 
+        const upgradeGod = document.getElementById('upgrade-click-god'); // NOUVEAU
         
         // Références aux upgrades critiques
         const critChanceUpgradeBtn = document.getElementById('upgrade-crit-chance');
@@ -766,6 +788,7 @@
             upgrade1,
             upgrade2_new,
             upgrade3_new,
+            upgradeGod, // AJOUT
             critChanceUpgradeBtn,
             critPowerUpgradeBtn,
             document.getElementById('upgrade-addition'),
@@ -810,6 +833,10 @@
                 ultrasaleDescription: "Ajoute +3 TPC de base (Achat Unique)",
                 cheatmealTitle: "Le Cheat Meal Ultime 🍕",
                 cheatmealDescription: "Ajoute +6 TPC de base (Achat Unique)",
+                // NOUVEAU
+                godmodeTitle: "La Transfo Divine ⚡",
+                godmodeDescription: "Multiplie tous les clics par 5000 (Achat Unique)",
+                
                 // MODIFICATION: Description avec 0.5%
                 critChanceTitle: "Chance de Transfo' Critique 📈",
                 critChanceDescription: `Augmente la chance de boost de ${critChancePerUpgrade.toFixed(1)}%`,
@@ -882,6 +909,10 @@
                 ultrasaleDescription: "Adds +3 base TPC (One-Time Purchase)",
                 cheatmealTitle: "The Ultimate Cheat Meal 🍕",
                 cheatmealDescription: "Adds +6 base TPC (One-Time Purchase)",
+                // NOUVEAU
+                godmodeTitle: "The Divine Transfo ⚡",
+                godmodeDescription: "Multiplies all clicks by 5000 (One-Time Purchase)",
+
                 // MODIFICATION: Description avec 0.5%
                 critChanceTitle: "Critical Transfo' Chance 📈",
                 critChanceDescription: `Increases boost chance by ${critChancePerUpgrade.toFixed(1)}%`,
@@ -954,6 +985,10 @@
                 ultrasaleDescription: "Añade +3 TPC base (Compra Única)",
                 cheatmealTitle: "La Comida Trampa Definitiva 🍕",
                 cheatmealDescription: "Añade +6 TPC base (Compra Única)",
+                // NOUVEAU
+                godmodeTitle: "La Transfo Divina ⚡",
+                godmodeDescription: "Multiplica todos los clics por 5000 (Compra Única)",
+
                 // MODIFICACION: Description avec 0.5%
                 critChanceTitle: "Probabilidad de Transfo' Crítica 📈",
                 critChanceDescription: `Aumenta la probabilidad de boost en ${critChancePerUpgrade.toFixed(1)}%`,
@@ -1332,7 +1367,7 @@
                 }
                 
                 // Si c'est un achat unique (Mindset, Ultra Sale, Cheat Meal)
-                if (button.hasAttribute('data-add-bonus')) {
+                if (button.hasAttribute('data-add-bonus') || button.hasAttribute('data-multiplier')) {
                     button.setAttribute('data-purchased', 'true');
                 }
                 
@@ -1355,6 +1390,7 @@
         function recalculateStatsFromUpgrades() {
             let totalClickPower = 1; // Base de 1 TPC
             let totalTps = 0;
+            let clickMultiplier = 1; // NOUVEAU : Multiplicateur global pour le clic
             
             let critChanceCount = 0;
             let critPowerCount = 0;
@@ -1367,6 +1403,10 @@
                 if (button.hasAttribute('data-add-bonus') && isPurchased) {
                     totalClickPower += parseInt(button.getAttribute('data-add-bonus'));
                 } 
+                // NOUVEAU : 1.5 Clics Multiplicateurs (x5000)
+                else if (button.hasAttribute('data-multiplier') && isPurchased) {
+                     clickMultiplier *= parseInt(button.getAttribute('data-multiplier'));
+                }
                 // 2. Clics répétables (Protéines)
                 else if (button.id === 'upgrade-addition') {
                     const addition = parseInt(button.getAttribute('data-addition'));
@@ -1388,7 +1428,8 @@
             });
 
             // Mise à jour des variables globales
-            clickPower = totalClickPower;
+            // Applique le multiplicateur à la puissance totale
+            clickPower = totalClickPower * clickMultiplier;
             tps = totalTps;
             
             // Mise à jour des stats critiques
@@ -1439,8 +1480,14 @@
                 upgrade3_new.style.opacity = 1;
             }
             
+            // NOUVEAU : Apparition de l'upgrade Divine (à 500 Milliards pour l'effet de surprise)
+            if (score >= 500000000000 && upgradeGod.classList.contains('hidden')) {
+                upgradeGod.classList.remove('hidden');
+                upgradeGod.style.opacity = 1;
+            }
+            
             // Assure que les upgrades sont visibles au rechargement si déjà achetés ou découverts
-            [upgrade2_new, upgrade3_new].forEach(btn => {
+            [upgrade2_new, upgrade3_new, upgradeGod].forEach(btn => {
                  if (btn.getAttribute('data-purchased') === 'true' || score >= parseInt(btn.getAttribute('data-cost')) * 0.8) {
                     btn.classList.remove('hidden');
                     btn.style.opacity = 1;
@@ -1453,7 +1500,7 @@
          */
         function updateUpgradeVisibility() {
             // 1. Améliorations à Achat Unique (data-max-once="true")
-            [upgrade1, upgrade2_new, upgrade3_new].forEach(button => {
+            [upgrade1, upgrade2_new, upgrade3_new, upgradeGod].forEach(button => {
                 const isPurchased = button.getAttribute('data-purchased') === 'true';
                 
                 // Si acheté, on ajoute la classe hidden-maxed pour masquer complètement
