@@ -123,6 +123,14 @@
             color: #e74c3c; /* Couleur rouge/critique */
             font-weight: bold;
         }
+
+        /* Affichage de la nouvelle monnaie d'objectifs */
+        #objective-currency-display {
+            margin-top: 8px;
+            font-size: 1.1em;
+            color: #9fe6a0; /* Vert clair pour la monnaie d'objectifs */
+            font-weight: bold;
+        }
         
         /* ------------------------------------------------ */
         /* Mise à jour des Améliorations */
@@ -495,6 +503,8 @@
                 <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
                 <!-- NOUVEAU: Affichage des statistiques de boost critique -->
                 <div id="crit-stats-display">Transfo' Critique : 0.0% (x2)</div>
+                    <!-- NOUVEAU: Affichage de la monnaie d'objectifs -->
+                    <div id="objective-currency-display">Points d'Objectif : 0</div>
             </div>
 
             <!-- Image de Tibo : Notez l'absence d'événement onclick inline, tout est géré en JS -->
@@ -504,6 +514,14 @@
 
         <div id="upgrades-area">
             <h2 id="upgrades-title">Améliorations</h2>
+
+            <!-- NOUVEAU: Panneau d'Objectifs -->
+            <div id="objectives-panel" style="text-align:left; margin-top:12px;">
+                <h3 style="color:#9fe6a0; margin:0 0 8px 0;">Objectifs</h3>
+                <div id="objectives-list">
+                    <!-- Les objectifs seront injectés ici par JS -->
+                </div>
+            </div>
 
             <!-- Améliorations de Clic (Bonus Additif Unique) -->
             <div id="click-multiplier-container" class="new-upgrade-container">
@@ -761,6 +779,12 @@
         let clickPower = 1; // Puissance de clic totale (base + bonus)
         let tps = 0; // Tibos Par Seconde
         
+        // NOUVEAU: Monnaie d'Objectifs
+        let objectiveCurrency = 0; // Nouvelle monnaie récompensée par les objectifs
+        // Statistiques pour le suivi des objectifs
+        let totalClicks = 0;
+        let totalPurchases = 0;
+        
         // NOUVEAU: Statistiques Critiques
         let baseCritChance = 0; // MODIFICATION: 0% de base
         let critChancePerUpgrade = 0.5; // MODIFICATION: 0.5% ajouté par achat
@@ -779,6 +803,7 @@
         const LANG_STORAGE_KEY = 'tiboClickerLang';
         
         const scoreDisplay = document.getElementById('score');
+        const objectiveCurrencyDisplay = document.getElementById('objective-currency-display');
         const tiboImage = document.getElementById('tibo-image');
         const clickPowerDisplay = document.getElementById('click-power-display');
         const tpsDisplay = document.getElementById('tps-display');
@@ -800,6 +825,7 @@
             upgrade2_new,
             upgrade3_new,
             upgradeGod, // AJOUT
+            document.getElementById('upgrade-addition-1b'),
             critChanceUpgradeBtn,
             critPowerUpgradeBtn,
             document.getElementById('upgrade-addition'),
@@ -859,6 +885,15 @@
                 proteinesDescription: "Ajoute +5 Tibos par Clic",
                 megaProteinTitle: "Pack d'entraînement Massif",
                 megaProteinDescription: "Ajoute +30 TPC de base par achat",
+                objectiveCurrencyName: "Points d'Objectif",
+                objectivesTitle: "Objectifs",
+                objective_clicks_100_title: "Clicker Novice",
+                objective_clicks_100_desc: "Clique 100 fois",
+                objective_score_1000_title: "Tibos Débutant",
+                objective_score_1000_desc: "Atteindre 1,000 Tibos",
+                objective_first_buy_title: "Premier Achat",
+                objective_first_buy_desc: "Acheter votre première amélioration",
+                objective_reward_received: "Récompense reçue : +",
                 alessioTitle: "Alessiode - Coach Personnel 🏋️",
                 alessioDescription: "Génère 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -937,6 +972,15 @@
                 proteinesDescription: "Adds +5 Tibos per Click",
                 megaProteinTitle: "Massive Training Pack",
                 megaProteinDescription: "Adds +30 base TPC per purchase",
+                objectiveCurrencyName: "Objective Points",
+                objectivesTitle: "Objectives",
+                objective_clicks_100_title: "Clicker Novice",
+                objective_clicks_100_desc: "Click 100 times",
+                objective_score_1000_title: "Tibos Starter",
+                objective_score_1000_desc: "Reach 1,000 Tibos",
+                objective_first_buy_title: "First Purchase",
+                objective_first_buy_desc: "Buy your first upgrade",
+                objective_reward_received: "Reward received: +",
                 alessioTitle: "Alessiode - Personal Coach 🏋️",
                 alessioDescription: "Generates 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -1015,6 +1059,15 @@
                 proteinesDescription: "Añade +5 Tibos por Clic",
                 megaProteinTitle: "Paquete de Entrenamiento Masivo",
                 megaProteinDescription: "Añade +30 TPC base por compra",
+                objectiveCurrencyName: "Puntos de Objetivo",
+                objectivesTitle: "Objetivos",
+                objective_clicks_100_title: "Clicker Novato",
+                objective_clicks_100_desc: "Haz 100 clics",
+                objective_score_1000_title: "Tibos Principiante",
+                objective_score_1000_desc: "Alcanza 1,000 Tibos",
+                objective_first_buy_title: "Primera Compra",
+                objective_first_buy_desc: "Compra tu primera mejora",
+                objective_reward_received: "Recompensa recibida: +",
                 alessioTitle: "Alessiode - Entrenador Personal 🏋️",
                 alessioDescription: "Genera 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -1148,6 +1201,7 @@
             updateScoreDisplay(); 
             updateTPSDisplay();
             updateCritStatsDisplay(); // NOUVEAU
+            updateObjectiveCurrencyDisplay(); // NOUVEAU
 
             // Mise à jour de tous les boutons d'amélioration
             upgradeButtons.forEach(button => {
@@ -1211,6 +1265,7 @@
             });
             checkUpgradeCosts(); // Vérifie l'état disabled/enabled
             updateUpgradeVisibility(); // NOUVEAU: Gère la visibilité après la mise à jour des stats
+            updateObjectivesUI(); // Met à jour le panneau d'objectifs
         }
         
         // --- Fonctions Utilitaire de Score ---
@@ -1246,6 +1301,91 @@
              // La chance critique ne doit jamais être affichée au-dessus de 100%
              const displayChance = Math.min(totalCritChance, MAX_CRIT_CHANCE); 
              critStatsDisplay.textContent = t.critStatsDisplay(displayChance, totalCritPower);
+        }
+
+        // --- Fonctions pour les Objectifs et la nouvelle monnaie ---
+        function updateObjectiveCurrencyDisplay() {
+            const t = translations[currentLang];
+            if (objectiveCurrencyDisplay) {
+                objectiveCurrencyDisplay.textContent = `${t.objectiveCurrencyName} : ${formatScore(objectiveCurrency)}`;
+            }
+        }
+
+        // Définition des objectifs (statique, peut être étendue)
+        const objectives = [
+            { id: 'obj_clicks_100', titleKey: 'objective_clicks_100_title', descKey: 'objective_clicks_100_desc', type: 'clicks', target: 100, progress: 0, completed: false, reward: 10 },
+            { id: 'obj_score_1000', titleKey: 'objective_score_1000_title', descKey: 'objective_score_1000_desc', type: 'score', target: 1000, progress: 0, completed: false, reward: 20 },
+            { id: 'obj_first_buy', titleKey: 'objective_first_buy_title', descKey: 'objective_first_buy_desc', type: 'purchases', target: 1, progress: 0, completed: false, reward: 15 }
+        ];
+
+        function updateObjectivesUI() {
+            const t = translations[currentLang];
+            const list = document.getElementById('objectives-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            // Affiche seulement les objectifs non complétés (les complétés disparaissent)
+            objectives.filter(o => !o.completed).forEach(obj => {
+                // Calculer la progression en temps réel à partir des compteurs globaux
+                let progressValue = 0;
+                if (obj.type === 'score') progressValue = Math.floor(score);
+                else if (obj.type === 'clicks') progressValue = totalClicks;
+                else if (obj.type === 'purchases') progressValue = totalPurchases;
+
+                // Met à jour la propriété progress pour la persistance si besoin
+                obj.progress = progressValue;
+
+                const item = document.createElement('div');
+                item.style.padding = '6px 8px';
+                item.style.border = '1px solid #3a3a3a';
+                item.style.borderRadius = '6px';
+                item.style.marginBottom = '6px';
+                item.style.background = '#262626';
+
+                const title = document.createElement('div');
+                title.style.color = '#ffcc00';
+                title.style.fontWeight = 'bold';
+                title.textContent = translations[currentLang][obj.titleKey];
+
+                const desc = document.createElement('div');
+                desc.style.fontSize = '0.9em';
+                desc.style.color = '#ccc';
+                desc.textContent = translations[currentLang][obj.descKey];
+
+                const progress = document.createElement('div');
+                progress.style.fontSize = '0.85em';
+                progress.style.color = '#9fbfbf';
+                const progText = obj.type === 'score' ? `${formatScore(progressValue)} / ${formatScore(obj.target)}` : `${progressValue} / ${obj.target}`;
+                progress.textContent = `Progress: ${progText}`;
+
+                item.appendChild(title);
+                item.appendChild(desc);
+                item.appendChild(progress);
+
+                list.appendChild(item);
+            });
+        }
+
+        // Vérifie les objectifs et récompense automatiquement
+        function checkObjectives() {
+            const t = translations[currentLang];
+            objectives.forEach(obj => {
+                if (obj.completed) return;
+                if (obj.type === 'clicks' && totalClicks >= obj.target) {
+                    obj.completed = true;
+                } else if (obj.type === 'score' && score >= obj.target) {
+                    obj.completed = true;
+                } else if (obj.type === 'purchases' && totalPurchases >= obj.target) {
+                    obj.completed = true;
+                }
+
+                if (obj.completed) {
+                    objectiveCurrency += obj.reward;
+                    showStatusMessage(`${t.objective_reward_received}${obj.reward} ${t.objectiveCurrencyName}`, false);
+                }
+            });
+            updateObjectiveCurrencyDisplay();
+            updateObjectivesUI();
         }
 
         /**
@@ -1292,6 +1432,9 @@
             setTimeout(() => tiboImage.classList.remove('active-touch'), 50);
 
             // Calcul du score
+            // Compteur total de clics pour les objectifs
+            totalClicks++;
+
             let scoreToAdd = clickPower;
             let isCrit = false;
 
@@ -1317,9 +1460,11 @@
 
             // Animation du texte flottant
             createFloatingText(scoreToAdd, clientX, clientY, isCrit);
-
             checkUpgradeCosts();
             checkUpgradeVisibility();
+
+            // Vérifier les objectifs immédiatement après un clic
+            checkObjectives();
 
             saveGame(); 
         }
@@ -1383,6 +1528,9 @@
                     let count = parseInt(button.getAttribute('data-count'));
                     button.setAttribute('data-count', ++count);
                 }
+
+                // Incrémente le compteur global d'achats (pour les objectifs)
+                totalPurchases++;
                 
                 // Si c'est un achat unique (Mindset, Ultra Sale, Cheat Meal)
                 if (button.hasAttribute('data-add-bonus') || button.hasAttribute('data-multiplier')) {
@@ -1394,6 +1542,8 @@
 
                 // 3. Mise à jour de l'UI et de l'état
                 updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
+                // Vérifier les objectifs après un achat (un achat peut déclencher une récompense)
+                checkObjectives();
                 saveGame(); // Sauvegarde le jeu après l'achat
             } else {
                 // NE PAS UTILISER alert()
@@ -1559,6 +1709,9 @@
             // Mise à jour de la visibilité des nouveaux upgrades (basé sur le score qui monte)
             checkUpgradeVisibility();
 
+            // Vérifie périodiquement les objectifs
+            checkObjectives();
+
             // Sauvegarde du jeu toutes les 10 secondes (pour ne pas surcharger)
             // Utiliser un drapeau pour ne pas sauvegarder 10 fois par seconde
             const now = Math.floor(performance.now() / 1000);
@@ -1583,6 +1736,9 @@
             
             const saveObject = {
                 score: score, 
+                objectiveCurrency: objectiveCurrency,
+                totalClicks: totalClicks,
+                totalPurchases: totalPurchases,
                 upgrades: [],
                 lang: currentLang
             };
@@ -1595,6 +1751,9 @@
                     purchased: button.getAttribute('data-purchased') === 'true'
                 });
             });
+
+            // Sauvegarde de l'état des objectifs
+            saveObject.objectives = objectives.map(o => ({ id: o.id, progress: o.progress, completed: !!o.completed }));
 
             localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(saveObject));
         }
@@ -1643,6 +1802,21 @@
                 if (saveObject.lang) {
                     currentLang = saveObject.lang;
                 }
+                // Restauration de la monnaie d'objectifs et compteurs
+                objectiveCurrency = parseInt(saveObject.objectiveCurrency || 0);
+                totalClicks = parseInt(saveObject.totalClicks || 0);
+                totalPurchases = parseInt(saveObject.totalPurchases || 0);
+
+                // Restauration des objectifs (si fournis)
+                if (Array.isArray(saveObject.objectives)) {
+                    saveObject.objectives.forEach(savedObj => {
+                        const obj = objectives.find(o => o.id === savedObj.id);
+                        if (obj) {
+                            obj.progress = savedObj.progress || 0;
+                            obj.completed = savedObj.completed === true;
+                        }
+                    });
+                }
             }
             
             // 3. Chargement de la Langue (si elle est définie indépendamment de la save)
@@ -1653,6 +1827,9 @@
             // NOUVEAU : Recalculer les stats globales après avoir appliqué les attributs des boutons
             recalculateStatsFromUpgrades();
             
+            // Vérifier immédiatement les objectifs (au cas où le joueur a déjà rempli des conditions)
+            checkObjectives();
+            updateObjectiveCurrencyDisplay();
             // 4. Mise à jour finale et unique de l'interface et de l'état.
             setLanguage(currentLang, false); 
             // Mise à jour de la visibilité initiale, y compris les upgrades cachés au max
