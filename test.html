@@ -1409,9 +1409,36 @@
             active.forEach(obj => {
                 // Calculer la progression en temps réel à partir des compteurs globaux
                 let progressValue = 0;
-                if (obj.type === 'score') progressValue = Math.floor(score);
-                else if (obj.type === 'clicks') progressValue = totalClicks;
-                else if (obj.type === 'purchases') progressValue = totalPurchases;
+                if (obj.type === 'score') {
+                    progressValue = Math.floor(score);
+                } else if (obj.type === 'clicks') {
+                    progressValue = totalClicks;
+                } else if (obj.type === 'purchases') {
+                    progressValue = totalPurchases;
+                } else if (obj.type === 'timed_clicks') {
+                    // Recalculer les clics récents dans la fenêtre (même logique que checkObjectives)
+                    const now = Date.now();
+                    const windowStart = now - ((obj.durationSec || 60) * 1000);
+                    progressValue = clickTimestamps.filter(ts => ts >= windowStart).length;
+                } else if (obj.type === 'buy_upgrade') {
+                    const button = document.getElementById(obj.upgradeId);
+                    if (button) {
+                        if (button.hasAttribute('data-count')) {
+                            progressValue = parseInt(button.getAttribute('data-count') || 0);
+                        } else {
+                            progressValue = (button.getAttribute('data-purchased') === 'true') ? 1 : 0;
+                        }
+                    } else {
+                        progressValue = obj.progress || 0;
+                    }
+                } else if (obj.type === 'tps') {
+                    progressValue = Math.floor(tps);
+                } else if (obj.type === 'crits') {
+                    progressValue = totalCrits;
+                } else {
+                    // Fallback: utiliser la valeur stockée si disponible
+                    progressValue = obj.progress || 0;
+                }
 
                 // Met à jour la propriété progress pour la persistance si besoin
                 obj.progress = progressValue;
