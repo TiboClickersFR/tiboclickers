@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -463,7 +464,7 @@
             <!-- TITRE DE LA PISTE MIS À JOUR POUR CORRESPONDRE À LA NOUVELLE PLAYLIST -->
             <p><span id="music-label">Musique</span> : <span id="current-track-title">Damn (Gabin)</span></p>
             <div id="music-control-buttons">
-                 <button onclick="toggleMusic()">▶️ / ⏸️</button>
+                 <button onclick="toggleMusic()">▶️</button>
                  <button onclick="nextTrack()">⏭️</button>
             </div>
         </div>
@@ -577,6 +578,16 @@
                     <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">2000 Tibos</span>
+            </button>
+
+            <!-- NOUVELLE AMÉLIORATION : Pack Massif (1 Milliard) -->
+            <button id="upgrade-addition-1b" class="upgrade-button" data-base-cost="1000000000" data-growth="1.15" data-addition="30" data-count="0" data-upgrade-key="megaProtein">
+                <div class="upgrade-details">
+                    <span class="upgrade-title">Pack d'entraînement Massif</span>
+                    <br><span class="upgrade-description">Ajoute +30 TPC de base par achat</span>
+                    <span class="upgrade-count">Possédé: 0</span>
+                </div>
+                <span class="upgrade-cost">1,000,000,000 Tibos</span>
             </button>
 
             <!-- Amélioration Passive 1 - Alessio -->
@@ -792,6 +803,7 @@
             critChanceUpgradeBtn,
             critPowerUpgradeBtn,
             document.getElementById('upgrade-addition'),
+            document.getElementById('upgrade-addition-1b'),
             document.getElementById('upgrade-passive-alessiode'),
             document.getElementById('upgrade-passive-justine'),
             document.getElementById('upgrade-passive-patate'),
@@ -845,6 +857,8 @@
                 // Upgrades Répétables
                 proteinesTitle: "Déverrouillage des Protéines",
                 proteinesDescription: "Ajoute +5 Tibos par Clic",
+                megaProteinTitle: "Pack d'entraînement Massif",
+                megaProteinDescription: "Ajoute +30 TPC de base par achat",
                 alessioTitle: "Alessiode - Coach Personnel 🏋️",
                 alessioDescription: "Génère 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -921,6 +935,8 @@
                 // Repeatable Upgrades
                 proteinesTitle: "Protein Unlock",
                 proteinesDescription: "Adds +5 Tibos per Click",
+                megaProteinTitle: "Massive Training Pack",
+                megaProteinDescription: "Adds +30 base TPC per purchase",
                 alessioTitle: "Alessiode - Personal Coach 🏋️",
                 alessioDescription: "Generates 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -997,6 +1013,8 @@
                 // Upgrades Repetibles
                 proteinesTitle: "Desbloqueo de Proteínas",
                 proteinesDescription: "Añade +5 Tibos por Clic",
+                megaProteinTitle: "Paquete de Entrenamiento Masivo",
+                megaProteinDescription: "Añade +30 TPC base por compra",
                 alessioTitle: "Alessiode - Entrenador Personal 🏋️",
                 alessioDescription: "Genera 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -1407,9 +1425,9 @@
                 else if (button.hasAttribute('data-multiplier') && isPurchased) {
                      clickMultiplier *= parseInt(button.getAttribute('data-multiplier'));
                 }
-                // 2. Clics répétables (Protéines)
-                else if (button.id === 'upgrade-addition') {
-                    const addition = parseInt(button.getAttribute('data-addition'));
+                // 2. Clics répétables (Protéines et autres améliorations avec data-addition)
+                else if (button.hasAttribute('data-addition')) {
+                    const addition = parseInt(button.getAttribute('data-addition')) || 0;
                     totalClickPower += addition * count;
                 }
                 // 3. Passifs (TPS, incluant le Minotaure et BoomFred)
