@@ -1440,8 +1440,8 @@
                     progressValue = obj.progress || 0;
                 }
 
-                // Met à jour la propriété progress pour la persistance si besoin
-                obj.progress = progressValue;
+                // Met à jour la propriété progress pour la persistance si besoin (plafonnée à la cible)
+                obj.progress = Math.min(progressValue, obj.target || progressValue);
 
                 const item = document.createElement('div');
                 item.style.padding = '6px 8px';
@@ -1523,7 +1523,7 @@
                     const now = Date.now();
                     const windowStart = now - (obj.durationSec * 1000);
                     const recent = clickTimestamps.filter(ts => ts >= windowStart).length;
-                    obj.progress = recent;
+                    obj.progress = Math.min(recent, obj.target);
                     if (recent >= obj.target) obj.completed = true;
                 } else if (obj.type === 'buy_upgrade') {
                     const button = document.getElementById(obj.upgradeId);
@@ -1536,13 +1536,13 @@
                             count = (button.getAttribute('data-purchased') === 'true') ? 1 : 0;
                         }
                     }
-                    obj.progress = count;
+                    obj.progress = Math.min(count, obj.target);
                     if (count >= obj.target) obj.completed = true;
                 } else if (obj.type === 'tps') {
-                    obj.progress = tps;
+                    obj.progress = Math.min(tps, obj.target);
                     if (tps >= obj.target) obj.completed = true;
                 } else if (obj.type === 'crits') {
-                    obj.progress = totalCrits;
+                    obj.progress = Math.min(totalCrits, obj.target);
                     if (totalCrits >= obj.target) obj.completed = true;
                 }
 
@@ -1567,68 +1567,84 @@
             function clamp(value, min, max) {
                 return Math.max(min, Math.min(max, value));
             }
+            function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
             // Choisir un template aléatoire (différent du type précédent si possible)
             const templates = ['clicks','score','purchases','timed_clicks','buy_upgrade','tps','crits'];
-            // Essayer d'éviter le même type
             const choices = templates.filter(t => t !== prevObj.type);
             const pick = choices[Math.floor(Math.random() * choices.length)];
 
             const baseTarget = prevObj.target || 10;
             let newObj = null;
-            const t = translations[currentLang];
+
+            // Récupérations de l'état du joueur
+            const currentClicks = totalClicks || 0;
+            const currentScore = Math.floor(score) || 0;
+            const currentPurchases = totalPurchases || 0;
+            const recent60 = (() => { const now = Date.now(); return clickTimestamps.filter(ts => ts >= now - 60000).length; })();
 
             if (pick === 'clicks') {
-                let rawTarget = Math.ceil(baseTarget * 2);
+                // Cible proche du total actuel, arrondie par pas de 50
+                const inc = Math.max(50, Math.ceil(Math.max(50, currentClicks * 0.2)) + randInt(0,150));
+                const rawTarget = Math.max(50, currentClicks + inc);
                 let target = roundToMultiple(rawTarget, 50);
                 target = clamp(target, 50, 5000);
-                let reward = Math.ceil((prevObj.reward || 5) * 1.5);
-                reward = Math.max(5, Math.round(reward / 5) * 5);
+                let reward = Math.max(5, Math.round((target / 200) / 5) * 5 || 5);
                 newObj = { type: 'clicks', target: target, reward: reward, titleKey: 'objective_clicks_100_title', descKey: 'objective_clicks_100_desc' };
             } else if (pick === 'score') {
-                let rawTarget = Math.ceil((prevObj.target || 1000) * 2);
+                // Cible relative au score actuel
+                const factor = Math.max(1.2, Math.min(3, 1 + (currentScore > 0 ? Math.log10(currentScore + 1)/5 : 0.5)));
+                const rawTarget = Math.ceil(Math.max(100, currentScore * factor));
                 let target = roundToMultiple(rawTarget, 50);
                 target = clamp(target, 100, 5000000);
-                let reward = Math.ceil((prevObj.reward || 10) * 1.6);
-                reward = Math.max(5, Math.round(reward / 5) * 5);
+                let reward = Math.max(5, Math.round((Math.log10(target + 1) * 2)) * 5);
                 newObj = { type: 'score', target: target, reward: reward, titleKey: 'objective_score_1000_title', descKey: 'objective_score_1000_desc' };
             } else if (pick === 'purchases') {
-                let rawTarget = Math.ceil((prevObj.target || 1) * 2);
-                let target = clamp(rawTarget, 1, 10); // reste petit
-                let reward = Math.ceil((prevObj.reward || 5) * 1.4);
-                reward = Math.max(5, Math.round(reward / 5) * 5);
+                // Petit accroissement raisonnable
+                const rawTarget = Math.max(1, currentPurchases + randInt(1, Math.min(3, Math.max(1, Math.ceil(currentPurchases*0.5)))));
+                const target = clamp(rawTarget, 1, 10);
+                const reward = Math.max(5, Math.round((target * 2) / 5) * 5);
                 newObj = { type: 'purchases', target: target, reward: reward, titleKey: 'objective_first_buy_title', descKey: 'objective_first_buy_desc' };
             } else if (pick === 'timed_clicks') {
-                let rawTarget = Math.ceil((prevObj.target || 50) * 2);
+                // Basé sur les clics récents sur 60s
+                const baseline = Math.max(50, recent60 || 10);
+                const factor = Math.min(3, 1.5 + Math.random());
+                const rawTarget = Math.ceil(baseline * factor);
                 let target = roundToMultiple(rawTarget, 50);
-                target = clamp(target, 50, 2000);
-                const dur = 60; // 60 seconds window
-                let reward = Math.ceil((prevObj.reward || 8) * 1.6);
-                reward = Math.max(5, Math.round(reward / 5) * 5);
+                target = clamp(target, 50, 500);
+                const dur = 60;
+                const reward = Math.max(5, Math.round((target/100)) * 5);
                 newObj = { type: 'timed_clicks', target: target, durationSec: dur, reward: reward, titleKey: 'timed_clicks_title', descKey: 'timed_clicks_desc', descParams: [target, dur] };
             } else if (pick === 'buy_upgrade') {
-                // Choisir un upgrade aléatoire parmi ceux existants (éviter les nulls)
+                // Choisir un upgrade adapté au joueur (éviter d'imposer d'acheter 10 items chers)
                 const availBtns = upgradeButtons.filter(b => b && b.id);
-                const upgBtn = availBtns.length ? availBtns[Math.floor(Math.random() * availBtns.length)] : document.getElementById('upgrade-addition');
+                // Trier par coût croissant pour privilégier items accessibles
+                availBtns.sort((a,b) => {
+                    const aCost = parseInt(a.getAttribute('data-base-cost') || a.getAttribute('data-cost') || '0');
+                    const bCost = parseInt(b.getAttribute('data-base-cost') || b.getAttribute('data-cost') || '0');
+                    return aCost - bCost;
+                });
+                // Choisir un item parmi les 6 premiers (plus accessibles), ou aléatoire si peu d'items
+                const pool = availBtns.slice(0, Math.max(1, Math.min(6, availBtns.length)));
+                const upgBtn = pool.length ? pool[Math.floor(Math.random() * pool.length)] : document.getElementById('upgrade-addition');
                 const upg = upgBtn ? upgBtn.id : 'upgrade-addition';
 
-                // Déterminer si l'upgrade est répétable (possède data-count)
-                let target;
-                if (upgBtn && upgBtn.hasAttribute('data-count')) {
-                    // Limitons les objectifs d'achat à 10 au maximum
-                    target = Math.min(10, Math.max(1, Math.ceil((prevObj.target || 1) * 2)));
-                } else {
-                    // Pour les achats uniques, cible = 1
-                    target = 1;
+                let currentCount = 0;
+                if (upgBtn) {
+                    if (upgBtn.hasAttribute('data-count')) currentCount = parseInt(upgBtn.getAttribute('data-count') || 0);
+                    else currentCount = (upgBtn.getAttribute('data-purchased') === 'true') ? 1 : 0;
                 }
+                // Cible raisonnable : petit gain au-dessus du currentCount
+                const add = randInt(1, Math.max(1, Math.min(3, Math.ceil(currentCount * 0.5) + 1)));
+                let target = currentCount + add;
+                if (upgBtn && !upgBtn.hasAttribute('data-count')) target = 1; // unique
+                target = Math.min(10, Math.max(1, target));
 
-                // Récompense liée au prix de l'item : plus l'item est cher, plus la récompense
+                // Reward scaled by item cost but kept reasonable
                 const baseCost = upgBtn ? parseInt(upgBtn.getAttribute('data-base-cost') || upgBtn.getAttribute('data-cost') || 0) : 0;
-                const costBasedReward = Math.max(1, Math.ceil(Math.log10(baseCost + 1) * 5));
-                const scaledReward = Math.ceil((prevObj.reward || 10) * 1.5);
-                const reward = Math.max(1, Math.ceil((costBasedReward + scaledReward) / 2));
+                const costReward = Math.max(5, Math.round(Math.log10(baseCost + 1) * 2) * 5);
+                const reward = Math.max(5, Math.round(((prevObj.reward || 10) + costReward) / 10) * 5);
 
-                // Pour l'affichage, essayer de récupérer un nom lisible de l'upgrade
                 let upgName = upg;
                 if (upgBtn) {
                     const key = upgBtn.getAttribute('data-upgrade-key');
@@ -1636,25 +1652,25 @@
                         const titleVal = translations[currentLang][key + 'Title'];
                         upgName = (typeof titleVal === 'function') ? titleVal() : titleVal;
                     } else {
-                        const titleEl = upgBtn.querySelector('.upgrade-title');
-                        if (titleEl) upgName = titleEl.textContent;
+                        const titleEl = upgBtn.querySelector('.upgrade-title'); if (titleEl) upgName = titleEl.textContent;
                     }
                 }
 
                 newObj = { type: 'buy_upgrade', upgradeId: upg, target: target, reward: reward, titleKey: 'buy_upgrade_title', descKey: 'buy_upgrade_desc', descParams: [target, upgName] };
             } else if (pick === 'tps') {
-                let rawTarget = Math.ceil((prevObj.target || 10) * 2);
-                let target = roundToMultiple(rawTarget, 50);
+                // TPS objectif proportionnel au tps actuel
+                const cur = Math.max(1, Math.floor(tps));
+                const rawTarget = Math.ceil(cur * (1.5 + Math.random()));
+                let target = (rawTarget < 50) ? rawTarget : roundToMultiple(rawTarget, 50);
                 target = clamp(target, 1, 1000000);
-                let reward = Math.ceil((prevObj.reward || 10) * 1.6);
-                reward = Math.max(5, Math.round(reward / 5) * 5);
+                const reward = Math.max(5, Math.round(Math.log10(target + 1) * 5));
                 newObj = { type: 'tps', target: target, reward: reward, titleKey: 'tps_title', descKey: 'tps_desc', descParams: [target] };
             } else if (pick === 'crits') {
-                let rawTarget = Math.ceil((prevObj.target || 5) * 2);
+                const cur = totalCrits || 0;
+                const rawTarget = Math.max(50, Math.ceil((cur || 1) * (1.5 + Math.random())));
                 let target = roundToMultiple(rawTarget, 50);
                 target = clamp(target, 50, 500);
-                let reward = Math.ceil((prevObj.reward || 5) * 1.5);
-                reward = Math.max(5, Math.round(reward / 5) * 5);
+                const reward = Math.max(5, Math.round(target / 100) * 5);
                 newObj = { type: 'crits', target: target, reward: reward, titleKey: 'crits_title', descKey: 'crits_desc', descParams: [target] };
             }
 
@@ -1857,6 +1873,13 @@
         });
 
         function buyUpgrade(button) {
+            // Empêcher l'achat si c'est une amélioration unique déjà achetée
+            const alreadyPurchased = button.getAttribute('data-purchased') === 'true';
+            if (alreadyPurchased && button.hasAttribute('data-max-once')) {
+                showStatusMessage(translations[currentLang].purchasedText || 'Acheté', true);
+                return;
+            }
+
             const cost = calculateCost(button);
             
             // Vérifie si le bouton est l'upgrade critique et si on a atteint 100%
