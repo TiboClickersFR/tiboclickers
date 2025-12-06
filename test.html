@@ -1560,6 +1560,14 @@
 
         // Génère l'objectif suivant avec plusieurs templates plus complexes
         function generateNextObjective(prevObj) {
+            // Helpers pour arrondir et clamp
+            function roundToMultiple(value, multiple) {
+                return Math.max(multiple, Math.round(value / multiple) * multiple);
+            }
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
             // Choisir un template aléatoire (différent du type précédent si possible)
             const templates = ['clicks','score','purchases','timed_clicks','buy_upgrade','tps','crits'];
             // Essayer d'éviter le même type
@@ -1571,15 +1579,33 @@
             const t = translations[currentLang];
 
             if (pick === 'clicks') {
-                newObj = { type: 'clicks', target: Math.ceil(baseTarget * 2), reward: Math.ceil((prevObj.reward || 5) * 1.5), titleKey: 'objective_clicks_100_title', descKey: 'objective_clicks_100_desc' };
+                let rawTarget = Math.ceil(baseTarget * 2);
+                let target = roundToMultiple(rawTarget, 50);
+                target = clamp(target, 50, 5000);
+                let reward = Math.ceil((prevObj.reward || 5) * 1.5);
+                reward = Math.max(5, Math.round(reward / 5) * 5);
+                newObj = { type: 'clicks', target: target, reward: reward, titleKey: 'objective_clicks_100_title', descKey: 'objective_clicks_100_desc' };
             } else if (pick === 'score') {
-                newObj = { type: 'score', target: Math.ceil((prevObj.target || 1000) * 2), reward: Math.ceil((prevObj.reward || 10) * 1.6), titleKey: 'objective_score_1000_title', descKey: 'objective_score_1000_desc' };
+                let rawTarget = Math.ceil((prevObj.target || 1000) * 2);
+                let target = roundToMultiple(rawTarget, 50);
+                target = clamp(target, 100, 5000000);
+                let reward = Math.ceil((prevObj.reward || 10) * 1.6);
+                reward = Math.max(5, Math.round(reward / 5) * 5);
+                newObj = { type: 'score', target: target, reward: reward, titleKey: 'objective_score_1000_title', descKey: 'objective_score_1000_desc' };
             } else if (pick === 'purchases') {
-                newObj = { type: 'purchases', target: Math.ceil((prevObj.target || 1) * 2), reward: Math.ceil((prevObj.reward || 5) * 1.4), titleKey: 'objective_first_buy_title', descKey: 'objective_first_buy_desc' };
+                let rawTarget = Math.ceil((prevObj.target || 1) * 2);
+                let target = clamp(rawTarget, 1, 10); // reste petit
+                let reward = Math.ceil((prevObj.reward || 5) * 1.4);
+                reward = Math.max(5, Math.round(reward / 5) * 5);
+                newObj = { type: 'purchases', target: target, reward: reward, titleKey: 'objective_first_buy_title', descKey: 'objective_first_buy_desc' };
             } else if (pick === 'timed_clicks') {
-                const target = Math.ceil((prevObj.target || 50) * 2);
+                let rawTarget = Math.ceil((prevObj.target || 50) * 2);
+                let target = roundToMultiple(rawTarget, 50);
+                target = clamp(target, 50, 2000);
                 const dur = 60; // 60 seconds window
-                newObj = { type: 'timed_clicks', target: target, durationSec: dur, reward: Math.ceil((prevObj.reward || 8) * 1.6), titleKey: 'timed_clicks_title', descKey: 'timed_clicks_desc', descParams: [target, dur] };
+                let reward = Math.ceil((prevObj.reward || 8) * 1.6);
+                reward = Math.max(5, Math.round(reward / 5) * 5);
+                newObj = { type: 'timed_clicks', target: target, durationSec: dur, reward: reward, titleKey: 'timed_clicks_title', descKey: 'timed_clicks_desc', descParams: [target, dur] };
             } else if (pick === 'buy_upgrade') {
                 // Choisir un upgrade aléatoire parmi ceux existants (éviter les nulls)
                 const availBtns = upgradeButtons.filter(b => b && b.id);
@@ -1617,11 +1643,19 @@
 
                 newObj = { type: 'buy_upgrade', upgradeId: upg, target: target, reward: reward, titleKey: 'buy_upgrade_title', descKey: 'buy_upgrade_desc', descParams: [target, upgName] };
             } else if (pick === 'tps') {
-                const target = Math.ceil((prevObj.target || 10) * 2);
-                newObj = { type: 'tps', target: target, reward: Math.ceil((prevObj.reward || 10) * 1.6), titleKey: 'tps_title', descKey: 'tps_desc', descParams: [target] };
+                let rawTarget = Math.ceil((prevObj.target || 10) * 2);
+                let target = roundToMultiple(rawTarget, 50);
+                target = clamp(target, 1, 1000000);
+                let reward = Math.ceil((prevObj.reward || 10) * 1.6);
+                reward = Math.max(5, Math.round(reward / 5) * 5);
+                newObj = { type: 'tps', target: target, reward: reward, titleKey: 'tps_title', descKey: 'tps_desc', descParams: [target] };
             } else if (pick === 'crits') {
-                const target = Math.ceil((prevObj.target || 5) * 2);
-                newObj = { type: 'crits', target: target, reward: Math.ceil((prevObj.reward || 5) * 1.5), titleKey: 'crits_title', descKey: 'crits_desc', descParams: [target] };
+                let rawTarget = Math.ceil((prevObj.target || 5) * 2);
+                let target = roundToMultiple(rawTarget, 50);
+                target = clamp(target, 50, 500);
+                let reward = Math.ceil((prevObj.reward || 5) * 1.5);
+                reward = Math.max(5, Math.round(reward / 5) * 5);
+                newObj = { type: 'crits', target: target, reward: reward, titleKey: 'crits_title', descKey: 'crits_desc', descParams: [target] };
             }
 
             if (newObj) {
