@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -122,39 +121,6 @@
             margin-top: 10px;
             color: #e74c3c; /* Couleur rouge/critique */
             font-weight: bold;
-        }
-
-        /* Affichage de la nouvelle monnaie d'objectifs */
-        #objective-currency-display {
-            margin-top: 8px;
-            font-size: 1.1em;
-            color: #9fe6a0; /* Vert clair pour la monnaie d'objectifs */
-            font-weight: bold;
-        }
-
-        /* Magasin d'objectifs */
-        #objective-shop {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .objective-shop-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            background: #2a2a2a;
-            border: 1px solid #3a3a3a;
-            border-radius: 6px;
-        }
-        .objective-shop-item button {
-            background: #3b6f3b;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
         }
         
         /* ------------------------------------------------ */
@@ -497,7 +463,7 @@
             <!-- TITRE DE LA PISTE MIS À JOUR POUR CORRESPONDRE À LA NOUVELLE PLAYLIST -->
             <p><span id="music-label">Musique</span> : <span id="current-track-title">Damn (Gabin)</span></p>
             <div id="music-control-buttons">
-                 <button onclick="toggleMusic()">▶️</button>
+                 <button onclick="toggleMusic()">▶️ / ⏸️</button>
                  <button onclick="nextTrack()">⏭️</button>
             </div>
         </div>
@@ -528,8 +494,9 @@
                 <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
                 <!-- NOUVEAU: Affichage des statistiques de boost critique -->
                 <div id="crit-stats-display">Transfo' Critique : 0.0% (x2)</div>
-                    <!-- NOUVEAU: Affichage de la monnaie d'objectifs -->
-                    <div id="objective-currency-display">Points d'Objectif : 0</div>
+                <!-- Rebirth UI -->
+                <div id="rebirth-points-display" style="margin-top:6px; font-size:1.05em; color:#8ad6ff; font-weight:bold;">Points de Rebirth : 0</div>
+                <button id="rebirth-btn" style="margin-top:8px; padding:8px 10px; background:#0b6391; color:#fff; border:none; border-radius:6px; cursor:pointer;">Rebirth (Coût: 1Qa)</button>
             </div>
 
             <!-- Image de Tibo : Notez l'absence d'événement onclick inline, tout est géré en JS -->
@@ -539,17 +506,6 @@
 
         <div id="upgrades-area">
             <h2 id="upgrades-title">Améliorations</h2>
-
-            <!-- NOUVEAU: Panneau d'Objectifs -->
-            <div id="objectives-panel" style="text-align:left; margin-top:12px;">
-                <h3 style="color:#9fe6a0; margin:0 0 8px 0;">Objectifs</h3>
-                <div id="objectives-list">
-                    <!-- Les objectifs seront injectés ici par JS -->
-                </div>
-                <div id="objective-shop">
-                    <!-- Items injected by JS -->
-                </div>
-            </div>
 
             <!-- Améliorations de Clic (Bonus Additif Unique) -->
             <div id="click-multiplier-container" class="new-upgrade-container">
@@ -595,7 +551,7 @@
             <hr style="border-color: #5a5a5a; margin: 15px 0;">
 
             <!-- NOUVELLES AMÉLIORATIONS CRITIQUES -->
-             <button id="upgrade-crit-chance" class="upgrade-button crit-upgrade" data-base-cost="20000" data-growth="1.3" data-crit-chance-add="0.5" data-count="0" data-upgrade-key="critChance">
+             <button id="upgrade-crit-chance" class="upgrade-button crit-upgrade" data-base-cost="20000" data-growth="1.1" data-crit-chance-add="0.5" data-count="0" data-upgrade-key="critChance">
                 <div class="upgrade-details">
                     <span class="upgrade-title">Chance de Transfo' Critique 📈</span>
                     <br><span class="upgrade-description">Augmente la chance de boost de 0.5%</span>
@@ -624,16 +580,6 @@
                     <span class="upgrade-count">Possédé: 0</span>
                 </div>
                 <span class="upgrade-cost">2000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Pack Massif (1 Milliard) -->
-            <button id="upgrade-addition-1b" class="upgrade-button" data-base-cost="1000000000" data-growth="1.15" data-addition="30" data-count="0" data-upgrade-key="megaProtein">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Pack d'entraînement Massif</span>
-                    <br><span class="upgrade-description">Ajoute +30 TPC de base par achat</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">1,000,000,000 Tibos</span>
             </button>
 
             <!-- Amélioration Passive 1 - Alessio -->
@@ -807,14 +753,6 @@
         let clickPower = 1; // Puissance de clic totale (base + bonus)
         let tps = 0; // Tibos Par Seconde
         
-        // NOUVEAU: Monnaie d'Objectifs
-        let objectiveCurrency = 0; // Nouvelle monnaie récompensée par les objectifs
-        // Statistiques pour le suivi des objectifs
-        let totalClicks = 0;
-        let totalPurchases = 0;
-        let totalCrits = 0; // nombre total de clicks critiques
-        let clickTimestamps = []; // timestamps des clics récents (pour objectifs temporels)
-        
         // NOUVEAU: Statistiques Critiques
         let baseCritChance = 0; // MODIFICATION: 0% de base
         let critChancePerUpgrade = 0.5; // MODIFICATION: 0.5% ajouté par achat
@@ -833,11 +771,74 @@
         const LANG_STORAGE_KEY = 'tiboClickerLang';
         
         const scoreDisplay = document.getElementById('score');
-        const objectiveCurrencyDisplay = document.getElementById('objective-currency-display');
         const tiboImage = document.getElementById('tibo-image');
         const clickPowerDisplay = document.getElementById('click-power-display');
         const tpsDisplay = document.getElementById('tps-display');
         const critStatsDisplay = document.getElementById('crit-stats-display'); // NOUVEAU
+        const rebirthPointsDisplay = document.getElementById('rebirth-points-display');
+        const rebirthBtn = document.getElementById('rebirth-btn');
+
+        // Rebirth system
+        let rebirthPoints = 0;
+        let rebirthCount = 0;
+        // Base cost for first rebirth: 1T (1e12). You can change the multiplier below to x1000 if you prefer.
+        const REBIRTH_BASE_COST = 1e12; // 1T = 1,000 milliards = 1e12
+        // Cost growth multiplier per rebirth (e.g., 100 -> x100 each rebirth). Set to 1000 for x1000.
+        const REBIRTH_COST_MULTIPLIER = 1000;
+        // Points awarded per rebirth (you asked for multiple points).
+        const REBIRTH_POINTS_PER = 5;
+
+        function getRebirthCost() {
+            // First rebirth cost = base * (REBIRTH_COST_MULTIPLIER ^ rebirthCount)
+            return Math.floor(REBIRTH_BASE_COST * Math.pow(REBIRTH_COST_MULTIPLIER, rebirthCount));
+        }
+
+        function updateRebirthUI() {
+            if (rebirthPointsDisplay) rebirthPointsDisplay.textContent = `Points de Rebirth : ${formatScore(rebirthPoints)}`;
+            if (rebirthBtn) {
+                const cost = getRebirthCost();
+                rebirthBtn.textContent = `Rebirth (Coût: ${formatScore(cost)})`;
+                // Ensure numeric comparison (score may sometimes be stringy after load)
+                rebirthBtn.disabled = (Number(score) < Number(cost));
+            }
+        }
+
+        function performRebirth() {
+            const cost = getRebirthCost();
+            if (score < cost) {
+                showStatusMessage('Pas assez de Tibos pour Rebirth.', true);
+                return;
+            }
+
+            // Consume currency (reset everything as requested)
+            // Reset money and counters
+            score = 0;
+            totalClicks = 0;
+            totalPurchases = 0;
+            totalCrits = 0;
+            clickTimestamps = [];
+            objectiveCurrency = 0;
+
+            // Reset all upgrades: counts and purchased flags
+            upgradeButtons.forEach(button => {
+                if (!button) return;
+                button.setAttribute('data-count', 0);
+                button.setAttribute('data-purchased', 'false');
+                button.classList.remove('hidden-maxed');
+            });
+
+            // Recalculate stats after clearing upgrades
+            recalculateStatsFromUpgrades();
+
+            // Award rebirth points and increment counter
+            rebirthPoints += REBIRTH_POINTS_PER;
+            rebirthCount += 1;
+
+            updateUI();
+            updateRebirthUI();
+            saveGame();
+            showStatusMessage(`Rebirth effectué ! +${REBIRTH_POINTS_PER} Points de Rebirth`, false);
+        }
         
         // Références aux boutons pour la gestion de l'apparition
         const upgrade1 = document.getElementById('upgrade-click-1');
@@ -855,11 +856,9 @@
             upgrade2_new,
             upgrade3_new,
             upgradeGod, // AJOUT
-            document.getElementById('upgrade-addition-1b'),
             critChanceUpgradeBtn,
             critPowerUpgradeBtn,
             document.getElementById('upgrade-addition'),
-            document.getElementById('upgrade-addition-1b'),
             document.getElementById('upgrade-passive-alessiode'),
             document.getElementById('upgrade-passive-justine'),
             document.getElementById('upgrade-passive-patate'),
@@ -913,32 +912,6 @@
                 // Upgrades Répétables
                 proteinesTitle: "Déverrouillage des Protéines",
                 proteinesDescription: "Ajoute +5 Tibos par Clic",
-                megaProteinTitle: "Pack d'entraînement Massif",
-                megaProteinDescription: "Ajoute +30 TPC de base par achat",
-                objectiveCurrencyName: "Points d'Objectif",
-                objectivesTitle: "Objectifs",
-                objective_clicks_100_title: "Clicker Novice",
-                objective_clicks_100_desc: "Clique 100 fois",
-                objective_score_1000_title: "Tibos Débutant",
-                objective_score_1000_desc: "Atteindre 1,000 Tibos",
-                objective_first_buy_title: "Premier Achat",
-                objective_first_buy_desc: "Acheter votre première amélioration",
-                objective_reward_received: "Récompense reçue : +",
-                shop_perm_click_x2_title: "Double Clic Permanent",
-                shop_perm_click_x2_desc: "Double vos Tibos par clic pour toujours (stackable)",
-                shop_temp_click_x2h_title: "Double Clic (1h)",
-                shop_temp_click_x2h_desc: "Double vos Tibos par clic pendant 1 heure",
-                shop_price_reduce_title: "Réduction des Prix",
-                shop_price_reduce_desc: "Réduit le prix des améliorations de 5% (empilable)",
-                notEnoughObjectivePoints: "Pas assez de Points d'Objectif",
-                timed_clicks_title: "Marathon de Clics",
-                timed_clicks_desc: (target, dur) => `Faire ${target} clics en ${dur} secondes`,
-                buy_upgrade_title: "Acheter Spécifique",
-                buy_upgrade_desc: (target, upg) => `Acheter ${target}x l'amélioration ${upg}`,
-                tps_title: "Atteindre TPS",
-                tps_desc: (target) => `Atteindre ${formatScore(target)} Tibos/s`,
-                crits_title: "Crit Master",
-                crits_desc: (target) => `Obtenir ${target} Transfo' Critiques`,
                 alessioTitle: "Alessiode - Coach Personnel 🏋️",
                 alessioDescription: "Génère 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -1015,32 +988,6 @@
                 // Repeatable Upgrades
                 proteinesTitle: "Protein Unlock",
                 proteinesDescription: "Adds +5 Tibos per Click",
-                megaProteinTitle: "Massive Training Pack",
-                megaProteinDescription: "Adds +30 base TPC per purchase",
-                objectiveCurrencyName: "Objective Points",
-                objectivesTitle: "Objectives",
-                objective_clicks_100_title: "Clicker Novice",
-                objective_clicks_100_desc: "Click 100 times",
-                objective_score_1000_title: "Tibos Starter",
-                objective_score_1000_desc: "Reach 1,000 Tibos",
-                objective_first_buy_title: "First Purchase",
-                objective_first_buy_desc: "Buy your first upgrade",
-                objective_reward_received: "Reward received: +",
-                shop_perm_click_x2_title: "Permanent Click x2",
-                shop_perm_click_x2_desc: "Double your Tibos per click forever (stackable)",
-                shop_temp_click_x2h_title: "Click x2 (1h)",
-                shop_temp_click_x2h_desc: "Double your Tibos per click for 1 hour",
-                shop_price_reduce_title: "Price Reduction",
-                shop_price_reduce_desc: "Reduces upgrade prices by 5% (stackable)",
-                notEnoughObjectivePoints: "Not enough Objective Points",
-                timed_clicks_title: "Click Marathon",
-                timed_clicks_desc: (target, dur) => `Do ${target} clicks in ${dur} seconds`,
-                buy_upgrade_title: "Buy Specific Upgrade",
-                buy_upgrade_desc: (target, upg) => `Buy ${target}x the upgrade ${upg}`,
-                tps_title: "Reach TPS",
-                tps_desc: (target) => `Reach ${formatScore(target)} Tibos/s`,
-                crits_title: "Crit Master",
-                crits_desc: (target) => `Get ${target} Critical Transfos`,
                 alessioTitle: "Alessiode - Personal Coach 🏋️",
                 alessioDescription: "Generates 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -1117,32 +1064,6 @@
                 // Upgrades Repetibles
                 proteinesTitle: "Desbloqueo de Proteínas",
                 proteinesDescription: "Añade +5 Tibos por Clic",
-                megaProteinTitle: "Paquete de Entrenamiento Masivo",
-                megaProteinDescription: "Añade +30 TPC base por compra",
-                objectiveCurrencyName: "Puntos de Objetivo",
-                objectivesTitle: "Objetivos",
-                objective_clicks_100_title: "Clicker Novato",
-                objective_clicks_100_desc: "Haz 100 clics",
-                objective_score_1000_title: "Tibos Principiante",
-                objective_score_1000_desc: "Alcanza 1,000 Tibos",
-                objective_first_buy_title: "Primera Compra",
-                objective_first_buy_desc: "Compra tu primera mejora",
-                objective_reward_received: "Recompensa recibida: +",
-                shop_perm_click_x2_title: "Clic x2 Permanente",
-                shop_perm_click_x2_desc: "Duplica tus Tibos por clic para siempre (acumulable)",
-                shop_temp_click_x2h_title: "Clic x2 (1h)",
-                shop_temp_click_x2h_desc: "Duplica tus Tibos por clic durante 1 hora",
-                shop_price_reduce_title: "Reducción de Precio",
-                shop_price_reduce_desc: "Reduce el precio de las mejoras en 5% (acumulable)",
-                notEnoughObjectivePoints: "No tienes suficientes Puntos de Objetivo",
-                timed_clicks_title: "Maratón de Clics",
-                timed_clicks_desc: (target, dur) => `Haz ${target} clics en ${dur} segundos`,
-                buy_upgrade_title: "Comprar Mejora Específica",
-                buy_upgrade_desc: (target, upg) => `Compra ${target}x la mejora ${upg}`,
-                tps_title: "Alcanza TPS",
-                tps_desc: (target) => `Alcanza ${formatScore(target)} Tibos/s`,
-                crits_title: "Maestro de Crit",
-                crits_desc: (target) => `Obtén ${target} Transfo' Críticas`,
                 alessioTitle: "Alessiode - Entrenador Personal 🏋️",
                 alessioDescription: "Genera 1 Tibo/s",
                 justineTitle: "Justine - Community Manager 📸",
@@ -1276,7 +1197,6 @@
             updateScoreDisplay(); 
             updateTPSDisplay();
             updateCritStatsDisplay(); // NOUVEAU
-            updateObjectiveCurrencyDisplay(); // NOUVEAU
 
             // Mise à jour de tous les boutons d'amélioration
             upgradeButtons.forEach(button => {
@@ -1340,7 +1260,7 @@
             });
             checkUpgradeCosts(); // Vérifie l'état disabled/enabled
             updateUpgradeVisibility(); // NOUVEAU: Gère la visibilité après la mise à jour des stats
-            updateObjectivesUI(); // Met à jour le panneau d'objectifs
+            updateRebirthUI();
         }
         
         // --- Fonctions Utilitaire de Score ---
@@ -1376,371 +1296,6 @@
              // La chance critique ne doit jamais être affichée au-dessus de 100%
              const displayChance = Math.min(totalCritChance, MAX_CRIT_CHANCE); 
              critStatsDisplay.textContent = t.critStatsDisplay(displayChance, totalCritPower);
-        }
-
-        // --- Fonctions pour les Objectifs et la nouvelle monnaie ---
-        function updateObjectiveCurrencyDisplay() {
-            const t = translations[currentLang];
-            if (objectiveCurrencyDisplay) {
-                objectiveCurrencyDisplay.textContent = `${t.objectiveCurrencyName} : ${formatScore(objectiveCurrency)}`;
-            }
-        }
-
-        // Définition des objectifs (statique, peut être étendue)
-        const objectives = [
-            { id: 'obj_clicks_100', titleKey: 'objective_clicks_100_title', descKey: 'objective_clicks_100_desc', type: 'clicks', target: 100, progress: 0, completed: false, reward: 10 },
-            { id: 'obj_score_1000', titleKey: 'objective_score_1000_title', descKey: 'objective_score_1000_desc', type: 'score', target: 1000, progress: 0, completed: false, reward: 20 },
-            { id: 'obj_first_buy', titleKey: 'objective_first_buy_title', descKey: 'objective_first_buy_desc', type: 'purchases', target: 1, progress: 0, completed: false, reward: 15 }
-        ];
-
-        function updateObjectivesUI() {
-            const t = translations[currentLang];
-            const list = document.getElementById('objectives-list');
-            if (!list) return;
-            list.innerHTML = '';
-
-            // Si aucun objectif actif, on en génère un par défaut pour que la zone
-            // ne reste pas vide (utile quand l'utilisateur a tout complété ou
-            // lors d'un restore où tous étaient marqués complétés).
-            ensureActiveObjectives();
-
-            // Affiche seulement les objectifs non complétés (les complétés disparaissent)
-            const active = objectives.filter(o => !o.completed);
-            active.forEach(obj => {
-                // Calculer la progression en temps réel à partir des compteurs globaux
-                let progressValue = 0;
-                if (obj.type === 'score') {
-                    progressValue = Math.floor(score);
-                } else if (obj.type === 'clicks') {
-                    progressValue = totalClicks;
-                } else if (obj.type === 'purchases') {
-                    progressValue = totalPurchases;
-                } else if (obj.type === 'timed_clicks') {
-                    // Recalculer les clics récents dans la fenêtre (même logique que checkObjectives)
-                    const now = Date.now();
-                    const windowStart = now - ((obj.durationSec || 60) * 1000);
-                    progressValue = clickTimestamps.filter(ts => ts >= windowStart).length;
-                } else if (obj.type === 'buy_upgrade') {
-                    const button = document.getElementById(obj.upgradeId);
-                    if (button) {
-                        if (button.hasAttribute('data-count')) {
-                            progressValue = parseInt(button.getAttribute('data-count') || 0);
-                        } else {
-                            progressValue = (button.getAttribute('data-purchased') === 'true') ? 1 : 0;
-                        }
-                    } else {
-                        progressValue = obj.progress || 0;
-                    }
-                } else if (obj.type === 'tps') {
-                    progressValue = Math.floor(tps);
-                } else if (obj.type === 'crits') {
-                    progressValue = totalCrits;
-                } else {
-                    // Fallback: utiliser la valeur stockée si disponible
-                    progressValue = obj.progress || 0;
-                }
-
-                // Met à jour la propriété progress pour la persistance si besoin (plafonnée à la cible)
-                obj.progress = Math.min(progressValue, obj.target || progressValue);
-
-                const item = document.createElement('div');
-                item.style.padding = '6px 8px';
-                item.style.border = '1px solid #3a3a3a';
-                item.style.borderRadius = '6px';
-                item.style.marginBottom = '6px';
-                item.style.background = '#262626';
-
-                const title = document.createElement('div');
-                title.style.color = '#ffcc00';
-                title.style.fontWeight = 'bold';
-                // Title can be a direct string or a translation key
-                let titleText = '';
-                if (obj.title) titleText = obj.title;
-                else if (obj.titleKey) {
-                    const v = t[obj.titleKey];
-                    titleText = (typeof v === 'function') ? v(...(obj.titleParams || [])) : v || '';
-                }
-                title.textContent = titleText;
-
-                const desc = document.createElement('div');
-                desc.style.fontSize = '0.9em';
-                desc.style.color = '#ccc';
-                let descText = '';
-                if (obj.desc) descText = obj.desc;
-                else if (obj.descKey) {
-                    const dv = t[obj.descKey];
-                    descText = (typeof dv === 'function') ? dv(...(obj.descParams || [])) : dv || '';
-                }
-                desc.textContent = descText;
-
-                const progress = document.createElement('div');
-                progress.style.fontSize = '0.85em';
-                progress.style.color = '#9fbfbf';
-                const progText = obj.type === 'score' ? `${formatScore(progressValue)} / ${formatScore(obj.target)}` : `${progressValue} / ${obj.target}`;
-                progress.textContent = `Progress: ${progText}`;
-
-                item.appendChild(title);
-                item.appendChild(desc);
-                item.appendChild(progress);
-
-                list.appendChild(item);
-            });
-        }
-
-        // Ensure there's at least one active objective to display
-        function ensureActiveObjectives() {
-            const activeCount = objectives.filter(o => !o.completed).length;
-            if (activeCount === 0) {
-                const defaultObj = {
-                    id: 'obj_default_' + Date.now(),
-                    titleKey: 'objective_clicks_100_title',
-                    descKey: 'objective_clicks_100_desc',
-                    type: 'clicks',
-                    target: 100,
-                    progress: 0,
-                    completed: false,
-                    reward: 10
-                };
-                objectives.push(defaultObj);
-            }
-        }
-
-        // Vérifie les objectifs et récompense automatiquement
-        function checkObjectives() {
-            const t = translations[currentLang];
-            objectives.forEach(obj => {
-                if (obj.completed) return;
-
-                // Evaluate objective progress for different objective types
-                if (obj.type === 'clicks' && totalClicks >= obj.target) {
-                    obj.completed = true;
-                } else if (obj.type === 'score' && score >= obj.target) {
-                    obj.completed = true;
-                } else if (obj.type === 'purchases' && totalPurchases >= obj.target) {
-                    obj.completed = true;
-                } else if (obj.type === 'timed_clicks') {
-                    // Count recent clicks within duration
-                    const now = Date.now();
-                    const windowStart = now - (obj.durationSec * 1000);
-                    const recent = clickTimestamps.filter(ts => ts >= windowStart).length;
-                    obj.progress = Math.min(recent, obj.target);
-                    if (recent >= obj.target) obj.completed = true;
-                } else if (obj.type === 'buy_upgrade') {
-                    const button = document.getElementById(obj.upgradeId);
-                    let count = 0;
-                    if (button) {
-                        if (button.hasAttribute('data-count')) {
-                            count = parseInt(button.getAttribute('data-count') || 0);
-                        } else {
-                            // Achat unique : considérer 1 si data-purchased === true
-                            count = (button.getAttribute('data-purchased') === 'true') ? 1 : 0;
-                        }
-                    }
-                    obj.progress = Math.min(count, obj.target);
-                    if (count >= obj.target) obj.completed = true;
-                } else if (obj.type === 'tps') {
-                    obj.progress = Math.min(tps, obj.target);
-                    if (tps >= obj.target) obj.completed = true;
-                } else if (obj.type === 'crits') {
-                    obj.progress = Math.min(totalCrits, obj.target);
-                    if (totalCrits >= obj.target) obj.completed = true;
-                }
-
-                if (obj.completed) {
-                    // Reward once
-                    objectiveCurrency += obj.reward;
-                    showStatusMessage(`${t.objective_reward_received}${obj.reward} ${t.objectiveCurrencyName}`, false);
-                    // Generate a new, harder objective based on this one
-                    generateNextObjective(obj);
-                }
-            });
-            updateObjectiveCurrencyDisplay();
-            updateObjectivesUI();
-        }
-
-        // Génère l'objectif suivant avec plusieurs templates plus complexes
-        function generateNextObjective(prevObj) {
-            // Helpers pour arrondir et clamp
-            function roundToMultiple(value, multiple) {
-                return Math.max(multiple, Math.round(value / multiple) * multiple);
-            }
-            function clamp(value, min, max) {
-                return Math.max(min, Math.min(max, value));
-            }
-            function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-            // Choisir un template aléatoire (différent du type précédent si possible)
-            const templates = ['clicks','score','purchases','timed_clicks','buy_upgrade','tps','crits'];
-            const choices = templates.filter(t => t !== prevObj.type);
-            const pick = choices[Math.floor(Math.random() * choices.length)];
-
-            const baseTarget = prevObj.target || 10;
-            let newObj = null;
-
-            // Récupérations de l'état du joueur
-            const currentClicks = totalClicks || 0;
-            const currentScore = Math.floor(score) || 0;
-            const currentPurchases = totalPurchases || 0;
-            const recent60 = (() => { const now = Date.now(); return clickTimestamps.filter(ts => ts >= now - 60000).length; })();
-
-            if (pick === 'clicks') {
-                // Cible proche du total actuel, arrondie par pas de 50
-                const inc = Math.max(50, Math.ceil(Math.max(50, currentClicks * 0.2)) + randInt(0,150));
-                const rawTarget = Math.max(50, currentClicks + inc);
-                let target = roundToMultiple(rawTarget, 50);
-                target = clamp(target, 50, 5000);
-                let reward = Math.max(5, Math.round((target / 200) / 5) * 5 || 5);
-                newObj = { type: 'clicks', target: target, reward: reward, titleKey: 'objective_clicks_100_title', descKey: 'objective_clicks_100_desc' };
-            } else if (pick === 'score') {
-                // Cible relative au score actuel
-                const factor = Math.max(1.2, Math.min(3, 1 + (currentScore > 0 ? Math.log10(currentScore + 1)/5 : 0.5)));
-                const rawTarget = Math.ceil(Math.max(100, currentScore * factor));
-                let target = roundToMultiple(rawTarget, 50);
-                target = clamp(target, 100, 5000000);
-                let reward = Math.max(5, Math.round((Math.log10(target + 1) * 2)) * 5);
-                newObj = { type: 'score', target: target, reward: reward, titleKey: 'objective_score_1000_title', descKey: 'objective_score_1000_desc' };
-            } else if (pick === 'purchases') {
-                // Petit accroissement raisonnable
-                const rawTarget = Math.max(1, currentPurchases + randInt(1, Math.min(3, Math.max(1, Math.ceil(currentPurchases*0.5)))));
-                const target = clamp(rawTarget, 1, 10);
-                const reward = Math.max(5, Math.round((target * 2) / 5) * 5);
-                newObj = { type: 'purchases', target: target, reward: reward, titleKey: 'objective_first_buy_title', descKey: 'objective_first_buy_desc' };
-            } else if (pick === 'timed_clicks') {
-                // Basé sur les clics récents sur 60s
-                const baseline = Math.max(50, recent60 || 10);
-                const factor = Math.min(3, 1.5 + Math.random());
-                const rawTarget = Math.ceil(baseline * factor);
-                let target = roundToMultiple(rawTarget, 50);
-                target = clamp(target, 50, 500);
-                const dur = 60;
-                const reward = Math.max(5, Math.round((target/100)) * 5);
-                newObj = { type: 'timed_clicks', target: target, durationSec: dur, reward: reward, titleKey: 'timed_clicks_title', descKey: 'timed_clicks_desc', descParams: [target, dur] };
-            } else if (pick === 'buy_upgrade') {
-                // Choisir un upgrade adapté au joueur (éviter d'imposer d'acheter 10 items chers)
-                const availBtns = upgradeButtons.filter(b => b && b.id);
-                // Trier par coût croissant pour privilégier items accessibles
-                availBtns.sort((a,b) => {
-                    const aCost = parseInt(a.getAttribute('data-base-cost') || a.getAttribute('data-cost') || '0');
-                    const bCost = parseInt(b.getAttribute('data-base-cost') || b.getAttribute('data-cost') || '0');
-                    return aCost - bCost;
-                });
-                // Choisir un item parmi les 6 premiers (plus accessibles), ou aléatoire si peu d'items
-                const pool = availBtns.slice(0, Math.max(1, Math.min(6, availBtns.length)));
-                const upgBtn = pool.length ? pool[Math.floor(Math.random() * pool.length)] : document.getElementById('upgrade-addition');
-                const upg = upgBtn ? upgBtn.id : 'upgrade-addition';
-
-                let currentCount = 0;
-                if (upgBtn) {
-                    if (upgBtn.hasAttribute('data-count')) currentCount = parseInt(upgBtn.getAttribute('data-count') || 0);
-                    else currentCount = (upgBtn.getAttribute('data-purchased') === 'true') ? 1 : 0;
-                }
-                // Cible raisonnable : petit gain au-dessus du currentCount
-                const add = randInt(1, Math.max(1, Math.min(3, Math.ceil(currentCount * 0.5) + 1)));
-                let target = currentCount + add;
-                if (upgBtn && !upgBtn.hasAttribute('data-count')) target = 1; // unique
-                target = Math.min(10, Math.max(1, target));
-
-                // Reward scaled by item cost but kept reasonable
-                const baseCost = upgBtn ? parseInt(upgBtn.getAttribute('data-base-cost') || upgBtn.getAttribute('data-cost') || 0) : 0;
-                const costReward = Math.max(5, Math.round(Math.log10(baseCost + 1) * 2) * 5);
-                const reward = Math.max(5, Math.round(((prevObj.reward || 10) + costReward) / 10) * 5);
-
-                let upgName = upg;
-                if (upgBtn) {
-                    const key = upgBtn.getAttribute('data-upgrade-key');
-                    if (key && translations[currentLang] && translations[currentLang][key + 'Title']) {
-                        const titleVal = translations[currentLang][key + 'Title'];
-                        upgName = (typeof titleVal === 'function') ? titleVal() : titleVal;
-                    } else {
-                        const titleEl = upgBtn.querySelector('.upgrade-title'); if (titleEl) upgName = titleEl.textContent;
-                    }
-                }
-
-                newObj = { type: 'buy_upgrade', upgradeId: upg, target: target, reward: reward, titleKey: 'buy_upgrade_title', descKey: 'buy_upgrade_desc', descParams: [target, upgName] };
-            } else if (pick === 'tps') {
-                // TPS objectif proportionnel au tps actuel
-                const cur = Math.max(1, Math.floor(tps));
-                const rawTarget = Math.ceil(cur * (1.5 + Math.random()));
-                let target = (rawTarget < 50) ? rawTarget : roundToMultiple(rawTarget, 50);
-                target = clamp(target, 1, 1000000);
-                const reward = Math.max(5, Math.round(Math.log10(target + 1) * 5));
-                newObj = { type: 'tps', target: target, reward: reward, titleKey: 'tps_title', descKey: 'tps_desc', descParams: [target] };
-            } else if (pick === 'crits') {
-                const cur = totalCrits || 0;
-                const rawTarget = Math.max(50, Math.ceil((cur || 1) * (1.5 + Math.random())));
-                let target = roundToMultiple(rawTarget, 50);
-                target = clamp(target, 50, 500);
-                const reward = Math.max(5, Math.round(target / 100) * 5);
-                newObj = { type: 'crits', target: target, reward: reward, titleKey: 'crits_title', descKey: 'crits_desc', descParams: [target] };
-            }
-
-            if (newObj) {
-                newObj.id = `${newObj.type}_${Date.now()}`;
-                newObj.progress = 0;
-                newObj.completed = false;
-                objectives.push(newObj);
-            }
-        }
-
-        // Objective shop definitions and handlers
-        const objectiveShopItems = [
-            { id: 'shop_perm_click_x2', titleKey: 'shop_perm_click_x2_title', descKey: 'shop_perm_click_x2_desc', cost: 50, growth: 2, type: 'perm_click', bought: 0 },
-            { id: 'shop_temp_click_x2h', titleKey: 'shop_temp_click_x2h_title', descKey: 'shop_temp_click_x2h_desc', cost: 20, growth: 1.5, type: 'temp_click', durationSec: 3600, bought: 0 },
-            { id: 'shop_price_reduce', titleKey: 'shop_price_reduce_title', descKey: 'shop_price_reduce_desc', cost: 100, growth: 2, type: 'price_reduce', bought: 0 }
-        ];
-
-        function updateObjectiveShopUI() {
-            const shop = document.getElementById('objective-shop');
-            if (!shop) return;
-            shop.innerHTML = '';
-            const t = translations[currentLang];
-
-            objectiveShopItems.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'objective-shop-item';
-
-                const left = document.createElement('div');
-                left.innerHTML = `<strong>${t[item.titleKey]}</strong><div style=\"font-size:0.9em;color:#ccc\">${t[item.descKey]}</div>`;
-
-                const right = document.createElement('div');
-                const cost = Math.floor(item.cost * Math.pow(item.growth || 1, item.bought));
-                const btn = document.createElement('button');
-                btn.textContent = `${t.objectiveCurrencyName}: ${formatScore(cost)}`;
-                btn.disabled = objectiveCurrency < cost;
-                btn.addEventListener('click', () => buyObjectiveShopItem(item.id));
-
-                right.appendChild(btn);
-                row.appendChild(left);
-                row.appendChild(right);
-                shop.appendChild(row);
-            });
-        }
-
-        function buyObjectiveShopItem(itemId) {
-            const item = objectiveShopItems.find(i => i.id === itemId);
-            if (!item) return;
-            const cost = Math.floor(item.cost * Math.pow(item.growth || 1, item.bought));
-            if (objectiveCurrency < cost) {
-                showStatusMessage(translations[currentLang].notEnoughObjectivePoints || 'Pas assez de Points d\'Objectif', true);
-                return;
-            }
-            objectiveCurrency -= cost;
-            item.bought++;
-
-            // Appliquer l'effet
-            if (item.type === 'perm_click') {
-                objectiveClickMultiplier *= 2; // permanent x2 stackable
-            } else if (item.type === 'temp_click') {
-                const expiresAt = Date.now() + (item.durationSec * 1000);
-                temporaryMultipliers.push({ multiplier: 2, expiresAt: expiresAt });
-            } else if (item.type === 'price_reduce') {
-                objectivePriceReductionCount++;
-            }
-
-            showStatusMessage(`${translations[currentLang].objective_reward_received}${0} ${translations[currentLang].objectiveCurrencyName}`, false);
-            updateObjectiveCurrencyDisplay();
-            updateObjectiveShopUI();
-            saveGame();
         }
 
         /**
@@ -1787,14 +1342,6 @@
             setTimeout(() => tiboImage.classList.remove('active-touch'), 50);
 
             // Calcul du score
-            // Compteur total de clics pour les objectifs
-            totalClicks++;
-            // Stocke le timestamp pour les objectifs temporels (garder seulement 2 heures)
-            const now = Date.now();
-            clickTimestamps.push(now);
-            const twoHours = 2 * 3600 * 1000;
-            clickTimestamps = clickTimestamps.filter(ts => now - ts <= twoHours);
-
             let scoreToAdd = clickPower;
             let isCrit = false;
 
@@ -1806,7 +1353,6 @@
             }
 
             score += scoreToAdd;
-              if (isCrit) totalCrits++;
             updateScoreDisplay();
             
             // Déterminer les coordonnées (Souris ou Touch)
@@ -1821,11 +1367,9 @@
 
             // Animation du texte flottant
             createFloatingText(scoreToAdd, clientX, clientY, isCrit);
+
             checkUpgradeCosts();
             checkUpgradeVisibility();
-
-            // Vérifier les objectifs immédiatement après un clic
-            checkObjectives();
 
             saveGame(); 
         }
@@ -1873,13 +1417,6 @@
         });
 
         function buyUpgrade(button) {
-            // Empêcher l'achat si c'est une amélioration unique déjà achetée
-            const alreadyPurchased = button.getAttribute('data-purchased') === 'true';
-            if (alreadyPurchased && button.hasAttribute('data-max-once')) {
-                showStatusMessage(translations[currentLang].purchasedText || 'Acheté', true);
-                return;
-            }
-
             const cost = calculateCost(button);
             
             // Vérifie si le bouton est l'upgrade critique et si on a atteint 100%
@@ -1896,9 +1433,6 @@
                     let count = parseInt(button.getAttribute('data-count'));
                     button.setAttribute('data-count', ++count);
                 }
-
-                // Incrémente le compteur global d'achats (pour les objectifs)
-                totalPurchases++;
                 
                 // Si c'est un achat unique (Mindset, Ultra Sale, Cheat Meal)
                 if (button.hasAttribute('data-add-bonus') || button.hasAttribute('data-multiplier')) {
@@ -1910,8 +1444,6 @@
 
                 // 3. Mise à jour de l'UI et de l'état
                 updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
-                // Vérifier les objectifs après un achat (un achat peut déclencher une récompense)
-                checkObjectives();
                 saveGame(); // Sauvegarde le jeu après l'achat
             } else {
                 // NE PAS UTILISER alert()
@@ -1943,9 +1475,9 @@
                 else if (button.hasAttribute('data-multiplier') && isPurchased) {
                      clickMultiplier *= parseInt(button.getAttribute('data-multiplier'));
                 }
-                // 2. Clics répétables (Protéines et autres améliorations avec data-addition)
-                else if (button.hasAttribute('data-addition')) {
-                    const addition = parseInt(button.getAttribute('data-addition')) || 0;
+                // 2. Clics répétables (Protéines)
+                else if (button.id === 'upgrade-addition') {
+                    const addition = parseInt(button.getAttribute('data-addition'));
                     totalClickPower += addition * count;
                 }
                 // 3. Passifs (TPS, incluant le Minotaure et BoomFred)
@@ -2077,9 +1609,6 @@
             // Mise à jour de la visibilité des nouveaux upgrades (basé sur le score qui monte)
             checkUpgradeVisibility();
 
-            // Vérifie périodiquement les objectifs
-            checkObjectives();
-
             // Sauvegarde du jeu toutes les 10 secondes (pour ne pas surcharger)
             // Utiliser un drapeau pour ne pas sauvegarder 10 fois par seconde
             const now = Math.floor(performance.now() / 1000);
@@ -2104,13 +1633,8 @@
             
             const saveObject = {
                 score: score,
-                objectiveCurrency: objectiveCurrency,
-                totalClicks: totalClicks,
-                totalPurchases: totalPurchases,
-                totalCrits: totalCrits,
-                objectiveClickMultiplier: objectiveClickMultiplier,
-                temporaryMultipliers: temporaryMultipliers,
-                objectivePriceReductionCount: objectivePriceReductionCount,
+                rebirthPoints: rebirthPoints,
+                rebirthCount: rebirthCount,
                 upgrades: [],
                 lang: currentLang
             };
@@ -2123,11 +1647,6 @@
                     purchased: button.getAttribute('data-purchased') === 'true'
                 });
             });
-
-            // Sauvegarde de l'état des objectifs
-            saveObject.objectives = objectives.map(o => ({ id: o.id, progress: o.progress, completed: !!o.completed }));
-            // Sauvegarde de l'état du magasin d'objectifs
-            saveObject.objectiveShop = objectiveShopItems.map(i => ({ id: i.id, bought: i.bought }));
 
             localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(saveObject));
         }
@@ -2176,34 +1695,9 @@
                 if (saveObject.lang) {
                     currentLang = saveObject.lang;
                 }
-                // Restauration de la monnaie d'objectifs et compteurs
-                objectiveCurrency = parseInt(saveObject.objectiveCurrency || 0);
-                totalClicks = parseInt(saveObject.totalClicks || 0);
-                totalPurchases = parseInt(saveObject.totalPurchases || 0);
-                // Restauration des stats liées aux objectifs
-                objectiveClickMultiplier = parseFloat(saveObject.objectiveClickMultiplier || 1);
-                temporaryMultipliers = Array.isArray(saveObject.temporaryMultipliers) ? saveObject.temporaryMultipliers.filter(tm => tm && tm.expiresAt && tm.expiresAt > Date.now()) : [];
-                objectivePriceReductionCount = parseInt(saveObject.objectivePriceReductionCount || 0);
-                totalCrits = parseInt(saveObject.totalCrits || 0);
-
-                // Restauration de l'état du magasin d'objectifs
-                if (Array.isArray(saveObject.objectiveShop)) {
-                    saveObject.objectiveShop.forEach(si => {
-                        const local = objectiveShopItems.find(it => it.id === si.id);
-                        if (local) local.bought = parseInt(si.bought || 0);
-                    });
-                }
-
-                // Restauration des objectifs (si fournis)
-                if (Array.isArray(saveObject.objectives)) {
-                    saveObject.objectives.forEach(savedObj => {
-                        const obj = objectives.find(o => o.id === savedObj.id);
-                        if (obj) {
-                            obj.progress = savedObj.progress || 0;
-                            obj.completed = savedObj.completed === true;
-                        }
-                    });
-                }
+                // Restauration de l'état de rebirth
+                rebirthPoints = parseInt(saveObject.rebirthPoints || 0);
+                rebirthCount = parseInt(saveObject.rebirthCount || 0);
             }
             
             // 3. Chargement de la Langue (si elle est définie indépendamment de la save)
@@ -2213,10 +1707,9 @@
             
             // NOUVEAU : Recalculer les stats globales après avoir appliqué les attributs des boutons
             recalculateStatsFromUpgrades();
-            
-            // Vérifier immédiatement les objectifs (au cas où le joueur a déjà rempli des conditions)
-            checkObjectives();
-            updateObjectiveCurrencyDisplay();
+            // Update rebirth UI
+            updateRebirthUI();
+
             // 4. Mise à jour finale et unique de l'interface et de l'état.
             setLanguage(currentLang, false); 
             // Mise à jour de la visibilité initiale, y compris les upgrades cachés au max
@@ -2352,6 +1845,15 @@
                 fileInput.click(); // Déclenche le clic sur l'input de fichier caché
             });
             fileInput.addEventListener('change', handleFileUpload);
+            // Wire rebirth button
+            try {
+                if (rebirthBtn) {
+                    rebirthBtn.addEventListener('click', performRebirth);
+                }
+                updateRebirthUI();
+            } catch (err) {
+                console.warn('Rebirth UI not fully initialized:', err);
+            }
         };
 
         // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
