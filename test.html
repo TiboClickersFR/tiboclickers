@@ -497,6 +497,7 @@
                 <!-- Rebirth UI -->
                 <div id="rebirth-points-display" style="margin-top:6px; font-size:1.05em; color:#8ad6ff; font-weight:bold;">Points de Rebirth : 0</div>
                 <button id="rebirth-btn" style="margin-top:8px; padding:8px 10px; background:#0b6391; color:#fff; border:none; border-radius:6px; cursor:pointer;">Rebirth (Coût: 1Qa)</button>
+                <!-- Rebirth shop moved to the Upgrades area (rendered there) -->
             </div>
 
             <!-- Image de Tibo : Notez l'absence d'événement onclick inline, tout est géré en JS -->
@@ -506,6 +507,15 @@
 
         <div id="upgrades-area">
             <h2 id="upgrades-title">Améliorations</h2>
+            <!-- Tabs: switch between regular upgrades and rebirth boosts -->
+            <div id="upgrades-tabs" style="display:flex; gap:8px; margin-bottom:8px;">
+                <button id="tab-upgrades" style="padding:6px 10px; background:#0b6391; color:#fff; border:none; border-radius:6px; cursor:pointer;">Améliorations</button>
+                <button id="tab-rebirth" style="padding:6px 10px; background:#0b6391; color:#fff; border:none; border-radius:6px; cursor:pointer;">Boosts Rebirth</button>
+            </div>
+            <!-- Rebirth shop container (rendered by JS). Hidden by default. -->
+            <div id="rebirth-shop-container" style="display:none; margin-bottom:12px;">
+                <div id="rebirth-shop-items" style="display:flex; flex-direction:column; gap:6px;"></div>
+            </div>
 
             <!-- Améliorations de Clic (Bonus Additif Unique) -->
             <div id="click-multiplier-container" class="new-upgrade-container">
@@ -781,12 +791,51 @@
         // Rebirth system
         let rebirthPoints = 0;
         let rebirthCount = 0;
-        // Base cost for first rebirth: 1T (1e12). You can change the multiplier below to x1000 if you prefer.
+        // Base cost for first rebirth: 1T (1e12).
         const REBIRTH_BASE_COST = 1e12; // 1T = 1,000 milliards = 1e12
         // Cost growth multiplier per rebirth (e.g., 100 -> x100 each rebirth). Set to 1000 for x1000.
-        const REBIRTH_COST_MULTIPLIER = 1000;
+        const REBIRTH_COST_MULTIPLIER = 100;
         // Points awarded per rebirth (you asked for multiple points).
         const REBIRTH_POINTS_PER = 5;
+
+        // Rebirth shop state: persistent purchases (key -> count)
+        let rebirthShopPurchases = {};
+
+        // Catalog of rebirth shop items (baseCost in rebirth points). Items can scale with purchases.
+        const rebirthShopCatalog = [
+            {
+                key: 'priceReduction',
+                id: 'rb-price-reduction',
+                name: 'Réduction de prix',
+                desc: 'Réduit le coût de tous les achats de 10% (stackable).',
+                baseCost: 1,
+                growth: 1.2 // small growth so later purchases cost more
+            },
+            {
+                key: 'productionMultiplier',
+                id: 'rb-prod-mult',
+                name: 'Production x2',
+                desc: 'Multiplie la production (clic + TPS) par 2 (stackable).',
+                baseCost: 3,
+                growth: 2 // cost doubles per purchase
+            },
+            {
+                key: 'clickPowerPermanent',
+                id: 'rb-click-power',
+                name: '+1 Puissance de Clic',
+                desc: 'Augmente la puissance de clic permanente (+1 par achat).',
+                baseCost: 2,
+                growth: 1.5
+            },
+            {
+                key: 'tpsMultiplier',
+                id: 'rb-tps-mult',
+                name: 'TPS x2',
+                desc: 'Double le TPS permanent (stackable).',
+                baseCost: 3,
+                growth: 2
+            }
+        ];
 
         function getRebirthCost() {
             // First rebirth cost = base * (REBIRTH_COST_MULTIPLIER ^ rebirthCount)
@@ -801,6 +850,103 @@
                 // Ensure numeric comparison (score may sometimes be stringy after load)
                 rebirthBtn.disabled = (Number(score) < Number(cost));
             }
+            // Refresh shop buttons (enable/disable based on current points)
+            try { renderRebirthShop(); } catch (e) { /* ignore if not initialized yet */ }
+        }
+
+        // Render the rebirth shop UI and wire buy buttons
+        function renderRebirthShop() {
+            const container = document.getElementById('rebirth-shop-items');
+            if (!container) return;
+            container.innerHTML = '';
+
+            rebirthShopCatalog.forEach(item => {
+                const count = rebirthShopPurchases[item.key] || 0;
+                const itemDiv = document.createElement('div');
+                itemDiv.style.display = 'flex';
+                itemDiv.style.justifyContent = 'space-between';
+                itemDiv.style.alignItems = 'center';
+
+                const left = document.createElement('div');
+                left.innerHTML = `<div style="font-weight:600">${item.name} <span style='color:#9ad6ff;font-weight:600'>x${count}</span></div><div style="font-size:0.9em;color:#cbd5e1">${item.desc}</div>`;
+
+                // compute current cost based on purchases
+                const currentCost = getRebirthShopItemCost(item);
+
+                const right = document.createElement('div');
+                const buyBtn = document.createElement('button');
+                buyBtn.textContent = `${currentCost} pts`;
+                buyBtn.style.padding = '6px 8px';
+                buyBtn.style.background = '#2b6f8f';
+                buyBtn.style.color = '#fff';
+                buyBtn.style.border = 'none';
+                buyBtn.style.borderRadius = '6px';
+                buyBtn.style.cursor = 'pointer';
+                buyBtn.id = `buy-${item.id}`;
+                buyBtn.disabled = (rebirthPoints < currentCost);
+                buyBtn.addEventListener('click', () => buyRebirthShopItem(item.key));
+
+                right.appendChild(buyBtn);
+
+                itemDiv.appendChild(left);
+                itemDiv.appendChild(right);
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function buyRebirthShopItem(key) {
+            const item = rebirthShopCatalog.find(i => i.key === key);
+            if (!item) return;
+            const cost = getRebirthShopItemCost(item);
+            if (rebirthPoints < cost) {
+                showStatusMessage('Pas assez de points de Rebirth.', true);
+                return;
+            }
+            rebirthPoints -= cost;
+            rebirthShopPurchases[key] = (rebirthShopPurchases[key] || 0) + 1;
+            // Apply immediate effects via recalculation
+            recalculateStatsFromUpgrades();
+            updateUI();
+            renderRebirthShop();
+            saveGame();
+            showStatusMessage(`${item.name} acheté !`, false);
+        }
+
+        // Initialize tab switching between upgrades and rebirth shop
+        function initRebirthShopTabs() {
+            const tabUp = document.getElementById('tab-upgrades');
+            const tabRb = document.getElementById('tab-rebirth');
+            const shopContainer = document.getElementById('rebirth-shop-container');
+            const upgradesArea = document.getElementById('upgrades-area');
+            if (!tabUp || !tabRb || !shopContainer || !upgradesArea) return;
+
+            function showUpgrades() {
+                // show all upgrade buttons (they are direct children in the area)
+                const buttons = upgradesArea.querySelectorAll('.upgrade-button');
+                buttons.forEach(b => b.style.display = 'flex');
+                shopContainer.style.display = 'none';
+                tabUp.style.opacity = 1; tabRb.style.opacity = 0.6;
+            }
+
+            function showRebirthShop() {
+                const buttons = upgradesArea.querySelectorAll('.upgrade-button');
+                buttons.forEach(b => b.style.display = 'none');
+                shopContainer.style.display = 'block';
+                tabUp.style.opacity = 0.6; tabRb.style.opacity = 1;
+                renderRebirthShop();
+            }
+
+            tabUp.addEventListener('click', showUpgrades);
+            tabRb.addEventListener('click', showRebirthShop);
+
+            // default: show upgrades
+            showUpgrades();
+        }
+
+        function getRebirthShopItemCost(item) {
+            const count = rebirthShopPurchases[item.key] || 0;
+            const growth = item.growth || 1;
+            return Math.max(1, Math.floor(item.baseCost * Math.pow(growth, count)));
         }
 
         function performRebirth() {
@@ -1316,6 +1462,12 @@
             
             // 2. Si l'amélioration n'est PAS répétable (pas de data-count), retourne le coût de base
             if (!button.hasAttribute('data-count')) {
+                // Apply price reduction from rebirth shop if any
+                const priceReductionCount = rebirthShopPurchases['priceReduction'] || 0;
+                if (priceReductionCount > 0) {
+                    const reductionMultiplier = Math.pow(0.9, priceReductionCount);
+                    return Math.max(1, Math.floor(baseCost * reductionMultiplier));
+                }
                 return baseCost;
             }
             
@@ -1324,6 +1476,13 @@
             const growthFactor = parseFloat(button.getAttribute('data-growth')) || CRIT_GROWTH_FACTOR;
 
             const calculatedCost = Math.floor(baseCost * Math.pow(growthFactor, count));
+            // Apply rebirth price reductions if any
+            const priceReductionCount = rebirthShopPurchases['priceReduction'] || 0;
+            if (priceReductionCount > 0) {
+                const reductionMultiplier = Math.pow(0.9, priceReductionCount); // -10% multiplicatif par achat
+                const reduced = Math.max(1, Math.floor(calculatedCost * reductionMultiplier));
+                return reduced;
+            }
             return calculatedCost;
         }
 
@@ -1497,8 +1656,20 @@
 
             // Mise à jour des variables globales
             // Applique le multiplicateur à la puissance totale
-            clickPower = totalClickPower * clickMultiplier;
-            tps = totalTps;
+            // Apply rebirth shop effects: clickPowerPermanent and multipliers
+            const extraClickPower = (rebirthShopPurchases['clickPowerPermanent'] || 0);
+            totalClickPower += extraClickPower;
+
+            // production multiplier (affects both clickPower and TPS)
+            const prodMultCount = (rebirthShopPurchases['productionMultiplier'] || 0);
+            const productionMultiplier = Math.pow(2, prodMultCount);
+
+            clickPower = totalClickPower * clickMultiplier * productionMultiplier;
+            // TPS multiplier purchases
+            const tpsMultCount = (rebirthShopPurchases['tpsMultiplier'] || 0);
+            const tpsMultiplier = Math.pow(2, tpsMultCount);
+
+            tps = totalTps * productionMultiplier * tpsMultiplier;
             
             // Mise à jour des stats critiques
             // totalCritChance commence à 0 (baseCritChance) et ajoute 0.5% par achat
@@ -1635,6 +1806,7 @@
                 score: score,
                 rebirthPoints: rebirthPoints,
                 rebirthCount: rebirthCount,
+                rebirthShop: rebirthShopPurchases,
                 upgrades: [],
                 lang: currentLang
             };
@@ -1698,6 +1870,8 @@
                 // Restauration de l'état de rebirth
                 rebirthPoints = parseInt(saveObject.rebirthPoints || 0);
                 rebirthCount = parseInt(saveObject.rebirthCount || 0);
+                // Restauration de la boutique de rebirth
+                rebirthShopPurchases = saveObject.rebirthShop || {};
             }
             
             // 3. Chargement de la Langue (si elle est définie indépendamment de la save)
@@ -1709,6 +1883,8 @@
             recalculateStatsFromUpgrades();
             // Update rebirth UI
             updateRebirthUI();
+            // Render rebirth shop UI
+            renderRebirthShop();
 
             // 4. Mise à jour finale et unique de l'interface et de l'état.
             setLanguage(currentLang, false); 
@@ -1853,6 +2029,13 @@
                 updateRebirthUI();
             } catch (err) {
                 console.warn('Rebirth UI not fully initialized:', err);
+            }
+
+            // Initialize tabs between upgrades and rebirth boosts
+            try {
+                initRebirthShopTabs();
+            } catch (err) {
+                console.warn('Rebirth shop tabs not initialized:', err);
             }
         };
 
