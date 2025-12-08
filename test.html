@@ -794,7 +794,8 @@
         // Base cost for first rebirth: 1T (1e12).
         const REBIRTH_BASE_COST = 1e12; // 1T = 1,000 milliards = 1e12
         // Cost growth multiplier per rebirth (e.g., 100 -> x100 each rebirth). Set to 1000 for x1000.
-        const REBIRTH_COST_MULTIPLIER = 100;
+        // MODIFICATION DEMANDÉE : x1000 par niveau
+        const REBIRTH_COST_MULTIPLIER = 1000;
         // Points awarded per rebirth (you asked for multiple points).
         const REBIRTH_POINTS_PER = 5;
 
@@ -802,6 +803,7 @@
         let rebirthShopPurchases = {};
 
         // Catalog of rebirth shop items (baseCost in rebirth points). Items can scale with purchases.
+        // MODIFICATION : Suppression de clickPowerPermanent et tpsMultiplier
         const rebirthShopCatalog = [
             {
                 key: 'priceReduction',
@@ -818,22 +820,6 @@
                 desc: 'Multiplie la production (clic + TPS) par 2 (stackable).',
                 baseCost: 3,
                 growth: 2 // cost doubles per purchase
-            },
-            {
-                key: 'clickPowerPermanent',
-                id: 'rb-click-power',
-                name: '+1 Puissance de Clic',
-                desc: 'Augmente la puissance de clic permanente (+1 par achat).',
-                baseCost: 2,
-                growth: 1.5
-            },
-            {
-                key: 'tpsMultiplier',
-                id: 'rb-tps-mult',
-                name: 'TPS x2',
-                desc: 'Double le TPS permanent (stackable).',
-                baseCost: 3,
-                growth: 2
             }
         ];
 
@@ -1656,20 +1642,20 @@
 
             // Mise à jour des variables globales
             // Applique le multiplicateur à la puissance totale
-            // Apply rebirth shop effects: clickPowerPermanent and multipliers
-            const extraClickPower = (rebirthShopPurchases['clickPowerPermanent'] || 0);
-            totalClickPower += extraClickPower;
-
+            // MODIFICATION: Suppression du calcul pour clickPowerPermanent
+            // Apply rebirth shop effects: multipliers only
+            
             // production multiplier (affects both clickPower and TPS)
             const prodMultCount = (rebirthShopPurchases['productionMultiplier'] || 0);
             const productionMultiplier = Math.pow(2, prodMultCount);
 
             clickPower = totalClickPower * clickMultiplier * productionMultiplier;
-            // TPS multiplier purchases
-            const tpsMultCount = (rebirthShopPurchases['tpsMultiplier'] || 0);
-            const tpsMultiplier = Math.pow(2, tpsMultCount);
+            
+            // MODIFICATION: Suppression du calcul pour tpsMultiplier
+            // const tpsMultCount = (rebirthShopPurchases['tpsMultiplier'] || 0);
+            // const tpsMultiplier = Math.pow(2, tpsMultCount);
 
-            tps = totalTps * productionMultiplier * tpsMultiplier;
+            tps = totalTps * productionMultiplier; // removed * tpsMultiplier
             
             // Mise à jour des stats critiques
             // totalCritChance commence à 0 (baseCritChance) et ajoute 0.5% par achat
