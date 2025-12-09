@@ -127,6 +127,46 @@
         /* Mise à jour des Améliorations */
         /* ------------------------------------------------ */
 
+        /* Styles pour les onglets du shop */
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(to bottom, #3c3c3c, #2c2c2c);
+            color: #aaa;
+            border: 1px solid #555;
+            border-radius: 6px 6px 0 0; /* Arrondi en haut seulement pour un effet onglet */
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+        }
+
+        .tab-button:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        .tab-button.active {
+            background: #0b6391; /* Bleu Tibo */
+            background: linear-gradient(to bottom, #0e7ab3, #0b6391);
+            color: #fff;
+            border-color: #0b6391;
+            box-shadow: 0 0 10px rgba(11, 99, 145, 0.5);
+            transform: translateY(-2px);
+            z-index: 10;
+        }
+
+        /* Conteneur des onglets */
+        #upgrades-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #555;
+            padding-bottom: 5px;
+        }
+
         .upgrade-button {
             width: 100%; 
             padding: 10px;
@@ -508,239 +548,242 @@
         <div id="upgrades-area">
             <h2 id="upgrades-title">Améliorations</h2>
             <!-- Tabs: switch between regular upgrades and rebirth boosts -->
-            <div id="upgrades-tabs" style="display:flex; gap:8px; margin-bottom:8px;">
-                <button id="tab-upgrades" style="padding:6px 10px; background:#0b6391; color:#fff; border:none; border-radius:6px; cursor:pointer;">Améliorations</button>
-                <button id="tab-rebirth" style="padding:6px 10px; background:#0b6391; color:#fff; border:none; border-radius:6px; cursor:pointer;">Boosts Rebirth</button>
+            <div id="upgrades-tabs">
+                <button id="tab-upgrades" class="tab-button active">Améliorations</button>
+                <button id="tab-rebirth" class="tab-button">Boosts Rebirth</button>
             </div>
             <!-- Rebirth shop container (rendered by JS). Hidden by default. -->
             <div id="rebirth-shop-container" style="display:none; margin-bottom:12px;">
                 <div id="rebirth-shop-items" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
-            <!-- Améliorations de Clic (Bonus Additif Unique) -->
-            <div id="click-multiplier-container" class="new-upgrade-container">
-                <!-- Upgrade 1 initiale -->
-                <!-- Ces achats sont uniques, ils utilisent data-cost -->
-                <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset" data-max-once="true">
+            <!-- WRAPPER POUR LES AMÉLIORATIONS CLASSIQUES (POUR CACHER LES <HR>) -->
+            <div id="standard-upgrades-wrapper">
+                <!-- Améliorations de Clic (Bonus Additif Unique) -->
+                <div id="click-multiplier-container" class="new-upgrade-container">
+                    <!-- Upgrade 1 initiale -->
+                    <!-- Ces achats sont uniques, ils utilisent data-cost -->
+                    <button id="upgrade-click-1" class="upgrade-button" data-cost="100" data-add-bonus="1" data-purchased="false" data-upgrade-key="mindset" data-max-once="true">
+                        <div class="upgrade-details">
+                            <span class="upgrade-title">Mise en Place du "Mindset"</span>
+                            <br><span class="upgrade-description">Ajoute +1 TPC de base (Achat Unique)</span>
+                        </div>
+                        <span class="upgrade-cost">100 Tibos</span> 
+                    </button>
+                    
+                    <!-- Upgrade 2 -->
+                     <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale" data-max-once="true">
+                        <div class="upgrade-details">
+                            <span class="upgrade-title">Tibo Ultra Sale 💥</span>
+                            <br><span class="upgrade-description">Ajoute +3 TPC de base (Achat Unique)</span>
+                        </div>
+                        <span class="upgrade-cost">500 Tibos</span>
+                    </button>
+                    
+                    <!-- Upgrade 3 -->
+                     <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal" data-max-once="true">
+                        <div class="upgrade-details">
+                            <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
+                            <br><span class="upgrade-description">Ajoute +6 TPC de base (Achat Unique)</span>
+                        </div>
+                        <span class="upgrade-cost">3000 Tibos</span>
+                    </button>
+
+                    <!-- NOUVELLE UPGRADE ULTIME : MULTIPLICATEUR X5000 -->
+                     <button id="upgrade-click-god" class="upgrade-button god-upgrade hidden" data-cost="1000000000000" data-multiplier="5000" data-purchased="false" data-upgrade-key="godmode" data-max-once="true">
+                        <div class="upgrade-details">
+                            <span class="upgrade-title">La Transfo Divine ⚡</span>
+                            <br><span class="upgrade-description">Multiplie le clic par 5000 (Achat Unique)</span>
+                        </div>
+                        <span class="upgrade-cost">1T Tibos</span>
+                    </button>
+
+                </div>
+                
+                <hr style="border-color: #5a5a5a; margin: 15px 0;">
+
+                <!-- NOUVELLES AMÉLIORATIONS CRITIQUES -->
+                 <button id="upgrade-crit-chance" class="upgrade-button crit-upgrade" data-base-cost="20000" data-growth="1.1" data-crit-chance-add="0.5" data-count="0" data-upgrade-key="critChance">
                     <div class="upgrade-details">
-                        <span class="upgrade-title">Mise en Place du "Mindset"</span>
-                        <br><span class="upgrade-description">Ajoute +1 TPC de base (Achat Unique)</span>
+                        <span class="upgrade-title">Chance de Transfo' Critique 📈</span>
+                        <br><span class="upgrade-description">Augmente la chance de boost de 0.5%</span>
+                        <span class="upgrade-count">Possédé: 0</span>
                     </div>
-                    <span class="upgrade-cost">100 Tibos</span> 
+                    <span class="upgrade-cost">20000 Tibos</span>
                 </button>
                 
-                <!-- Upgrade 2 -->
-                 <button id="upgrade-click-2-new" class="upgrade-button hidden" data-cost="500" data-add-bonus="3" data-purchased="false" data-upgrade-key="ultrasale" data-max-once="true">
+                <button id="upgrade-crit-power" class="upgrade-button crit-upgrade" data-base-cost="50000" data-growth="1.3" data-crit-power-add="2" data-count="0" data-upgrade-key="critPower">
                     <div class="upgrade-details">
-                        <span class="upgrade-title">Tibo Ultra Sale 💥</span>
-                        <br><span class="upgrade-description">Ajoute +3 TPC de base (Achat Unique)</span>
+                        <span class="upgrade-title">Puissance de Transfo' Critique 🔥</span>
+                        <br><span class="upgrade-description">Augmente le multiplicateur de boost de x2 (base x2)</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">50000 Tibos</span>
+                </button>
+                
+                <hr style="border-color: #5a5a5a; margin: 15px 0;">
+
+                <!-- Amélioration du Clic (Ajout) - Prix exponentiel -->
+                <!-- Ces achats sont répétables, ils utilisent data-base-cost -->
+                <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-growth="1.15" data-addition="5" data-count="0" data-upgrade-key="proteines">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Déverrouillage des Protéines</span>
+                        <br><span class="upgrade-description">Ajoute +5 Tibos par Clic</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">2000 Tibos</span>
+                </button>
+
+                <!-- Amélioration Passive 1 - Alessio -->
+                <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-growth="1.15" data-tps="1" data-count="0" data-upgrade-key="alessio">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
+                        <br><span class="upgrade-description">Génère 1 Tibo/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
                     </div>
                     <span class="upgrade-cost">500 Tibos</span>
                 </button>
                 
-                <!-- Upgrade 3 -->
-                 <button id="upgrade-click-3-new" class="upgrade-button hidden" data-cost="3000" data-add-bonus="6" data-purchased="false" data-upgrade-key="cheatmeal" data-max-once="true">
+                <!-- Amélioration Passive 2 - Justine -->
+                <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-growth="1.15" data-tps="10" data-count="0" data-upgrade-key="justine">
                     <div class="upgrade-details">
-                        <span class="upgrade-title">Le Cheat Meal Ultime 🍕</span>
-                        <br><span class="upgrade-description">Ajoute +6 TPC de base (Achat Unique)</span>
+                        <span class="upgrade-title">Justine - Community Manager 📸</span>
+                        <br><span class="upgrade-description">Génère 10 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
                     </div>
-                    <span class="upgrade-cost">3000 Tibos</span>
+                    <span class="upgrade-cost">5000 Tibos</span>
+                </button>
+                
+                <!-- Amélioration Passive 3 - Patate Douce (CHEATEE: 150 TPS) -->
+                <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-growth="1.15" data-tps="150" data-count="0" data-upgrade-key="patates">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">L'Usine à Patates Douces COSMIQUE 🍠🚀</span>
+                        <br><span class="upgrade-description">Génère 150 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">40000 Tibos</span>
                 </button>
 
-                <!-- NOUVELLE UPGRADE ULTIME : MULTIPLICATEUR X5000 -->
-                 <button id="upgrade-click-god" class="upgrade-button god-upgrade hidden" data-cost="1000000000000" data-multiplier="5000" data-purchased="false" data-upgrade-key="godmode" data-max-once="true">
+                <!-- NOUVELLE AMÉLIORATION : Nogode -->
+                <button id="upgrade-passive-nogode" class="upgrade-button" data-base-cost="200000" data-growth="1.15" data-tps="500" data-count="0" data-upgrade-key="nogode">
                     <div class="upgrade-details">
-                        <span class="upgrade-title">La Transfo Divine ⚡</span>
-                        <br><span class="upgrade-description">Multiplie le clic par 5000 (Achat Unique)</span>
+                        <span class="upgrade-title">Nogode - Le Disrupteur Sombre 🖤</span>
+                        <br><span class="upgrade-description">Génère 500 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
                     </div>
-                    <span class="upgrade-cost">1T Tibos</span>
+                    <span class="upgrade-cost">200000 Tibos</span>
                 </button>
 
+                <!-- NOUVELLE AMÉLIORATION : Sachatte -->
+                <button id="upgrade-passive-sachatte" class="upgrade-button" data-base-cost="1000000" data-growth="1.15" data-tps="2000" data-count="0" data-upgrade-key="sachatte">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Sachatte - L'Éclaireuse Mystique ✨</span>
+                        <br><span class="upgrade-description">Génère 2,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">1000000 Tibos</span>
+                </button>
+                
+                <!-- AMÉLIORATION CORRIGÉE : Milodes (Le style est géré par la classe .upgrade-button) -->
+                <button id="upgrade-passive-milodes" class="upgrade-button" data-base-cost="8000000" data-growth="1.15" data-tps="10000" data-count="0" data-upgrade-key="milodes">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Milodes - Le Mobilisateur Instantané 🚀</span>
+                        <br><span class="upgrade-description">Génère 10,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">8000000 Tibos</span>
+                </button>
+
+                <!-- NOUVELLE AMÉLIORATION : Thomas -->
+                <button id="upgrade-passive-thomas" class="upgrade-button" data-base-cost="50000000" data-growth="1.15" data-tps="50000" data-count="0" data-upgrade-key="thomas">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Thomas - L'Architecte des Ressources 💰</span>
+                        <br><span class="upgrade-description">Génère 50,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">50000000 Tibos</span>
+                </button>
+
+                <!-- NOUVELLE AMÉLIORATION : Lenaik -->
+                <button id="upgrade-passive-lenaik" class="upgrade-button" data-base-cost="200000000" data-growth="1.15" data-tps="200000" data-count="0" data-upgrade-key="lenaik">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Lenaik - La Gardienne Hyper-Protectrice 🛡️</span>
+                        <br><span class="upgrade-description">Génère 200,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">200000000 Tibos</span>
+                </button>
+                
+                <!-- NOUVELLE AMÉLIORATION : Rodrigues -->
+                <button id="upgrade-passive-rodrigues" class="upgrade-button" data-base-cost="1000000000" data-growth="1.15" data-tps="1000000" data-count="0" data-upgrade-key="rodrigues">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Rodrigues - Le Bâton de Pèlerin 💫</span>
+                        <br><span class="upgrade-description">Génère 1,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">1000000000 Tibos</span>
+                </button>
+                
+                <!-- NOUVELLE AMÉLIORATION : Minotaure 🐂 -->
+                <button id="upgrade-passive-minotaure" class="upgrade-button" data-base-cost="5000000000" data-growth="1.15" data-tps="5000000" data-count="0" data-upgrade-key="minotaure">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Minotaure - Tu veux qu'il te fasse quoi ? 🐂</span>
+                        <br><span class="upgrade-description">Le Taureau de Crète. Génère 5,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">5000000000 Tibos</span>
+                </button>
+                
+                <!-- AMÉLIORATION : BoomFred (LE PLUS PUISSANT) -->
+                <button id="upgrade-passive-boomfred" class="upgrade-button" data-base-cost="25000000000" data-growth="1.15" data-tps="25000000" data-count="0" data-upgrade-key="boomfred">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">BoomFred - Le goat du sax et de Glazunov 🎷</span>
+                        <br><span class="upgrade-description">Génère 25,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">25000000000 Tibos</span>
+                </button>
+
+                <!-- NOUVELLE AMÉLIORATION : Tomasi -->
+                <button id="upgrade-passive-tomasi" class="upgrade-button" data-base-cost="200000000000" data-growth="1.15" data-tps="150000000" data-count="0" data-upgrade-key="tomasi">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Tomasi - La Mélodie Divine 🎵</span>
+                        <br><span class="upgrade-description">Génère 150,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">200,000,000,000 Tibos</span>
+                </button>
+
+                <!-- NOUVELLE AMÉLIORATION : SperGabMaker -->
+                <button id="upgrade-passive-spergabmaker" class="upgrade-button" data-base-cost="2000000000000" data-growth="1.15" data-tps="1000000000" data-count="0" data-upgrade-key="spergabmaker">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">SperGabMaker - L'Alchimiste Suprême 🧬</span>
+                        <br><span class="upgrade-description">Génère 1,000,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">2,000,000,000,000 Tibos</span>
+                </button>
+
+                <!-- NOUVELLE AMÉLIORATION : Timéto -->
+                <button id="upgrade-passive-timeto" class="upgrade-button" data-base-cost="25000000000000" data-growth="1.15" data-tps="10000000000" data-count="0" data-upgrade-key="timeto">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Timéto - Le Maître du Temps ⏳</span>
+                        <br><span class="upgrade-description">Génère 10,000,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">25,000,000,000,000 Tibos</span>
+                </button>
+
+                <!-- NOUVELLE AMÉLIORATION : Boubou -->
+                <button id="upgrade-passive-boubou" class="upgrade-button" data-base-cost="500000000000000" data-growth="1.15" data-tps="200000000000" data-count="0" data-upgrade-key="boubou">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Boubou - Bienvenue chez nous frère 🤝</span>
+                        <br><span class="upgrade-description">Génère 200,000,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">500,000,000,000,000 Tibos</span>
+                </button>
             </div>
-            
-            <hr style="border-color: #5a5a5a; margin: 15px 0;">
-
-            <!-- NOUVELLES AMÉLIORATIONS CRITIQUES -->
-             <button id="upgrade-crit-chance" class="upgrade-button crit-upgrade" data-base-cost="20000" data-growth="1.1" data-crit-chance-add="0.5" data-count="0" data-upgrade-key="critChance">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Chance de Transfo' Critique 📈</span>
-                    <br><span class="upgrade-description">Augmente la chance de boost de 0.5%</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">20000 Tibos</span>
-            </button>
-            
-            <button id="upgrade-crit-power" class="upgrade-button crit-upgrade" data-base-cost="50000" data-growth="1.3" data-crit-power-add="2" data-count="0" data-upgrade-key="critPower">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Puissance de Transfo' Critique 🔥</span>
-                    <br><span class="upgrade-description">Augmente le multiplicateur de boost de x2 (base x2)</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">50000 Tibos</span>
-            </button>
-            
-            <hr style="border-color: #5a5a5a; margin: 15px 0;">
-
-            <!-- Amélioration du Clic (Ajout) - Prix exponentiel -->
-            <!-- Ces achats sont répétables, ils utilisent data-base-cost -->
-            <button id="upgrade-addition" class="upgrade-button" data-base-cost="2000" data-growth="1.15" data-addition="5" data-count="0" data-upgrade-key="proteines">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Déverrouillage des Protéines</span>
-                    <br><span class="upgrade-description">Ajoute +5 Tibos par Clic</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">2000 Tibos</span>
-            </button>
-
-            <!-- Amélioration Passive 1 - Alessio -->
-            <button id="upgrade-passive-alessiode" class="upgrade-button" data-base-cost="500" data-growth="1.15" data-tps="1" data-count="0" data-upgrade-key="alessio">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Alessiode - Coach Personnel 🏋️</span>
-                    <br><span class="upgrade-description">Génère 1 Tibo/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">500 Tibos</span>
-            </button>
-            
-            <!-- Amélioration Passive 2 - Justine -->
-            <button id="upgrade-passive-justine" class="upgrade-button" data-base-cost="5000" data-growth="1.15" data-tps="10" data-count="0" data-upgrade-key="justine">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Justine - Community Manager 📸</span>
-                    <br><span class="upgrade-description">Génère 10 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">5000 Tibos</span>
-            </button>
-            
-            <!-- Amélioration Passive 3 - Patate Douce (CHEATEE: 150 TPS) -->
-            <button id="upgrade-passive-patate" class="upgrade-button" data-base-cost="40000" data-growth="1.15" data-tps="150" data-count="0" data-upgrade-key="patates">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">L'Usine à Patates Douces COSMIQUE 🍠🚀</span>
-                    <br><span class="upgrade-description">Génère 150 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">40000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Nogode -->
-            <button id="upgrade-passive-nogode" class="upgrade-button" data-base-cost="200000" data-growth="1.15" data-tps="500" data-count="0" data-upgrade-key="nogode">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Nogode - Le Disrupteur Sombre 🖤</span>
-                    <br><span class="upgrade-description">Génère 500 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">200000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Sachatte -->
-            <button id="upgrade-passive-sachatte" class="upgrade-button" data-base-cost="1000000" data-growth="1.15" data-tps="2000" data-count="0" data-upgrade-key="sachatte">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Sachatte - L'Éclaireuse Mystique ✨</span>
-                    <br><span class="upgrade-description">Génère 2,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">1000000 Tibos</span>
-            </button>
-            
-            <!-- AMÉLIORATION CORRIGÉE : Milodes (Le style est géré par la classe .upgrade-button) -->
-            <button id="upgrade-passive-milodes" class="upgrade-button" data-base-cost="8000000" data-growth="1.15" data-tps="10000" data-count="0" data-upgrade-key="milodes">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Milodes - Le Mobilisateur Instantané 🚀</span>
-                    <br><span class="upgrade-description">Génère 10,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">8000000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Thomas -->
-            <button id="upgrade-passive-thomas" class="upgrade-button" data-base-cost="50000000" data-growth="1.15" data-tps="50000" data-count="0" data-upgrade-key="thomas">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Thomas - L'Architecte des Ressources 💰</span>
-                    <br><span class="upgrade-description">Génère 50,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">50000000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Lenaik -->
-            <button id="upgrade-passive-lenaik" class="upgrade-button" data-base-cost="200000000" data-growth="1.15" data-tps="200000" data-count="0" data-upgrade-key="lenaik">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Lenaik - La Gardienne Hyper-Protectrice 🛡️</span>
-                    <br><span class="upgrade-description">Génère 200,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">200000000 Tibos</span>
-            </button>
-            
-            <!-- NOUVELLE AMÉLIORATION : Rodrigues -->
-            <button id="upgrade-passive-rodrigues" class="upgrade-button" data-base-cost="1000000000" data-growth="1.15" data-tps="1000000" data-count="0" data-upgrade-key="rodrigues">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Rodrigues - Le Bâton de Pèlerin 💫</span>
-                    <br><span class="upgrade-description">Génère 1,000,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">1000000000 Tibos</span>
-            </button>
-            
-            <!-- NOUVELLE AMÉLIORATION : Minotaure 🐂 -->
-            <button id="upgrade-passive-minotaure" class="upgrade-button" data-base-cost="5000000000" data-growth="1.15" data-tps="5000000" data-count="0" data-upgrade-key="minotaure">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Minotaure - Tu veux qu'il te fasse quoi ? 🐂</span>
-                    <br><span class="upgrade-description">Le Taureau de Crète. Génère 5,000,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">5000000000 Tibos</span>
-            </button>
-            
-            <!-- AMÉLIORATION : BoomFred (LE PLUS PUISSANT) -->
-            <button id="upgrade-passive-boomfred" class="upgrade-button" data-base-cost="25000000000" data-growth="1.15" data-tps="25000000" data-count="0" data-upgrade-key="boomfred">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">BoomFred - Le goat du sax et de Glazunov 🎷</span>
-                    <br><span class="upgrade-description">Génère 25,000,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">25000000000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Tomasi -->
-            <button id="upgrade-passive-tomasi" class="upgrade-button" data-base-cost="200000000000" data-growth="1.15" data-tps="150000000" data-count="0" data-upgrade-key="tomasi">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Tomasi - La Mélodie Divine 🎵</span>
-                    <br><span class="upgrade-description">Génère 150,000,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">200,000,000,000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : SperGabMaker -->
-            <button id="upgrade-passive-spergabmaker" class="upgrade-button" data-base-cost="2000000000000" data-growth="1.15" data-tps="1000000000" data-count="0" data-upgrade-key="spergabmaker">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">SperGabMaker - L'Alchimiste Suprême 🧬</span>
-                    <br><span class="upgrade-description">Génère 1,000,000,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">2,000,000,000,000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Timéto -->
-            <button id="upgrade-passive-timeto" class="upgrade-button" data-base-cost="25000000000000" data-growth="1.15" data-tps="10000000000" data-count="0" data-upgrade-key="timeto">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Timéto - Le Maître du Temps ⏳</span>
-                    <br><span class="upgrade-description">Génère 10,000,000,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">25,000,000,000,000 Tibos</span>
-            </button>
-
-            <!-- NOUVELLE AMÉLIORATION : Boubou -->
-            <button id="upgrade-passive-boubou" class="upgrade-button" data-base-cost="500000000000000" data-growth="1.15" data-tps="200000000000" data-count="0" data-upgrade-key="boubou">
-                <div class="upgrade-details">
-                    <span class="upgrade-title">Boubou - Bienvenue chez nous frère 🤝</span>
-                    <br><span class="upgrade-description">Génère 200,000,000,000 Tibos/s</span>
-                    <span class="upgrade-count">Possédé: 0</span>
-                </div>
-                <span class="upgrade-cost">500,000,000,000,000 Tibos</span>
-            </button>
             
         </div>
         
@@ -903,22 +946,25 @@
             const tabUp = document.getElementById('tab-upgrades');
             const tabRb = document.getElementById('tab-rebirth');
             const shopContainer = document.getElementById('rebirth-shop-container');
-            const upgradesArea = document.getElementById('upgrades-area');
-            if (!tabUp || !tabRb || !shopContainer || !upgradesArea) return;
+            const standardUpgradesWrapper = document.getElementById('standard-upgrades-wrapper');
+            
+            if (!tabUp || !tabRb || !shopContainer || !standardUpgradesWrapper) return;
 
             function showUpgrades() {
-                // show all upgrade buttons (they are direct children in the area)
-                const buttons = upgradesArea.querySelectorAll('.upgrade-button');
-                buttons.forEach(b => b.style.display = 'flex');
+                standardUpgradesWrapper.style.display = 'block';
                 shopContainer.style.display = 'none';
-                tabUp.style.opacity = 1; tabRb.style.opacity = 0.6;
+                
+                tabUp.classList.add('active');
+                tabRb.classList.remove('active');
             }
 
             function showRebirthShop() {
-                const buttons = upgradesArea.querySelectorAll('.upgrade-button');
-                buttons.forEach(b => b.style.display = 'none');
+                standardUpgradesWrapper.style.display = 'none';
                 shopContainer.style.display = 'block';
-                tabUp.style.opacity = 0.6; tabRb.style.opacity = 1;
+                
+                tabUp.classList.remove('active');
+                tabRb.classList.add('active');
+                
                 renderRebirthShop();
             }
 
@@ -1049,11 +1095,11 @@
                 justineTitle: "Justine - Community Manager 📸",
                 justineDescription: "Génère 10 Tibos/s",
                 patatesTitle: "L'Usine à Patates Douces COSMIQUE 🍠🚀",
-                patatesDescription: "Génère 150 Tibos/s",
+                patatesDescription: "Génère 150 Tibo/s",
                 nogodeTitle: "Nogode - Le Disrupteur Sombre 🖤",
-                nogodeDescription: "Génère 500 Tibos/s",
+                nogodeDescription: "Génère 500 Tibo/s",
                 sachatteTitle: "Sachatte - L'Éclaireuse Mystique ✨",
-                sachatteDescription: "Génère 2,000 Tibos/s",
+                sachatteDescription: "Génère 2,000 Tibo/s",
                 milodesTitle: "Milodes - Le Mobilisateur Instantané 🚀",
                 milodesDescription: "Génère 10,000 Tibos/s",
                 thomasTitle: "Thomas - L'Architecte des Ressources 💰",
