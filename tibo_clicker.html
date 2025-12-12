@@ -789,6 +789,16 @@
                     </div>
                     <span class="upgrade-cost">500,000,000,000,000 Tibos</span>
                 </button>
+
+                <!-- NOUVELLE AMÉLIORATION : TeraBou -->
+                <button id="upgrade-passive-terabou" class="upgrade-button" data-base-cost="25000000000000000" data-growth="1.15" data-tps="10000000000000" data-count="0" data-upgrade-key="terabou">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">TeraBou - Le créateur</span>
+                        <br><span class="upgrade-description">Génère 10,000,000,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">25,000,000,000,000,000 Tibos</span>
+                </button>
             </div>
             
         </div>
@@ -1060,7 +1070,8 @@
             document.getElementById('upgrade-passive-tomasi'),
             document.getElementById('upgrade-passive-boubou'),
             document.getElementById('upgrade-passive-spergabmaker'),
-            document.getElementById('upgrade-passive-timeto')
+            document.getElementById('upgrade-passive-timeto'),
+            document.getElementById('upgrade-passive-terabou') // AJOUTÉ
         ];
         
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
@@ -1103,9 +1114,9 @@
                 patatesTitle: "L'Usine à Patates Douces COSMIQUE 🍠🚀",
                 patatesDescription: "Génère 150 Tibo/s",
                 nogodeTitle: "Nogode - Le Disrupteur Sombre 🖤",
-                nogodeDescription: "Génère 500 Tibo/s",
+                nogodeDescription: "Génère 500 Tibos/s",
                 sachatteTitle: "Sachatte - L'Éclaireuse Mystique ✨",
-                sachatteDescription: "Génère 2,000 Tibo/s",
+                sachatteDescription: "Génère 2,000 Tibos/s",
                 milodesTitle: "Milodes - Le Mobilisateur Instantané 🚀",
                 milodesDescription: "Génère 10,000 Tibos/s",
                 thomasTitle: "Thomas - L'Architecte des Ressources 💰",
@@ -1127,6 +1138,8 @@
                 spergabmakerDescription: "Génère 1,000,000,000 Tibos/s",
                 timetoTitle: "Timéto - Le Maître du Temps ⏳",
                 timetoDescription: "Génère 10,000,000,000 Tibos/s",
+                terabouTitle: "TeraBou - Le créateur 👑",
+                terabouDescription: "Génère 10,000,000,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
@@ -1203,6 +1216,8 @@
                 spergabmakerDescription: "Generates 1,000,000,000 Tibo/s",
                 timetoTitle: "Timéto - The Time Master ⏳",
                 timetoDescription: "Generates 10,000,000,000 Tibo/s",
+                terabouTitle: "TeraBou - The Creator 👑",
+                terabouDescription: "Generates 10,000,000,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -1279,6 +1294,8 @@
                 spergabmakerDescription: "Genera 1,000,000,000 Tibo/s",
                 timetoTitle: "Timéto - El Maestro del Tiempo ⏳",
                 timetoDescription: "Genera 10,000,000,000 Tibo/s",
+                terabouTitle: "TeraBou - El Creador 👑",
+                terabouDescription: "Genera 10,000,000,000,000 Tibo/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
