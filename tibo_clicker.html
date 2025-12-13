@@ -136,6 +136,23 @@
             color: #e74c3c; /* Couleur rouge/critique */
             font-weight: bold;
         }
+
+        /* NOUVEAU : Affichage du Boost */
+        #boost-status-display {
+            margin-top: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #00ff00;
+            display: none; /* Caché par défaut */
+            text-shadow: 0 0 5px #00ff00;
+            animation: pulseBoost 1.5s infinite;
+        }
+
+        @keyframes pulseBoost {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
         
         /* ------------------------------------------------ */
         /* Mise à jour des Améliorations */
@@ -437,6 +454,93 @@
             background-color: #f44336; /* Rouge erreur */
             color: white;
         }
+        
+        /* ------------------------------------------------ */
+        /* STYLES DU MINI-JEU (PLATFORMER) */
+        /* ------------------------------------------------ */
+        #minigame-overlay {
+            display: none; /* Caché par défaut */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 2000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #minigame-container {
+            background: #222;
+            border: 4px solid #ffcc00;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            max-width: 95%;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.3);
+        }
+        
+        canvas#minigame-canvas {
+            background-color: #333;
+            border: 2px solid #555;
+            display: block;
+            margin: 0 auto 10px auto;
+            max-width: 100%;
+        }
+        
+        #minigame-controls {
+            margin-top: 10px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .mg-btn {
+            padding: 10px;
+            font-size: 1.5em; /* Gros boutons */
+            font-weight: bold;
+            border: 2px solid #555;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #444;
+            color: white;
+            min-width: 60px;
+            min-height: 60px;
+            user-select: none; /* IMPORTANT */
+            touch-action: manipulation; /* IMPORTANT */
+        }
+        
+        .mg-btn:active {
+            background-color: #666;
+            transform: scale(0.95);
+        }
+        
+        #mg-close-btn { 
+            background-color: #e74c3c; 
+            color: white; 
+            font-size: 1em;
+            padding: 10px 20px;
+            min-width: auto;
+            min-height: auto;
+            border-color: #c0392b;
+        }
+        
+        .mg-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .mg-stat-val { color: #ffcc00; }
+        .mg-bonus-val { color: #00ff00; }
 
 
         /* ------------------------------------------------ */
@@ -566,10 +670,18 @@
 
                 <!-- NOUVEAU: Affichage des statistiques de boost critique -->
                 <div id="crit-stats-display">Transfo' Critique : 0.0% (x2)</div>
+                
+                <!-- NOUVEAU: Affichage du Timer de Boost -->
+                <div id="boost-status-display">BOOST ACTIF x2 : <span id="boost-timer">0</span>s</div>
+                
                 <!-- Rebirth UI -->
                 <div id="rebirth-points-display" style="margin-top:6px; font-size:1.05em; color:#8ad6ff; font-weight:bold;">Points de Rebirth : 0</div>
                 <button id="rebirth-btn" style="margin-top:8px; padding:8px 10px; background:#0b6391; color:#fff; border:none; border-radius:6px; cursor:pointer;">Rebirth (Coût: 1Qa)</button>
-                <!-- Rebirth shop moved to the Upgrades area (rendered there) -->
+                
+                <!-- NOUVEAU : BOUTON MINI-JEU -->
+                <button id="open-minigame-btn" style="margin-top:8px; padding:8px 10px; background:#e67e22; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    🏃 Mini-Jeu (Plateforme)
+                </button>
             </div>
 
             <!-- Image de Tibo : Notez l'absence d'événement onclick inline, tout est géré en JS -->
@@ -851,6 +963,28 @@
         <div id="status-message" style="display: none;"></div>
     </div>
 
+    <!-- MINI-JEU OVERLAY -->
+    <div id="minigame-overlay">
+        <div id="minigame-container">
+            <h2 style="color: #ffcc00; margin-top: 0;">Tibo Platform - Time Attack ⏱️</h2>
+            <div class="mg-stats">
+                <span>Temps: <span id="mg-timer" style="color:white; font-weight:bold;">30</span>s</span> | 
+                <span>Haltères: <span id="mg-score" class="mg-stat-val">0</span></span>
+            </div>
+            <!-- Canvas agrandi en hauteur pour le jeu de plateforme -->
+            <canvas id="minigame-canvas" width="600" height="300"></canvas>
+            <p style="color: #ccc; font-size: 0.9em; margin-bottom: 5px;">
+                Collectez le maximum d'haltères en 30 secondes !<br>
+                Chaque haltère = +10s de BOOST !
+            </p>
+            <div id="minigame-controls">
+                <button class="mg-btn" id="btn-left">⬅️</button>
+                <button class="mg-btn" id="btn-jump" style="background-color: #ffcc00; color: #000;">🦘</button>
+                <button class="mg-btn" id="btn-right">➡️</button>
+                <button id="mg-close-btn" class="mg-btn">Abandonner</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // JavaScript pour la logique du jeu
@@ -885,6 +1019,8 @@
         const critStatsDisplay = document.getElementById('crit-stats-display'); // NOUVEAU
         const rebirthPointsDisplay = document.getElementById('rebirth-points-display');
         const rebirthBtn = document.getElementById('rebirth-btn');
+        const boostStatusDisplay = document.getElementById('boost-status-display');
+        const boostTimerDisplay = document.getElementById('boost-timer');
 
         // Rebirth system
         let rebirthPoints = 0;
@@ -899,6 +1035,25 @@
 
         // Rebirth shop state: persistent purchases (key -> count)
         let rebirthShopPurchases = {};
+        
+        // --- LOGIQUE DU BOOST ---
+        let boostMultiplier = 1; // Multiplicateur temporaire (normal = 1, boost = 2)
+        let boostTimeRemaining = 0; // En secondes
+
+        function activateBoost(durationToAdd) {
+            boostTimeRemaining += durationToAdd;
+            boostMultiplier = 2; // On fixe le boost à x2
+            updateBoostUI();
+        }
+
+        function updateBoostUI() {
+            if (boostTimeRemaining > 0) {
+                boostStatusDisplay.style.display = 'block';
+                boostTimerDisplay.textContent = Math.ceil(boostTimeRemaining);
+            } else {
+                boostStatusDisplay.style.display = 'none';
+            }
+        }
 
         // Catalog of rebirth shop items (baseCost in rebirth points). Items can scale with purchases.
         // MODIFICATION : Suppression de clickPowerPermanent et tpsMultiplier
@@ -1046,11 +1201,10 @@
             // Consume currency (reset everything as requested)
             // Reset money and counters
             score = 0;
-            totalClicks = 0;
-            totalPurchases = 0;
-            totalCrits = 0;
-            clickTimestamps = [];
-            objectiveCurrency = 0;
+            
+            // Reset Boosts too
+            boostTimeRemaining = 0;
+            boostMultiplier = 1;
 
             // Reset all upgrades: counts and purchased flags
             upgradeButtons.forEach(button => {
@@ -1160,7 +1314,7 @@
                 lenaikDescription: "Génère 200,000 Tibos/s",
                 rodriguesTitle: "Rodrigues - Le Bâton de Pèlerin 💫",
                 rodriguesDescription: "Génère 1,000,000 Tibos/s",
-                minotaureTitle: "Minotaure - Tu veux qu'il te fasse quoi ? 🐂",
+                minotaureTitle: "Minotaur - Tu veux qu'il te fasse quoi ? 🐂",
                 minotaureDescription: "Le Taureau de Crète. Génère 5,000,000 Tibos/s",
                 boomfredTitle: "BoomFred - Le goat du sax et de Glazunov 🎷",
                 boomfredDescription: "Génère 25,000,000 Tibos/s",
@@ -1430,6 +1584,7 @@
             updateScoreDisplay(); 
             updateTPSDisplay();
             updateCritStatsDisplay(); // NOUVEAU
+            updateBoostUI(); // NOUVEAU
 
             // Mise à jour de tous les boutons d'amélioration
             upgradeButtons.forEach(button => {
@@ -1514,7 +1669,9 @@
         function updateScoreDisplay() {
             scoreDisplay.textContent = formatScore(score);
             const t = translations[currentLang];
-            clickPowerDisplay.textContent = t.clickPowerDisplay(clickPower);
+            // APPLIQUER LE BOOST ICI (Visuellement)
+            const displayedClickPower = clickPower * boostMultiplier;
+            clickPowerDisplay.textContent = t.clickPowerDisplay(displayedClickPower);
         }
 
         // NOUVEAU : Fonction de basculement du formatage
@@ -1526,17 +1683,16 @@
 
         function updateTPSDisplay() {
             const t = translations[currentLang];
+            // APPLIQUER LE BOOST ICI (Visuellement)
+            const effectiveTPS = tps * boostMultiplier;
+            
             let valueStr;
             
             if (isTPSFormatted) {
                 // Mode Formatté (K, M, B...)
-                valueStr = formatScore(tps);
+                valueStr = formatScore(effectiveTPS);
             } else {
-                // Mode Non Formatté (Nombre brut avec 1 décimale si petit, ou entier)
-                // On utilise toFixed(0) pour les gros nombres pour éviter la notation scientifique
-                // et on ajoute des espaces pour la lisibilité si supporté, sinon brut.
-                // Ici brut simple comme demandé "non formatté".
-                valueStr = tps.toFixed(0); 
+                valueStr = effectiveTPS.toFixed(0); 
             }
             
             tpsDisplay.textContent = t.tpsDisplay(valueStr);
@@ -1596,18 +1752,15 @@
         // --- Logique du Clic (Mise à jour pour le Mobile) ---
 
         function handleInteraction(e) {
-            // Empêche le comportement par défaut pour les événements tactiles
-            // afin d'éviter le zoom, le scroll ou les "clics fantômes"
             if (e.type === 'touchstart') {
                 e.preventDefault(); 
             }
             
-            // Gestion de l'animation tactile
             tiboImage.classList.add('active-touch');
             setTimeout(() => tiboImage.classList.remove('active-touch'), 50);
 
-            // Calcul du score
-            let scoreToAdd = clickPower;
+            // Calcul du score avec BOOST
+            let scoreToAdd = clickPower * boostMultiplier;
             let isCrit = false;
 
             const actualCritChance = Math.min(totalCritChance, MAX_CRIT_CHANCE) / 100;
@@ -1630,7 +1783,6 @@
                 clientY = e.clientY;
             }
 
-            // Animation du texte flottant
             createFloatingText(scoreToAdd, clientX, clientY, isCrit);
 
             checkUpgradeCosts();
@@ -1657,19 +1809,12 @@
                 text.textContent = `+${formatScore(amount)}`;
             }
             
-            // Positionnement
-            const rect = tiboImage.getBoundingClientRect();
-            // On calcule le décalage pour centrer un peu
-            // Mais pour le mobile, on veut que ça apparaisse un peu au-dessus du doigt
             const offsetY = isCrit ? -50 : -20; 
-            
             text.style.left = `${x}px`; 
             text.style.top = `${y + offsetY}px`;
 
-            // On ajoute au body pour éviter les problèmes de débordement/coupure
             document.body.appendChild(text);
 
-            // Nettoyage après l'animation
             text.addEventListener('animationend', () => {
                 text.remove();
             });
@@ -1684,7 +1829,6 @@
         function buyUpgrade(button) {
             const cost = calculateCost(button);
             
-            // Vérifie si le bouton est l'upgrade critique et si on a atteint 100%
             if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
                  showStatusMessage(translations[currentLang].maxCritChanceReached, true);
                  return; 
@@ -1693,33 +1837,23 @@
             if (score >= cost) {
                 score -= cost;
                 
-                // Incrémente le compteur pour l'achat suivant (seulement si c'est répétable)
                 if (button.hasAttribute('data-count')) {
                     let count = parseInt(button.getAttribute('data-count'));
                     button.setAttribute('data-count', ++count);
                 }
                 
-                // Si c'est un achat unique (Mindset, Ultra Sale, Cheat Meal)
                 if (button.hasAttribute('data-add-bonus') || button.hasAttribute('data-multiplier')) {
                     button.setAttribute('data-purchased', 'true');
                 }
                 
-                // 2. Recalculer toutes les stats à partir des attributs des boutons
                 recalculateStatsFromUpgrades();
-
-                // 3. Mise à jour de l'UI et de l'état
-                updateUI(); // Met à jour le texte du bouton et le statut 'disabled' (incluant le count)
-                saveGame(); // Sauvegarde le jeu après l'achat
+                updateUI(); 
+                saveGame();
             } else {
-                // NE PAS UTILISER alert()
                 showStatusMessage(translations[currentLang].notEnoughTibos || "Pas assez de Tibos !", true);
             }
         }
         
-        /**
-         * NOUVEAU : Recalcule les statistiques globales (clickPower, tps, critChance, critPower) 
-         * en parcourant tous les upgrades
-         */
         function recalculateStatsFromUpgrades() {
             let totalClickPower = 1; // Base de 1 TPC
             let totalTps = 0;
@@ -1760,25 +1894,14 @@
                 }
             });
 
-            // Mise à jour des variables globales
-            // Applique le multiplicateur à la puissance totale
-            // MODIFICATION: Suppression du calcul pour clickPowerPermanent
-            // Apply rebirth shop effects: multipliers only
-            
             // production multiplier (affects both clickPower and TPS)
             const prodMultCount = (rebirthShopPurchases['productionMultiplier'] || 0);
             const productionMultiplier = Math.pow(2, prodMultCount);
 
             clickPower = totalClickPower * clickMultiplier * productionMultiplier;
-            
-            // MODIFICATION: Suppression du calcul pour tpsMultiplier
-            // const tpsMultCount = (rebirthShopPurchases['tpsMultiplier'] || 0);
-            // const tpsMultiplier = Math.pow(2, tpsMultCount);
-
-            tps = totalTps * productionMultiplier; // removed * tpsMultiplier
+            tps = totalTps * productionMultiplier; 
             
             // Mise à jour des stats critiques
-            // totalCritChance commence à 0 (baseCritChance) et ajoute 0.5% par achat
             totalCritChance = baseCritChance + (critChanceCount * critChancePerUpgrade);
             totalCritPower = 2 + (critPowerCount * critPowerPerUpgrade);
         }
@@ -1789,33 +1912,24 @@
                 const cost = calculateCost(button);
                 const isPurchased = button.getAttribute('data-purchased') === 'true';
                 
-                // Mettre à jour le coût affiché (si non acheté)
                 const costElement = button.querySelector('.upgrade-cost');
                 if (costElement && !isPurchased) {
-                     // Utilise la traduction pour formater le coût
                     costElement.textContent = translations[currentLang].costText(cost);
                 }
                 
-                // Désactivation si déjà acheté (pour les achats uniques)
                 if (isPurchased && button.hasAttribute('data-max-once')) {
                     button.disabled = true;
                 }
-                // Désactivation si chance max (100%) atteinte pour l'upgrade chance critique
                 else if (button.id === 'upgrade-crit-chance' && totalCritChance >= MAX_CRIT_CHANCE) {
                     button.disabled = true;
-                    // Le texte du coût est mis à jour dans updateUI()
                 }
-                // Désactivation si score insuffisant
                 else {
                     button.disabled = score < cost;
                 }
             });
         }
         
-        // Rend visible les upgrades cachés une fois le score atteint
         function checkUpgradeVisibility() {
-            // Logique pour révéler les upgrades uniques
-            // Note: On utilise le score actuel (qui est chargé) pour vérifier
             if (score >= 400 && upgrade2_new.classList.contains('hidden')) {
                 upgrade2_new.classList.remove('hidden');
                 upgrade2_new.style.opacity = 1;
@@ -1824,14 +1938,11 @@
                 upgrade3_new.classList.remove('hidden');
                 upgrade3_new.style.opacity = 1;
             }
-            
-            // NOUVEAU : Apparition de l'upgrade Divine (à 500 Milliards pour l'effet de surprise)
             if (score >= 500000000000 && upgradeGod.classList.contains('hidden')) {
                 upgradeGod.classList.remove('hidden');
                 upgradeGod.style.opacity = 1;
             }
             
-            // Assure que les upgrades sont visibles au rechargement si déjà achetés ou découverts
             [upgrade2_new, upgrade3_new, upgradeGod].forEach(btn => {
                  if (btn.getAttribute('data-purchased') === 'true' || score >= parseInt(btn.getAttribute('data-cost')) * 0.8) {
                     btn.classList.remove('hidden');
@@ -1840,25 +1951,16 @@
             });
         }
         
-        /**
-         * NOUVEAU: Gère l'ajout/retrait de la classe 'hidden-maxed' pour faire disparaître les upgrades.
-         */
         function updateUpgradeVisibility() {
-            // 1. Améliorations à Achat Unique (data-max-once="true")
             [upgrade1, upgrade2_new, upgrade3_new, upgradeGod].forEach(button => {
                 const isPurchased = button.getAttribute('data-purchased') === 'true';
-                
-                // Si acheté, on ajoute la classe hidden-maxed pour masquer complètement
                 if (isPurchased) {
                     button.classList.add('hidden-maxed');
                 } else {
-                    // Si pas acheté, on gère la visibilité basée sur le score (classe 'hidden')
-                    // et on s'assure que hidden-maxed n'est pas là
                     button.classList.remove('hidden-maxed');
                 }
             });
             
-            // 2. Amélioration de Chance Critique (Maximum 100%)
             if (totalCritChance >= MAX_CRIT_CHANCE) {
                 critChanceUpgradeBtn.classList.add('hidden-maxed');
             } else {
@@ -1870,24 +1972,55 @@
         // --- Logique Passive (Game Loop) ---
 
         function gameLoop() {
+            // GESTION DU BOOST TEMPOREL
+            if (boostTimeRemaining > 0) {
+                boostTimeRemaining -= 0.1; // -0.1s toutes les 100ms
+                if (boostTimeRemaining <= 0) {
+                    boostTimeRemaining = 0;
+                    boostMultiplier = 1;
+                    updateBoostUI();
+                } else if (Math.floor(boostTimeRemaining) !== Math.floor(boostTimeRemaining + 0.1)) {
+                    // Update UI every integer second change
+                    updateBoostUI();
+                }
+            }
+            
+            // GESTION DU BOUTON MINI-JEU (COOLDOWN)
+            // Met à jour le texte du bouton si le jeu est en cooldown
+            const mgBtn = document.getElementById('open-minigame-btn');
+            if (minigameCooldownEnd > Date.now()) {
+                const remaining = Math.ceil((minigameCooldownEnd - Date.now()) / 1000);
+                // Calcul des minutes/secondes pour affichage plus propre si nécessaire, ici simple secondes
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                mgBtn.textContent = `⏳ Attente: ${mins}m ${secs}s`;
+                mgBtn.disabled = true;
+                mgBtn.style.opacity = 0.6;
+                mgBtn.style.cursor = 'not-allowed';
+            } else {
+                // Rétablit le texte si on sort du cooldown
+                if (mgBtn.disabled) { // petite opti : ne changer que si nécessaire
+                    mgBtn.textContent = "🏃 Mini-Jeu (Plateforme)";
+                    mgBtn.disabled = false;
+                    mgBtn.style.opacity = 1;
+                    mgBtn.style.cursor = 'pointer';
+                }
+            }
+
             // Vérifie si le TPS est > 0 avant d'ajouter le score
             if (tps > 0) {
-                // Ajout du TPS (divisé par le nombre de cycles par seconde, ici 10)
-                // L'utilisation de tps / 10 pour un intervalle de 100ms donne tps / seconde
-                const addedScore = tps / 10; 
+                // Application du BOOST sur le TPS
+                const addedScore = (tps * boostMultiplier) / 10; 
                 score += addedScore; 
             }
             
             // Affichage et vérification
             updateScoreDisplay();
             updateTPSDisplay(); 
-            updateCritStatsDisplay(); // NOUVEAU
+            updateCritStatsDisplay(); 
             checkUpgradeCosts();
-            // Mise à jour de la visibilité des nouveaux upgrades (basé sur le score qui monte)
             checkUpgradeVisibility();
 
-            // Sauvegarde du jeu toutes les 10 secondes (pour ne pas surcharger)
-            // Utiliser un drapeau pour ne pas sauvegarder 10 fois par seconde
             const now = Math.floor(performance.now() / 1000);
             if (now % 10 === 0 && !window.hasSavedThisSecond) {
                 saveGame();
@@ -1903,8 +2036,6 @@
         // --- Sauvegarde et Chargement (Local Storage) ---
 
         function saveGame() {
-            // Sauvegarde des stats critiques
-            // MODIFICATION: Met à jour l'attribut data-crit-chance-add du bouton
             critChanceUpgradeBtn.setAttribute('data-crit-chance-add', critChancePerUpgrade); 
             critPowerUpgradeBtn.setAttribute('data-crit-power-add', critPowerPerUpgrade);
             
@@ -1915,11 +2046,10 @@
                 rebirthShop: rebirthShopPurchases,
                 upgrades: [],
                 lang: currentLang,
-                // NOUVEAU: Sauvegarde de la préférence de formatage
-                isTPSFormatted: isTPSFormatted 
+                isTPSFormatted: isTPSFormatted,
+                minigameCooldown: minigameCooldownEnd // NOUVEAU: Sauvegarde du cooldown
             };
 
-            // Sauvegarde de l'état de chaque bouton
             upgradeButtons.forEach(button => {
                 saveObject.upgrades.push({
                     id: button.id,
@@ -1931,78 +2061,56 @@
             localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(saveObject));
         }
 
-        /**
-         * Charge le jeu en restaurant toutes les données avant de mettre à jour l'UI.
-         * Cette fonction est appelée au démarrage et lors d'une restauration par fichier.
-         * @param {object|null} loadedSaveObject L'objet de sauvegarde à charger (si restauration par fichier).
-         */
         function loadGame(loadedSaveObject = null) {
             let saveObject;
             
             if (loadedSaveObject) {
-                // Chargement à partir d'un fichier fourni
                 saveObject = loadedSaveObject;
             } else {
-                // Chargement depuis le Local Storage
                 const savedGame = localStorage.getItem(GAME_STORAGE_KEY);
                 saveObject = savedGame ? JSON.parse(savedGame) : null;
             }
 
             const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
 
-            // 1. Initialisation des données par défaut
             score = 0;
             clickPower = 1; 
             tps = 0; 
-            isTPSFormatted = true; // Valeur par défaut si non présente
+            isTPSFormatted = true; 
             
-            // 2. Restauration de l'état
             if (saveObject) {
-                
-                // Restauration du score
                 score = saveObject.score || 0;
 
-                // Restauration de l'état des boutons (set des attributs)
                 saveObject.upgrades.forEach(savedUpgrade => {
                     const button = document.getElementById(savedUpgrade.id);
                     if (button) {
-                        // Assurez-vous que les données sont des nombres/booléens pour éviter les erreurs
                         button.setAttribute('data-count', parseInt(savedUpgrade.count || 0));
                         button.setAttribute('data-purchased', (savedUpgrade.purchased === true || savedUpgrade.purchased === 'true').toString());
                     }
                 });
                 
-                // Restauration de la langue
-                if (saveObject.lang) {
-                    currentLang = saveObject.lang;
-                }
-                // Restauration de l'état de rebirth
+                if (saveObject.lang) currentLang = saveObject.lang;
                 rebirthPoints = parseInt(saveObject.rebirthPoints || 0);
                 rebirthCount = parseInt(saveObject.rebirthCount || 0);
-                // Restauration de la boutique de rebirth
                 rebirthShopPurchases = saveObject.rebirthShop || {};
                 
-                // NOUVEAU: Restauration de la préférence de formatage
                 if (saveObject.hasOwnProperty('isTPSFormatted')) {
                     isTPSFormatted = saveObject.isTPSFormatted;
                 }
+                
+                // NOUVEAU: Chargement du cooldown
+                if (saveObject.minigameCooldown) {
+                    minigameCooldownEnd = saveObject.minigameCooldown;
+                }
             }
             
-            // 3. Chargement de la Langue (si elle est définie indépendamment de la save)
-            if (savedLang) {
-                currentLang = savedLang;
-            }
+            if (savedLang) currentLang = savedLang;
             
-            // NOUVEAU : Recalculer les stats globales après avoir appliqué les attributs des boutons
             recalculateStatsFromUpgrades();
-            // Update rebirth UI
             updateRebirthUI();
-            // Render rebirth shop UI
             renderRebirthShop();
 
-            // 4. Mise à jour finale et unique de l'interface et de l'état.
             setLanguage(currentLang, false); 
-            // Mise à jour de la visibilité initiale, y compris les upgrades cachés au max
             updateUpgradeVisibility(); 
         }
         
@@ -2010,19 +2118,11 @@
             localStorage.setItem(LANG_STORAGE_KEY, currentLang);
         }
         
-        // --- NOUVELLES FONCTIONS : Sauvegarde Manuelle et Restauration par Fichier ---
-        
-        /**
-         * Affiche un message de statut temporaire à l'utilisateur.
-         * @param {string} message Le message à afficher (traduit).
-         * @param {boolean} isError Vrai si c'est une erreur, Faux si c'est un succès.
-         */
         function showStatusMessage(message, isError) {
             const statusDiv = document.getElementById('status-message');
             statusDiv.textContent = message;
             statusDiv.style.display = 'block';
 
-            // Gérer les classes de style
             statusDiv.classList.remove('status-success', 'status-error');
             if (isError) {
                 statusDiv.classList.add('status-error');
@@ -2030,20 +2130,13 @@
                 statusDiv.classList.add('status-success');
             }
 
-            // Masquer après 5 secondes
             setTimeout(() => {
                 statusDiv.style.display = 'none';
             }, 5000);
         }
 
-        /**
-         * Télécharge l'état actuel du jeu dans un fichier .tibo.
-         */
         function downloadGameSave() {
-            // 1. Assurez-vous que la sauvegarde locale est à jour avant d'exporter
             saveGame();
-            
-            // 2. Récupérer les données brutes du localStorage
             const dataToSave = localStorage.getItem(GAME_STORAGE_KEY);
             
             if (!dataToSave) {
@@ -2051,13 +2144,10 @@
                  return;
             }
 
-            // 3. Créer un Blob (Binary Large Object)
             const blob = new Blob([dataToSave], { type: 'application/json' });
-            
-            // 4. Créer et cliquer sur un lien de téléchargement invisible
             const a = document.createElement('a');
             const date = new Date().toISOString().slice(0, 10);
-            a.download = `tibo-clicker-save-${date}.tibo`; // Nom du fichier avec extension
+            a.download = `tibo-clicker-save-${date}.tibo`; 
             a.href = URL.createObjectURL(blob);
             
             document.body.appendChild(a);
@@ -2067,17 +2157,13 @@
             showStatusMessage(translations[currentLang].saveSuccess, false);
         }
 
-        /**
-         * Lit le fichier de sauvegarde et restaure l'état du jeu.
-         */
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // 1. Vérification du type de fichier
             if (!file.name.endsWith('.tibo')) {
                 showStatusMessage(translations[currentLang].fileTypeWrong, true);
-                event.target.value = ''; // Réinitialiser le champ pour permettre un nouveau chargement
+                event.target.value = ''; 
                 return;
             }
 
@@ -2088,22 +2174,17 @@
                     const content = e.target.result;
                     const loadedState = JSON.parse(content);
 
-                    // 2. Validation de base de la structure du fichier
-                    // Le Minotaure est un upgrade, il doit faire partie du tableau 'upgrades'
                     if (typeof loadedState.score !== 'number' || !Array.isArray(loadedState.upgrades)) {
                         showStatusMessage(translations[currentLang].loadCorrupted, true);
                         event.target.value = '';
                         return;
                     }
 
-                    // 3. Appliquer la nouvelle sauvegarde (met à jour les variables globales)
                     loadGame(loadedState); 
-                    
-                    // 4. Mettre à jour la sauvegarde locale pour la persistance
                     saveGame(); 
 
                     showStatusMessage(translations[currentLang].loadSuccess, false);
-                    event.target.value = ''; // Réinitialiser le champ
+                    event.target.value = ''; 
                 } catch (error) {
                     showStatusMessage(translations[currentLang].loadFileError, true);
                     console.error("File loading error:", error);
@@ -2118,16 +2199,289 @@
 
             reader.readAsText(file);
         }
+
+        // --- MINI-JEU (TIBO PLATFORMER) LOGIQUE ---
+        const minigameBtn = document.getElementById('open-minigame-btn');
+        const minigameOverlay = document.getElementById('minigame-overlay');
+        const mgCloseBtn = document.getElementById('mg-close-btn');
+        const mgCanvas = document.getElementById('minigame-canvas');
+        const mgCtx = mgCanvas.getContext('2d');
+        const mgScoreEl = document.getElementById('mg-score');
+        const mgTimerEl = document.getElementById('mg-timer');
+
+        // Boutons Tactiles
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+        const btnJump = document.getElementById('btn-jump');
+
+        let mgRunning = false;
+        let mgFrameId;
         
+        let minigameCooldownEnd = 0; 
+        const MINIGAME_COOLDOWN_DURATION = 1800000; // 30min en ms
+        
+        // NOUVEAU: Durée du mini-jeu
+        let minigameTimeRemaining = 30; // 30 secondes
+
+        // État du Jeu
+        let pPlayer = { x: 30, y: 250, w: 20, h: 20, vx: 0, vy: 0, grounded: false, speed: 4, jumpPower: -10 };
+        let pKeys = { left: false, right: false, up: false };
+        let pPlatforms = [];
+        let pItems = []; // Shakers à collecter
+        let pScore = 0; // Nombre de shakers collectés
+        // GOAL_SCORE supprimé car on joue au temps
+
+        // Configuration des Niveaux (Simple boucle pour l'instant)
+        // Sol + Plateformes flottantes
+        function initLevel() {
+            pPlatforms = [
+                { x: 0, y: 280, w: 600, h: 20 }, // Sol
+                { x: 150, y: 220, w: 100, h: 10 },
+                { x: 350, y: 180, w: 100, h: 10 },
+                { x: 50, y: 140, w: 80, h: 10 },
+                { x: 250, y: 100, w: 100, h: 10 },
+                { x: 450, y: 60, w: 100, h: 10 }
+            ];
+            pItems = [];
+            spawnItem();
+        }
+
+        function spawnItem() {
+            // Choisir une plateforme aléatoire (sauf le sol)
+            const platIdx = Math.floor(Math.random() * (pPlatforms.length - 1)) + 1;
+            const plat = pPlatforms[platIdx];
+            
+            pItems.push({
+                x: plat.x + (plat.w / 2) - 10,
+                y: plat.y - 20,
+                w: 20,
+                h: 20,
+                collected: false
+            });
+        }
+
+        // Listeners
+        minigameBtn.addEventListener('click', startMinigame);
+        mgCloseBtn.addEventListener('click', stopMinigame);
+
+        // Clavier
+        window.addEventListener('keydown', (e) => {
+            if (!mgRunning) return;
+            if (e.code === 'ArrowLeft') pKeys.left = true;
+            if (e.code === 'ArrowRight') pKeys.right = true;
+            if (e.code === 'ArrowUp' || e.code === 'Space') {
+                if (pPlayer.grounded) {
+                    pPlayer.vy = pPlayer.jumpPower;
+                    pPlayer.grounded = false;
+                }
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft') pKeys.left = false;
+            if (e.code === 'ArrowRight') pKeys.right = false;
+        });
+
+        // Tactile (Boutons HTML)
+        function bindTouch(btn, key) {
+            btn.addEventListener('mousedown', (e) => { e.preventDefault(); pKeys[key] = true; });
+            btn.addEventListener('mouseup', (e) => { e.preventDefault(); pKeys[key] = false; });
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); pKeys[key] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); pKeys[key] = false; });
+        }
+
+        bindTouch(btnLeft, 'left');
+        bindTouch(btnRight, 'right');
+        
+        // Saut Tactile (Trigger simple)
+        const jumpAction = (e) => {
+            e.preventDefault();
+            if (mgRunning && pPlayer.grounded) {
+                pPlayer.vy = pPlayer.jumpPower;
+                pPlayer.grounded = false;
+            }
+        };
+        btnJump.addEventListener('mousedown', jumpAction);
+        btnJump.addEventListener('touchstart', jumpAction);
+
+
+        function startMinigame() {
+            if (Date.now() < minigameCooldownEnd) return;
+            
+            minigameOverlay.style.display = 'flex';
+            resetMinigame();
+            mgRunning = true;
+            // NOUVEAU: Réinitialise le timer
+            minigameTimeRemaining = 30;
+            // NOUVEAU: Démarre la boucle de mise à jour du temps indépendante du rendu si besoin,
+            // ou on peut le faire dans mgUpdate (plus simple).
+            mgLoop();
+        }
+
+        function stopMinigame() {
+            mgRunning = false;
+            cancelAnimationFrame(mgFrameId);
+            minigameOverlay.style.display = 'none';
+        }
+
+        function resetMinigame() {
+            pPlayer = { x: 30, y: 250, w: 20, h: 20, vx: 0, vy: 0, grounded: false, speed: 4, jumpPower: -10 };
+            pScore = 0;
+            mgScoreEl.textContent = pScore;
+            initLevel();
+        }
+
+        function mgLoop() {
+            if (!mgRunning) return;
+            mgUpdate();
+            mgDraw();
+            mgFrameId = requestAnimationFrame(mgLoop);
+        }
+
+        function mgUpdate() {
+            // NOUVEAU: Mise à jour du timer
+            // On décrémente de 1/60eme de seconde environ (pour simplifier, on peut utiliser Date.now() pour la précision,
+            // mais 1/60 est suffisant pour un mini-jeu simple).
+            if (minigameTimeRemaining > 0) {
+                minigameTimeRemaining -= 1/60;
+                mgTimerEl.textContent = Math.ceil(minigameTimeRemaining);
+                
+                if (minigameTimeRemaining <= 0) {
+                    endMinigame(); // Fin du temps
+                    return;
+                }
+            }
+
+            // Mouvement Horizontal
+            if (pKeys.left) pPlayer.vx = -pPlayer.speed;
+            else if (pKeys.right) pPlayer.vx = pPlayer.speed;
+            else pPlayer.vx = 0;
+
+            pPlayer.x += pPlayer.vx;
+
+            // Limites Écran X
+            if (pPlayer.x < 0) pPlayer.x = 0;
+            if (pPlayer.x + pPlayer.w > mgCanvas.width) pPlayer.x = mgCanvas.width - pPlayer.w;
+
+            // Gravité
+            pPlayer.vy += 0.6;
+            pPlayer.y += pPlayer.vy;
+            pPlayer.grounded = false;
+
+            // Collisions Plateformes
+            for (let plat of pPlatforms) {
+                // Check simple AABB
+                if (pPlayer.x < plat.x + plat.w &&
+                    pPlayer.x + pPlayer.w > plat.x &&
+                    pPlayer.y < plat.y + plat.h &&
+                    pPlayer.y + pPlayer.h > plat.y) {
+                    
+                    // Collision par le haut (Atterrissage)
+                    // On vérifie qu'on arrivait du haut (vy > 0) et qu'on était au-dessus avant
+                    if (pPlayer.vy > 0 && pPlayer.y + pPlayer.h - pPlayer.vy <= plat.y + 10) {
+                        pPlayer.grounded = true;
+                        pPlayer.vy = 0;
+                        pPlayer.y = plat.y - pPlayer.h;
+                    }
+                    // Collision par le bas (tête cogne)
+                    else if (pPlayer.vy < 0 && pPlayer.y - pPlayer.vy >= plat.y + plat.h) {
+                         pPlayer.vy = 0;
+                         pPlayer.y = plat.y + plat.h;
+                    }
+                }
+            }
+
+            // Chute dans le vide (Reset position)
+            if (pPlayer.y > mgCanvas.height) {
+                pPlayer.x = 30;
+                pPlayer.y = 200;
+                pPlayer.vy = 0;
+            }
+
+            // Collisions Items
+            for (let i = pItems.length - 1; i >= 0; i--) {
+                let item = pItems[i];
+                if (!item.collected &&
+                    pPlayer.x < item.x + item.w &&
+                    pPlayer.x + pPlayer.w > item.x &&
+                    pPlayer.y < item.y + item.h &&
+                    pPlayer.y + pPlayer.h > item.y) {
+                    
+                    item.collected = true;
+                    pItems.splice(i, 1);
+                    pScore++;
+                    mgScoreEl.textContent = pScore;
+                    
+                    // NOUVEAU: Plus de condition de victoire à 5. On fait juste spawn le suivant.
+                    spawnItem();
+                }
+            }
+        }
+
+        // Renommé de winMinigame à endMinigame pour refléter la fin du timer
+        function endMinigame() {
+            mgRunning = false;
+            minigameOverlay.style.display = 'none';
+            
+            // NOUVEAU: Calcul de la récompense
+            // Chaque haltère = 10 secondes de boost
+            const boostDuration = pScore * 10;
+            
+            if (boostDuration > 0) {
+                activateBoost(boostDuration);
+                showStatusMessage(`Temps écoulé ! ${pScore} haltères = ${boostDuration}s de Boost x2 !`, false);
+            } else {
+                showStatusMessage("Temps écoulé ! 0 haltère récupéré... Pas de boost.", true);
+            }
+            
+            // Cooldown de 30 minutes
+            minigameCooldownEnd = Date.now() + MINIGAME_COOLDOWN_DURATION;
+            saveGame(); // Sauvegarde immédiate du cooldown
+        }
+
+        function mgDraw() {
+            // Clear
+            mgCtx.clearRect(0, 0, mgCanvas.width, mgCanvas.height);
+            
+            // Fond
+            mgCtx.fillStyle = '#222';
+            mgCtx.fillRect(0, 0, mgCanvas.width, mgCanvas.height);
+
+            // Plateformes
+            mgCtx.fillStyle = '#7f8c8d';
+            for (let plat of pPlatforms) {
+                mgCtx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                // Bordure
+                mgCtx.strokeStyle = '#95a5a6';
+                mgCtx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+            }
+
+            // Items (Shakers)
+            for (let item of pItems) {
+                mgCtx.fillStyle = '#3498db'; // Bleu shaker
+                mgCtx.fillRect(item.x, item.y, item.w, item.h);
+                // Bouchon
+                mgCtx.fillStyle = '#ecf0f1';
+                mgCtx.fillRect(item.x + 5, item.y - 5, 10, 5);
+            }
+
+            // Joueur (Tibo)
+            mgCtx.fillStyle = '#ffcc00';
+            mgCtx.fillRect(pPlayer.x, pPlayer.y, pPlayer.w, pPlayer.h);
+            // Yeux (Direction)
+            mgCtx.fillStyle = 'black';
+            if (pPlayer.vx >= 0) {
+                 mgCtx.fillRect(pPlayer.x + 12, pPlayer.y + 4, 4, 4);
+            } else {
+                 mgCtx.fillRect(pPlayer.x + 4, pPlayer.y + 4, 4, 4);
+            }
+        }
+
         // --- Initialisation et Événements ---
 
         window.onload = function() {
-            // 1. Initialisation de la Musique
             loadTrack(currentTrackIndex); 
-            // 2. Chargement du jeu (qui met à jour l'UI à la fin et appelle recalculateStatsFromUpgrades)
             loadGame(); 
             
-            // 3. Événements pour la Sauvegarde/Restauration
             document.getElementById('save-btn').addEventListener('click', downloadGameSave);
             
             const fileInput = document.getElementById('file-input');
@@ -2135,7 +2489,6 @@
                 fileInput.click(); // Déclenche le clic sur l'input de fichier caché
             });
             fileInput.addEventListener('change', handleFileUpload);
-            // Wire rebirth button
             try {
                 if (rebirthBtn) {
                     rebirthBtn.addEventListener('click', performRebirth);
@@ -2145,7 +2498,6 @@
                 console.warn('Rebirth UI not fully initialized:', err);
             }
 
-            // Initialize tabs between upgrades and rebirth boosts
             try {
                 initRebirthShopTabs();
             } catch (err) {
@@ -2153,9 +2505,7 @@
             }
         };
 
-        // Détection du clic sur l'image pour autoriser la lecture audio (contourne l'autoplay block)
         let hasInteracted = false;
-        // Utilisez mousedown/touchstart pour initialiser l'audio plus rapidement
         const initAudio = () => {
              if (!hasInteracted) {
                 playMusic();
