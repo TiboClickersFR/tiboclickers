@@ -114,6 +114,20 @@
             margin-top: 5px;
             color: #ccc;
         }
+
+        /* NOUVEAU : Style interactif pour le TPS */
+        #tps-display {
+            cursor: pointer;
+            transition: color 0.2s, text-shadow 0.2s;
+            border-bottom: 1px dotted #555; /* Indication visuelle subtile */
+            display: inline-block; /* Pour que la bordure colle au texte */
+            padding-bottom: 2px;
+        }
+        #tps-display:hover {
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            border-bottom-color: #fff;
+        }
         
         /* NOUVEAU : Affichage des stats critiques */
         #crit-stats-display {
@@ -544,7 +558,12 @@
                 <p id="tibos-owned-label">Tibos Possédés :</p>
                 <div id="score">0</div>
                 <div id="click-power-display">Puissance de Clic : 1 Tibo</div>
-                <div id="tps-display">Tibos par Seconde (TPS) : 0</div>
+                
+                <!-- TPS DISPLAY: AJOUT DU ONCLICK POUR LE TOGGLE -->
+                <div id="tps-display" onclick="toggleTPSFormat()" title="Cliquez pour changer le format (K, M, B / Entier)">
+                    Tibos par Seconde (TPS) : 0
+                </div>
+
                 <!-- NOUVEAU: Affichage des statistiques de boost critique -->
                 <div id="crit-stats-display">Transfo' Critique : 0.0% (x2)</div>
                 <!-- Rebirth UI -->
@@ -839,6 +858,9 @@
         let clickPower = 1; // Puissance de clic totale (base + bonus)
         let tps = 0; // Tibos Par Seconde
         
+        // NOUVEAU : Variable d'état pour le formatage du TPS (Par défaut: true = K, M, B...)
+        let isTPSFormatted = true;
+
         // NOUVEAU: Statistiques Critiques
         let baseCritChance = 0; // MODIFICATION: 0% de base
         let critChancePerUpgrade = 0.5; // MODIFICATION: 0.5% ajouté par achat
@@ -1098,7 +1120,8 @@
                 musicLabel: "Musique", 
                 tibosOwnedLabel: "Tibos Possédés :",
                 clickPowerDisplay: (power) => `Puissance de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                // MISE A JOUR : Prend maintenant une chaîne formatée
+                tpsDisplay: (val) => `Tibos par Seconde (TPS) : ${val}`,
                 // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
                 critStatsDisplay: (chance, power) => `Transfo' Critique : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Améliorations",
@@ -1174,7 +1197,7 @@
                 musicLabel: "Music", 
                 tibosOwnedLabel: "Tibos Owned:",
                 clickPowerDisplay: (power) => `Click Power: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                tpsDisplay: (tps) => `Tibos Per Second (TPS): ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                tpsDisplay: (val) => `Tibos Per Second (TPS): ${val}`,
                 // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
                 critStatsDisplay: (chance, power) => `Critical Transfo' : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Upgrades",
@@ -1250,7 +1273,7 @@
                 musicLabel: "Música", 
                 tibosOwnedLabel: "Tibos Poseídos:",
                 clickPowerDisplay: (power) => `Poder de Clic: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
-                tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
+                tpsDisplay: (val) => `Tibos Por Segundo (TPS): ${val}`,
                 // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
                 critStatsDisplay: (chance, power) => `Transfo' Crítica : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Mejoras",
@@ -1494,10 +1517,29 @@
             clickPowerDisplay.textContent = t.clickPowerDisplay(clickPower);
         }
 
+        // NOUVEAU : Fonction de basculement du formatage
+        function toggleTPSFormat() {
+            isTPSFormatted = !isTPSFormatted;
+            updateTPSDisplay();
+            saveGame(); // On sauvegarde la préférence
+        }
+
         function updateTPSDisplay() {
             const t = translations[currentLang];
-            const tpsValue = tps > 1000 ? tps.toFixed(1) : tps.toFixed(0); 
-            tpsDisplay.textContent = t.tpsDisplay(parseFloat(tpsValue));
+            let valueStr;
+            
+            if (isTPSFormatted) {
+                // Mode Formatté (K, M, B...)
+                valueStr = formatScore(tps);
+            } else {
+                // Mode Non Formatté (Nombre brut avec 1 décimale si petit, ou entier)
+                // On utilise toFixed(0) pour les gros nombres pour éviter la notation scientifique
+                // et on ajoute des espaces pour la lisibilité si supporté, sinon brut.
+                // Ici brut simple comme demandé "non formatté".
+                valueStr = tps.toFixed(0); 
+            }
+            
+            tpsDisplay.textContent = t.tpsDisplay(valueStr);
         }
         
         // NOUVEAU: Mise à jour de l'affichage des stats critiques
@@ -1872,7 +1914,9 @@
                 rebirthCount: rebirthCount,
                 rebirthShop: rebirthShopPurchases,
                 upgrades: [],
-                lang: currentLang
+                lang: currentLang,
+                // NOUVEAU: Sauvegarde de la préférence de formatage
+                isTPSFormatted: isTPSFormatted 
             };
 
             // Sauvegarde de l'état de chaque bouton
@@ -1910,6 +1954,7 @@
             score = 0;
             clickPower = 1; 
             tps = 0; 
+            isTPSFormatted = true; // Valeur par défaut si non présente
             
             // 2. Restauration de l'état
             if (saveObject) {
@@ -1936,6 +1981,11 @@
                 rebirthCount = parseInt(saveObject.rebirthCount || 0);
                 // Restauration de la boutique de rebirth
                 rebirthShopPurchases = saveObject.rebirthShop || {};
+                
+                // NOUVEAU: Restauration de la préférence de formatage
+                if (saveObject.hasOwnProperty('isTPSFormatted')) {
+                    isTPSFormatted = saveObject.isTPSFormatted;
+                }
             }
             
             // 3. Chargement de la Langue (si elle est définie indépendamment de la save)
