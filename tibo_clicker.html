@@ -496,6 +496,13 @@
 <body>
 
     <h1 id="main-title">Tibo Clicker - La Vraie Transfo' ! 💪</h1>
+    <p><a
+        style = "color: #ffcc00; text-decoration: underline; font-size: larger;" 
+        href="https://docs.google.com/forms/d/e/1FAIpQLSdTkj3CRghYf9atAjwkM8mpsth---v935-oi2yk6DYN23YTkA/viewform?usp=dialog"
+        target = "_blank"
+        title="¡Nuevo: Formulario de Google para sugerir mejoras!">
+        New : Google Form pour proposer des améliorations !</a>
+    </p>
     
     <!-- CONTENEUR GLOBAL POUR LES CONTRÔLES -->
     <div id="top-controls-container">
@@ -799,6 +806,16 @@
                     </div>
                     <span class="upgrade-cost">25,000,000,000,000,000 Tibos</span>
                 </button>
+
+                <!-- NOUVELLE AMÉLIORATION : Cheveux Longs -->
+                <button id="upgrade-passive-cheveuxlongs" class="upgrade-button" data-base-cost="1000000000000000000" data-growth="1.15" data-tps="500000000000000" data-count="0" data-upgrade-key="cheveuxlongs">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Cheveux Longs - La Puissance Capillaire 💇‍♂️</span>
+                        <br><span class="upgrade-description">Génère 500,000,000,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">1,000,000,000,000,000,000 Tibos</span>
+                </button>
             </div>
             
         </div>
@@ -1056,7 +1073,6 @@
             document.getElementById('upgrade-passive-alessiode'),
             document.getElementById('upgrade-passive-justine'),
             document.getElementById('upgrade-passive-patate'),
-            // Nouveaux Personnages
             document.getElementById('upgrade-passive-nogode'), 
             document.getElementById('upgrade-passive-sachatte'),
             document.getElementById('upgrade-passive-milodes'),
@@ -1064,14 +1080,13 @@
             document.getElementById('upgrade-passive-lenaik'),
             document.getElementById('upgrade-passive-rodrigues'),
             document.getElementById('upgrade-passive-minotaure'),
-            // NOUVEAU : BoomFred
             document.getElementById('upgrade-passive-boomfred'),
-            // AJOUTS RÉCENTS
             document.getElementById('upgrade-passive-tomasi'),
             document.getElementById('upgrade-passive-boubou'),
             document.getElementById('upgrade-passive-spergabmaker'),
             document.getElementById('upgrade-passive-timeto'),
-            document.getElementById('upgrade-passive-terabou') // AJOUTÉ
+            document.getElementById('upgrade-passive-terabou'),
+            document.getElementById('upgrade-passive-cheveuxlongs') // AJOUTÉ
         ];
         
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
@@ -1084,7 +1099,6 @@
                 tibosOwnedLabel: "Tibos Possédés :",
                 clickPowerDisplay: (power) => `Puissance de Clic : ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
                 tpsDisplay: (tps) => `Tibos par Seconde (TPS) : ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
-                // NOUVEAU: Affichage Critiques
                 // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
                 critStatsDisplay: (chance, power) => `Transfo' Critique : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Améliorations",
@@ -1095,11 +1109,9 @@
                 ultrasaleDescription: "Ajoute +3 TPC de base (Achat Unique)",
                 cheatmealTitle: "Le Cheat Meal Ultime 🍕",
                 cheatmealDescription: "Ajoute +6 TPC de base (Achat Unique)",
-                // NOUVEAU
                 godmodeTitle: "La Transfo Divine ⚡",
                 godmodeDescription: "Multiplie tous les clics par 5000 (Achat Unique)",
-                
-                // MODIFICATION: Description avec 0.5%
+
                 critChanceTitle: "Chance de Transfo' Critique 📈",
                 critChanceDescription: `Augmente la chance de boost de ${critChancePerUpgrade.toFixed(1)}%`,
                 critPowerTitle: "Puissance de Transfo' Critique 🔥",
@@ -1129,7 +1141,6 @@
                 minotaureDescription: "Le Taureau de Crète. Génère 5,000,000 Tibos/s",
                 boomfredTitle: "BoomFred - Le goat du sax et de Glazunov 🎷",
                 boomfredDescription: "Génère 25,000,000 Tibos/s",
-                // NOUVEAUX
                 tomasiTitle: "Tomasi - La Mélodie Divine 🎵",
                 tomasiDescription: "Génère 150,000,000 Tibos/s",
                 boubouTitle: "Boubou - Bienvenue chez nous frère 🤝",
@@ -1140,6 +1151,8 @@
                 timetoDescription: "Génère 10,000,000,000 Tibos/s",
                 terabouTitle: "TeraBou - Le créateur 👑",
                 terabouDescription: "Génère 10,000,000,000,000 Tibos/s",
+                cheveuxlongsTitle: "Cheveux Longs - La Puissance Capillaire 💇‍♂️",
+                cheveuxlongsDescription: "Génère 500,000,000,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
@@ -1162,7 +1175,6 @@
                 tibosOwnedLabel: "Tibos Owned:",
                 clickPowerDisplay: (power) => `Click Power: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
                 tpsDisplay: (tps) => `Tibos Per Second (TPS): ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
-                // NOUVEAU: Affichage Critiques
                 // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
                 critStatsDisplay: (chance, power) => `Critical Transfo' : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Upgrades",
@@ -1173,11 +1185,9 @@
                 ultrasaleDescription: "Adds +3 base TPC (One-Time Purchase)",
                 cheatmealTitle: "The Ultimate Cheat Meal 🍕",
                 cheatmealDescription: "Adds +6 base TPC (One-Time Purchase)",
-                // NOUVEAU
                 godmodeTitle: "The Divine Transfo ⚡",
                 godmodeDescription: "Multiplies all clicks by 5000 (One-Time Purchase)",
 
-                // MODIFICATION: Description avec 0.5%
                 critChanceTitle: "Critical Transfo' Chance 📈",
                 critChanceDescription: `Increases boost chance by ${critChancePerUpgrade.toFixed(1)}%`,
                 critPowerTitle: "Critical Transfo' Power 🔥",
@@ -1207,7 +1217,6 @@
                 minotaureDescription: "The Cretan Bull. Generates 5,000,000 Tibo/s",
                 boomfredTitle: "BoomFred - The Sax and Glazunov GOAT 🎷",
                 boomfredDescription: "Generates 25,000,000 Tibo/s",
-                // NEW
                 tomasiTitle: "Tomasi - The Divine Melody 🎵",
                 tomasiDescription: "Generates 150,000,000 Tibo/s",
                 boubouTitle: "Boubou - Welcome home brother 🤝",
@@ -1218,6 +1227,8 @@
                 timetoDescription: "Generates 10,000,000,000 Tibo/s",
                 terabouTitle: "TeraBou - The Creator 👑",
                 terabouDescription: "Generates 10,000,000,000,000 Tibo/s",
+                cheveuxlongsTitle: "Long Hair - Hair Power 💇‍♂️",
+                cheveuxlongsDescription: "Generates 500,000,000,000,000 Tibos/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -1240,7 +1251,6 @@
                 tibosOwnedLabel: "Tibos Poseídos:",
                 clickPowerDisplay: (power) => `Poder de Clic: ${formatScore(power)} Tibo${power > 1 ? 's' : ''}`,
                 tpsDisplay: (tps) => `Tibos Por Segundo (TPS): ${tps > 1000 ? tps.toFixed(1) : tps.toFixed(0)}`,
-                // NOUVEAU: Affichage Critiques
                 // MODIFICATION : Utilise critChancePerUpgrade pour la description traduite
                 critStatsDisplay: (chance, power) => `Transfo' Crítica : ${chance.toFixed(1)}% (x${power.toFixed(0)})`,
                 upgradesTitle: "Mejoras",
@@ -1251,11 +1261,9 @@
                 ultrasaleDescription: "Añade +3 TPC base (Compra Única)",
                 cheatmealTitle: "La Comida Trampa Definitiva 🍕",
                 cheatmealDescription: "Añade +6 TPC base (Compra Única)",
-                // NOUVEAU
                 godmodeTitle: "La Transfo Divina ⚡",
                 godmodeDescription: "Multiplica todos los clics por 5000 (Compra Única)",
 
-                // MODIFICACION: Description avec 0.5%
                 critChanceTitle: "Probabilidad de Transfo' Crítica 📈",
                 critChanceDescription: `Aumenta la probabilidad de boost en ${critChancePerUpgrade.toFixed(1)}%`,
                 critPowerTitle: "Poder de Transfo' Crítica 🔥",
@@ -1285,7 +1293,6 @@
                 minotaureDescription: "El Minotauro de Creta. Genera 5,000,000 Tibo/s",
                 boomfredTitle: "BoomFred - El GOAT del saxo y Glazunov 🎷",
                 boomfredDescription: "Genera 25,000,000 Tibo/s",
-                // NEW
                 tomasiTitle: "Tomasi - La Melodía Divina 🎵",
                 tomasiDescription: "Genera 150,000,000 Tibo/s",
                 boubouTitle: "Boubou - Bienvenido a casa hermano 🤝",
@@ -1296,6 +1303,8 @@
                 timetoDescription: "Genera 10,000,000,000 Tibo/s",
                 terabouTitle: "TeraBou - El Creador 👑",
                 terabouDescription: "Genera 10,000,000,000,000 Tibo/s",
+                cheveuxlongsTitle: "Pelo Largo - Poder Capilar 💇‍♂️",
+                cheveuxlongsDescription: "Genera 500,000,000,000,000 Tibos/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
