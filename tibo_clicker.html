@@ -1988,25 +1988,20 @@
         // --- Logique Passive (Game Loop) ---
 
         function gameLoop() {
-            // GESTION DU BOOST TEMPOREL
             if (boostTimeRemaining > 0) {
-                boostTimeRemaining -= 0.1; // -0.1s toutes les 100ms
+                boostTimeRemaining -= 0.1; 
                 if (boostTimeRemaining <= 0) {
                     boostTimeRemaining = 0;
                     boostMultiplier = 1;
                     updateBoostUI();
                 } else if (Math.floor(boostTimeRemaining) !== Math.floor(boostTimeRemaining + 0.1)) {
-                    // Update UI every integer second change
                     updateBoostUI();
                 }
             }
             
-            // GESTION DU BOUTON MINI-JEU (COOLDOWN)
-            // Met à jour le texte du bouton si le jeu est en cooldown
             const mgBtn = document.getElementById('open-minigame-btn');
             if (minigameCooldownEnd > Date.now()) {
                 const remaining = Math.ceil((minigameCooldownEnd - Date.now()) / 1000);
-                // Calcul des minutes/secondes pour affichage plus propre si nécessaire, ici simple secondes
                 const mins = Math.floor(remaining / 60);
                 const secs = remaining % 60;
                 mgBtn.textContent = `⏳ Attente: ${mins}m ${secs}s`;
@@ -2014,8 +2009,7 @@
                 mgBtn.style.opacity = 0.6;
                 mgBtn.style.cursor = 'not-allowed';
             } else {
-                // Rétablit le texte si on sort du cooldown
-                if (mgBtn.disabled) { // petite opti : ne changer que si nécessaire
+                if (mgBtn.disabled) { 
                     mgBtn.textContent = "🏃 Mini-Jeu (Plateforme)";
                     mgBtn.disabled = false;
                     mgBtn.style.opacity = 1;
@@ -2023,19 +2017,17 @@
                 }
             }
 
-            // Vérifie si le TPS est > 0 avant d'ajouter le score
             if (tps > 0) {
-                // Application du BOOST sur le TPS
                 const addedScore = (tps * boostMultiplier) / 10; 
                 score += addedScore; 
             }
             
-            // Affichage et vérification
             updateScoreDisplay();
             updateTPSDisplay(); 
             updateCritStatsDisplay(); 
             checkUpgradeCosts();
             checkUpgradeVisibility();
+            updateRebirthUI(); // Ajout crucial ici pour mettre à jour le bouton Rebirth en temps réel
 
             const now = Math.floor(performance.now() / 1000);
             if (now % 10 === 0 && !window.hasSavedThisSecond) {
@@ -2046,10 +2038,7 @@
             }
         }
 
-        // Exécution de la boucle toutes les 100ms (10 fois par seconde)
         setInterval(gameLoop, 100); 
-
-        // --- Sauvegarde et Chargement (Local Storage) ---
 
         function saveGame() {
             critChanceUpgradeBtn.setAttribute('data-crit-chance-add', critChancePerUpgrade); 
