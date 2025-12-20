@@ -947,6 +947,15 @@
                     </div>
                     <span class="upgrade-cost">1,000,000,000,000,000,000 Tibos</span>
                 </button>
+
+                <button id="upgrade-passive-benji" class="upgrade-button" data-base-cost="50000000000000000000" data-growth="1.15" data-tps="20000000000000000" data-count="0" data-upgrade-key="benji">
+                    <div class="upgrade-details">
+                        <span class="upgrade-title">Benji - L'Atout Charisme 😎</span>
+                        <br><span class="upgrade-description">Génère 20,000,000,000,000,000 Tibos/s</span>
+                        <span class="upgrade-count">Possédé: 0</span>
+                    </div>
+                    <span class="upgrade-cost">50,000,000,000,000,000,000 Tibos</span>
+                </button>
             </div>
             
         </div>
@@ -1262,7 +1271,8 @@
             document.getElementById('upgrade-passive-spergabmaker'),
             document.getElementById('upgrade-passive-timeto'),
             document.getElementById('upgrade-passive-terabou'),
-            document.getElementById('upgrade-passive-cheveuxlongs') // AJOUTÉ
+            document.getElementById('upgrade-passive-cheveuxlongs'),
+            document.getElementById('upgrade-passive-benji')
         ];
         
         // --- Dictionnaire de Traduction (Translations Dictionary) ---
@@ -1330,6 +1340,8 @@
                 terabouDescription: "Génère 10,000,000,000,000 Tibos/s",
                 cheveuxlongsTitle: "Cheveux Longs - La Puissance Capillaire 💇‍♂️",
                 cheveuxlongsDescription: "Génère 500,000,000,000,000 Tibos/s",
+                benjiTitle: "Benji - L'Atout Charisme 😎",
+                benjiDescription: "Génère 20,000,000,000,000,000 Tibos/s",
                 // Texte secondaire
                 countText: (count) => `Possédé: ${count}`,
                 costText: (cost) => `${formatScore(cost)} Tibos`,
@@ -1406,6 +1418,8 @@
                 terabouDescription: "Generates 10,000,000,000,000 Tibo/s",
                 cheveuxlongsTitle: "Long Hair - Hair Power 💇‍♂️",
                 cheveuxlongsDescription: "Generates 500,000,000,000,000 Tibos/s",
+                benjiTitle: "Benji - The Charisma Asset 😎",
+                benjiDescription: "Generates 20,000,000,000,000,000 Tibos/s",
                 // Secondary Text
                 countText: (count) => `Owned: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
@@ -1482,6 +1496,8 @@
                 terabouDescription: "Genera 10,000,000,000,000 Tibo/s",
                 cheveuxlongsTitle: "Pelo Largo - Poder Capilar 💇‍♂️",
                 cheveuxlongsDescription: "Genera 500,000,000,000,000 Tibos/s",
+                benjiTitle: "Benji - El Activo de Carisma 😎",
+                benjiDescription: "Genera 20,000,000,000,000,000 Tibos/s",
                 // Secondary Text
                 countText: (count) => `Poseído: ${count}`,
                 costText: (count) => `${formatScore(count)} Tibos`,
